@@ -1,0 +1,101 @@
+=================== FEFFIT RESULTS ====================
+\[\[Statistics\]\]
+   nvarys, npts       =  6, 104
+   n_independent      =  12\.205
+   chi_square         =  [\d\.]{10}
+   reduced chi_square =  [\d\.]{10}
+   r-factor           =  [\d\.]{10}
+   Akaike info crit   =  [\d\.]{10}
+   Bayesian info crit =  [\d\.]{10}
+
+\[\[Data\]\]
+   fit space          = 'r'
+   r-range            = 1\.400, 3\.000
+   k-range            = 3\.000, 14\.000
+   k window, dk       = 'hanning', 1\.000
+   paths used in fit  = \['feff/feff0001\.dat', 'feff/feff0002\.dat', 'feff/feff0003\.dat', 'feff/feff0004\.dat'\]
+   k-weight           = 2
+   epsilon_k          = Array\(mean=5\.1913e-04, std=4\.5676e-04\)
+   epsilon_r          = [\d\.]{10}
+   n_independent      = 12\.205
+
+\[\[Variables\]\]
+   alpha          = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.0000e-07\)
+   amp            = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.00000000\)
+   enot           = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.0000e-07\)
+   ss             = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  0\.00300000\)
+   ss2            = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  0\.00300000\)
+   ss3            = [-\s][\d\.]{10} \+/- [\d\.]{10}  = 'ss2'
+   ssfe           = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  0\.00300000\)
+
+\[\[Correlations\]\]    \(unreported correlations are <  0\.100\)
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+   \w+, \w+\s+= [\s\-]0\.\d{3}
+
+
+\[\[Paths\]\]
+ = Path 'S1' = Rh K Edge
+    feffdat file = feff/feff0001\.dat, from feff run 'feff'
+    geometry  atom      x        y        z      ipot
+              Rh       0\.0000,  0\.0000,  0\.0000  0 \(absorber\)
+               C      -0\.7410,  0\.2885, -1\.7419  3
+     reff   =  [\d\.]{10}
+     degen  =  1\.00000000
+     n\*s02  = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'amp'
+     e0     = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'enot'
+     r      = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'reff \+ alpha\*reff'
+     deltar = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'alpha\*reff'
+     sigma2 = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'ss'
+
+ = Path 'S2' = Rh K Edge
+    feffdat file = feff/feff0002\.dat, from feff run 'feff'
+    geometry  atom      x        y        z      ipot
+              Rh       0\.0000,  0\.0000,  0\.0000  0 \(absorber\)
+               C       1\.4414,  0\.4279,  1\.2965  3
+     reff   =  [\d\.]{10}
+     degen  =  1\.00000000
+     n\*s02  = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'amp'
+     e0     = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'enot'
+     r      = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'reff \+ alpha\*reff'
+     deltar = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'alpha\*reff'
+     sigma2 = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'ss2'
+
+ = Path 'S3' = Rh K Edge
+    feffdat file = feff/feff0003\.dat, from feff run 'feff'
+    geometry  atom      x        y        z      ipot
+              Rh       0\.0000,  0\.0000,  0\.0000  0 \(absorber\)
+               C      -1\.6586, -0\.1094,  1\.2084  3
+     reff   =  [\d\.]{10}
+     degen  =  1\.00000000
+     n\*s02  = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'amp'
+     e0     = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'enot'
+     r      = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'reff \+ alpha\*reff'
+     deltar = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'alpha\*reff'
+     sigma2 = [-\s][\d\.]{10}  := 'ss3'
+
+ = Path 'Fe' = Rh K Edge
+    feffdat file = feff/feff0004\.dat, from feff run 'feff'
+    geometry  atom      x        y        z      ipot
+              Rh       0\.0000,  0\.0000,  0\.0000  0 \(absorber\)
+               C       0\.6043, -2\.0001,  0\.0975  3
+     reff   =  [\d\.]{10}
+     degen  =  1\.00000000
+     n\*s02  = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'amp'
+     e0     = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'enot'
+     r      = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'reff \+ alpha\*reff'
+     deltar = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'alpha\*reff'
+     sigma2 = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'ssfe'
+
+=======================================================

@@ -1,0 +1,6 @@
+  id,                     name, value, expr, vary
+   1,                      amp,   0.1, enot, False
+   2,                     enot,   0.1,     , True
+   3,                    alpha,  10.0,     , False
+   4,                    ssfe1, 0.003,     , True
+   5,                    ssfe2, 0.003,     , True

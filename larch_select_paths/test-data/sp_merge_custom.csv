@@ -1,0 +1,7 @@
+  id,                 filename,                    label, s02,   e0,                   sigma2,     deltar
+   1,     primary/feff0001.dat,           primary.S.Fe.1, amp, enot,             sprimarysfe1, alpha*reff
+   2,     primary/feff0002.dat,           primary.S.Fe.2, amp, enot,             sprimarysfe2, alpha*reff
+   3,     primary/feff0003.dat,          primary.Fe.Fe.3, amp, enot,            custom_name_1, alpha*reff
+   4,   secondary/feff0001.dat,         secondary.S.Fe.1, amp, enot,           ssecondarysfe1, alpha*reff
+   5,   secondary/feff0002.dat,         secondary.S.Fe.2, amp, enot,           ssecondarysfe2, alpha*reff
+   6,   secondary/feff0003.dat,        secondary.Fe.Fe.3, amp, enot,            custom_name_2, alpha*reff

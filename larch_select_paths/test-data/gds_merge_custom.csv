@@ -1,0 +1,10 @@
+  id,                     name, value, expr, vary
+   1,                      amp,   1.0,     , True
+   2,                     enot, 1e-07,     , True
+   3,                    alpha, 1e-07,     , True
+   4,             sprimarysfe1, 0.003,     , True
+   5,             sprimarysfe2, 0.003,     , True
+   6,     primarycustom_name_1, 0.003,     , True
+   7,           ssecondarysfe1, 0.003,     , True
+   8,           ssecondarysfe2, 0.003,     , True
+   9,   secondarycustom_name_2, 0.003,     , True

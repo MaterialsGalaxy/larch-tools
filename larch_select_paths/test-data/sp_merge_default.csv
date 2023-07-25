@@ -1,0 +1,17 @@
+  id,                 filename,                    label, s02,   e0,                   sigma2,     deltar
+   1,           1/feff0001.dat,                 1.S.Fe.1, amp, enot,                   s1sfe1, alpha*reff
+   2,           1/feff0002.dat,                 1.S.Fe.2, amp, enot,                   s1sfe2, alpha*reff
+   3,           1/feff0003.dat,                1.Fe.Fe.3, amp, enot,                  s1fefe3, alpha*reff
+   4,           1/feff0004.dat,                 1.S.Fe.4, amp, enot,                   s1sfe4, alpha*reff
+   5,           1/feff0005.dat,                 1.S.Fe.5, amp, enot,                   s1sfe5, alpha*reff
+   6,           1/feff0006.dat,               1.S.S.Fe.6, amp, enot,                  s1ssfe6, alpha*reff
+   7,           1/feff0007.dat,               1.S.S.Fe.7, amp, enot,                  s1ssfe7, alpha*reff
+   8,           1/feff0008.dat,                1.Fe.Fe.8, amp, enot,                  s1fefe8, alpha*reff
+   9,           2/feff0001.dat,                 2.S.Fe.1, amp, enot,                   s2sfe1, alpha*reff
+  10,           2/feff0002.dat,                 2.S.Fe.2, amp, enot,                   s2sfe2, alpha*reff
+  11,           2/feff0003.dat,                2.Fe.Fe.3, amp, enot,                  s2fefe3, alpha*reff
+  12,           2/feff0004.dat,                 2.S.Fe.4, amp, enot,                   s2sfe4, alpha*reff
+  13,           2/feff0005.dat,                 2.S.Fe.5, amp, enot,                   s2sfe5, alpha*reff
+  14,           2/feff0006.dat,               2.S.S.Fe.6, amp, enot,                  s2ssfe6, alpha*reff
+  15,           2/feff0007.dat,               2.S.S.Fe.7, amp, enot,                  s2ssfe7, alpha*reff
+  16,           2/feff0008.dat,                2.Fe.Fe.8, amp, enot,                  s2fefe8, alpha*reff

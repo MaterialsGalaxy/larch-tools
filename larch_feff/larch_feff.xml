@@ -1,0 +1,106 @@
+<tool id="larch_feff" name="Larch FEFF" version="@TOOL_VERSION@+galaxy@WRAPPER_VERSION@" python_template_version="3.5" profile="22.05" license="MIT">
+    <description>generate FEFF paths from XAFS data</description>
+    <macros>
+        <!-- version of underlying tool (PEP 440) -->
+        <token name="@TOOL_VERSION@">0.9.66</token>
+        <!-- version of this tool wrapper (integer) -->
+        <token name="@WRAPPER_VERSION@">0</token>
+        <!-- citation should be updated with every underlying tool version -->
+        <!-- typical fields to update are version, month, year, and doi -->
+        <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+    </macros>
+    <creator>
+        <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
+        <requirement type="package" version="3.5.2">matplotlib</requirement>
+        <!-- xraydb 4.5.0 is compatible with sqlalchemy 2, but is not yet available on condaforge so pin it -->
+        <requirement type="package" version="4.4.7">xraydb</requirement>
+        <requirement type="package" version="1.4.46">sqlalchemy</requirement>
+        <requirement type="package" version="2023.3.23">pymatgen</requirement>
+    </requirements>
+    <required_files>
+        <include type="literal" path="larch_feff.py"/>
+    </required_files>
+    <command detect_errors="exit_code"><![CDATA[
+        python '${__tool_directory__}/larch_feff.py' '$format.structure_file' '$inputs'
+        && zip -r out.zip feff
+    ]]></command>
+    <configfiles>
+        <inputs name="inputs"/>
+    </configfiles>
+    <inputs>
+        <conditional name="format">
+            <param name="format" type="select" display="radio" label="Structure file format">
+                <option value="feff" selected="true">FEFF input</option>
+                <option value="cif">CIF</option>
+            </param>
+            <when value="feff">
+                <param name="structure_file" type="data" format="inp" label="Crystal structure file" help="Crystal structure file to be used for fitting, already in FEFF .inp format."/>
+            </when>
+            <when value="cif">
+                <param name="structure_file" type="data" format="cif" label="Crystal structure file" help="Crystal structure file to be used for fitting, in CIF format."/>
+                <param name="absorbing_atom" type="text" value="0" label="Absorbing atom" help="Either the chemical symbol or index of the absorbing atom within the structure."/>
+                <param name="radius" type="float" value="4.0" label="Radius" help="Atoms within this distance of the absorbing atom will be included in the FEFF calculation. Note that this must include at least one atom for each unique potential identified in the strucutre. Larger radii will lead to more potential scattering paths."/>
+            </when>
+        </conditional>
+    </inputs>
+    <outputs>
+        <data name="out_csv" format="feff" from_work_dir="out.csv" label="CSV summary of ${format.structure_file.name}"/>
+        <data name="out_dir" format="zip" from_work_dir="out.zip" label="FEFF paths of ${format.structure_file.name}"/>
+        <data name="feff_inp" format="inp" from_work_dir="feff/feff.inp" label="FEFF input of ${format.structure_file.name}">
+            <filter>format["format"]=="cif"</filter>
+        </data>
+    </outputs>
+    <tests>
+        <!-- Test FEFF input -->
+        <test expect_num_outputs="2">
+            <conditional name="format">
+                <param name="format" value="feff"/>
+                <param name="structure_file" value="test.inp"/>
+            </conditional>
+            <output name="out_csv" file="[CSV_summary_of_test.inp].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="276848" delta="10"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- Test CIF input -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1564889.cif"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1564889.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1564889.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="85776" delta="10"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- Test CIF input failure with low radius -->
+        <test expect_failure="true">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1564889.cif"/>
+                <param name="absorbing_atom" value="S"/>
+                <param name="radius" value="0.1"/>
+            </conditional>
+        </test>
+    </tests>
+    <help><![CDATA[
+        Runs a FEFF6 calculation to find potential scattering paths in the provided structure.
+
+        If a ``cif`` file is used, the formatted FEFF ``inp`` file will be produced as an output that can be used again in the future.
+        Be aware that the choice of Absorbing atom and Radius will affect the success of the calculation, as all unique potentials must be represented in the final structure.
+        It is also possible that the ``cif`` file itself is not suitable, for example chemical symbols denoting ions (e.g. ``Fe2+``) are not supported.
+    ]]></help>
+    <citations>
+        <citation type="doi">@TOOL_CITATION@</citation>
+        <citation type="doi">10.1107/S0909049505012719</citation>
+        <citation type="doi">10.1016/j.commatsci.2012.10.028</citation>
+    </citations>
+</tool>
