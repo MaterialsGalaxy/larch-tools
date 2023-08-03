@@ -74,10 +74,14 @@ def dict_to_gds(data_dict):
         one_par = None
         if gds_vary:
             # equivalent to a guess parameter in Demeter
-            one_par = guess(name=gds_name, value=gds_val, vary=gds_vary, expr=gds_expr)
+            one_par = guess(
+                name=gds_name, value=gds_val, vary=gds_vary, expr=gds_expr
+            )
         else:
             # equivalent to a defined parameter in Demeter
-            one_par = param(name=gds_name, value=gds_val, vary=gds_vary, expr=gds_expr)
+            one_par = param(
+                name=gds_name, value=gds_val, vary=gds_vary, expr=gds_expr
+            )
         if one_par is not None:
             dgs_group.__setattr__(gds_name, one_par)
     return dgs_group
@@ -89,11 +93,19 @@ def plot_rmr(path: str, data_set, rmin, rmax):
     plt.plot(data_set.data.r, data_set.data.chir_re, color="b", label="expt.")
     plt.plot(data_set.model.r, data_set.model.chir_mag, color="r")
     plt.plot(data_set.model.r, data_set.model.chir_re, color="r", label="fit")
-    plt.ylabel("Magnitude of Fourier Transform of $k^2 \cdot \chi$/$\mathrm{\AA}^{-3}$")
-    plt.xlabel("Radial distance/$\mathrm{\AA}$")
+    plt.ylabel(
+        "Magnitude of Fourier Transform of "
+        r"$k^2 \cdot \chi$/$\mathrm{\AA}^{-3}$"
+    )
+    plt.xlabel(r"Radial distance/$\mathrm{\AA}$")
     plt.xlim(0, 5)
 
-    plt.fill([rmin, rmin, rmax, rmax], [-rmax, rmax, rmax, -rmax], color="g", alpha=0.1)
+    plt.fill(
+        [rmin, rmin, rmax, rmax],
+        [-rmax, rmax, rmax, -rmax],
+        color="g",
+        alpha=0.1,
+    )
     plt.text(rmax - 0.65, -rmax + 0.5, "fit range")
     plt.legend()
     plt.savefig(path, format="png")
@@ -117,21 +129,31 @@ def plot_chikr(path: str, data_set, rmin, rmax, kmin, kmax):
         label="fit",
     )
     ax1.set_xlim(0, 15)
-    ax1.set_xlabel("$k (\mathrm{\AA})^{-1}$")
-    ax1.set_ylabel("$k^2$ $\chi (k)(\mathrm{\AA})^{-2}$")
+    ax1.set_xlabel(r"$k (\mathrm{\AA})^{-1}$")
+    ax1.set_ylabel(r"$k^2$ $\chi (k)(\mathrm{\AA})^{-2}$")
 
-    ax1.fill([kmin, kmin, kmax, kmax], [-rmax, rmax, rmax, -rmax], color="g", alpha=0.1)
+    ax1.fill(
+        [kmin, kmin, kmax, kmax],
+        [-rmax, rmax, rmax, -rmax],
+        color="g",
+        alpha=0.1,
+    )
     ax1.text(kmax - 1.65, -rmax + 0.5, "fit range")
     ax1.legend()
 
     ax2.plot(data_set.data.r, data_set.data.chir_mag, color="b", label="expt.")
     ax2.plot(data_set.model.r, data_set.model.chir_mag, color="r", label="fit")
     ax2.set_xlim(0, 5)
-    ax2.set_xlabel("$R(\mathrm{\AA})$")
-    ax2.set_ylabel("$|\chi(R)|(\mathrm{\AA}^{-3})$")
+    ax2.set_xlabel(r"$R(\mathrm{\AA})$")
+    ax2.set_ylabel(r"$|\chi(R)|(\mathrm{\AA}^{-3})$")
     ax2.legend(loc="upper right")
 
-    ax2.fill([rmin, rmin, rmax, rmax], [-rmax, rmax, rmax, -rmax], color="g", alpha=0.1)
+    ax2.fill(
+        [rmin, rmin, rmax, rmax],
+        [-rmax, rmax, rmax, -rmax],
+        color="g",
+        alpha=0.1,
+    )
     ax2.text(rmax - 0.65, -rmax + 0.5, "fit range")
     fig.savefig(path, format="png")
     plt.close("all")
@@ -233,7 +255,9 @@ def check_threshold(
                 f"{series_id} as {variable} > {threshold}"
             )
         else:
-            message = f"WARNING: Project {series_id} has {variable} > {threshold}"
+            message = (
+                f"WARNING: Project {series_id} has {variable} > {threshold}"
+            )
 
         print(message)
         return early_stopping
@@ -258,7 +282,12 @@ def series_execution(
         series_id = str(series_index).zfill(id_length)
         try:
             out = main(
-                series_file, gds_file, sp_file, fit_vars, plot_graph, f"_{series_id}"
+                series_file,
+                gds_file,
+                sp_file,
+                fit_vars,
+                plot_graph,
+                f"_{series_id}",
             )
         except ValueError as e:
             rows.append([np.NaN for _ in report_criteria])
@@ -335,7 +364,9 @@ if __name__ == "__main__":
     else:
         if os.path.isdir(prj_file):
             # Sort the unzipped directory, all filenames should be zero-padded
-            filepaths = [os.path.join(prj_file, p) for p in os.listdir(prj_file)]
+            filepaths = [
+                os.path.join(prj_file, p) for p in os.listdir(prj_file)
+            ]
             filepaths.sort()
         else:
             # DO NOT sort if we have multiple Galaxy datasets - the filenames

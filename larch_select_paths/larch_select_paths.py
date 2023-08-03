@@ -7,9 +7,12 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 
 SP_DATA = [
-    f"{'id':>4s}, {'filename':>24s}, {'label':>24s}, {'s02':>3s}, {'e0':>4s}, {'sigma2':>24s}, {'deltar':>10s}\n"
+    f"{'id':>4s}, {'filename':>24s}, {'label':>24s}, {'s02':>3s}, {'e0':>4s}, "
+    f"{'sigma2':>24s}, {'deltar':>10s}\n"
 ]
-GDS_DATA = [f"{'id':>4s}, {'name':>24s}, {'value':>5s}, {'expr':>4s}, {'vary':>4s}\n"]
+GDS_DATA = [
+    f"{'id':>4s}, {'name':>24s}, {'value':>5s}, {'expr':>4s}, {'vary':>4s}\n"
+]
 SP_ROW_ID = 1
 GDS_ROW_ID = 1
 AMP = "amp"
@@ -51,7 +54,8 @@ def write_selected_path(
         deltar = label + deltar
 
     SP_DATA.append(
-        f"{SP_ROW_ID:>4d}, {filename:>24s}, {label:>24s}, {s02:>3s}, {e0:>4s}, {sigma2:>24s}, {deltar:>10s}\n"
+        f"{SP_ROW_ID:>4d}, {filename:>24s}, {label:>24s}, {s02:>3s}, "
+        f"{e0:>4s}, {sigma2:>24s}, {deltar:>10s}\n"
     )
     SP_ROW_ID += 1
 
@@ -70,7 +74,8 @@ def write_gds(
     formatted_name = name if (label is None) else label + name
 
     GDS_DATA.append(
-        f"{GDS_ROW_ID:4d}, {formatted_name:>24s}, {str(value):>5s}, {expr:>4s}, {str(vary):>4s}\n"
+        f"{GDS_ROW_ID:4d}, {formatted_name:>24s}, {str(value):>5s}, "
+        f"{expr:>4s}, {str(vary):>4s}\n"
     )
     GDS_ROW_ID += 1
 
@@ -123,7 +128,9 @@ def main(input_values):
         labels = set()
         with ZipFile("merged.zip", "x", ZIP_DEFLATED) as zipfile_out:
             for i, feff_output in enumerate(input_values["feff_outputs"]):
-                label = feff_output.pop("label") or str(i + 1).zfill(zfill_length)
+                label = feff_output.pop("label") or str(i + 1).zfill(
+                    zfill_length
+                )
                 if label in labels:
                     raise ValueError(f"Label '{label}' is not unique")
                 labels.add(label)
@@ -135,7 +142,9 @@ def main(input_values):
                         if zipinfo.filename != "feff/":
                             zipinfo.filename = zipinfo.filename[5:]
                             z.extract(member=zipinfo, path=label)
-                            zipfile_out.write(os.path.join(label, zipinfo.filename))
+                            zipfile_out.write(
+                                os.path.join(label, zipinfo.filename)
+                            )
 
     with open("sp.csv", "w") as out:
         out.writelines(SP_DATA)

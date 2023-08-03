@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from larch.xafs.feffrunner import feff6l
+
 from pymatgen.io.cif import CifParser
 from pymatgen.io.feff import Atoms, Header, Potential
 
@@ -21,7 +22,7 @@ def get_path_labels(paths_file):
             if re.match("-{15}", a_line.strip()) is not None:
                 is_meta = False
             elif not is_meta:
-                if re.match("\s*\d*\s{4}\d*\s{3}", a_line) is not None:
+                if re.match(r"\s*\d*\s{4}\d*\s{3}", a_line) is not None:
                     if a_path:
                         all_paths[a_path["index"]] = a_path
                     line_data = a_line.split()
@@ -31,7 +32,7 @@ def get_path_labels(paths_file):
                         "degeneracy": line_data[2],
                     }
                 elif (
-                    re.match("\s{6}x\s{11}y\s{5}", a_line) is None
+                    re.match(r"\s{6}x\s{11}y\s{5}", a_line) is None
                 ):  # ignore the intermediate headings
                     line_data = a_line.split()
                     if "label" not in a_path:

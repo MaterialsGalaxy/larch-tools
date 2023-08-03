@@ -6,7 +6,13 @@ import shutil
 import sys
 from zipfile import ZipFile
 
-from larch.io import create_athena, h5group, merge_groups, read_ascii, set_array_labels
+from larch.io import (
+    create_athena,
+    h5group,
+    merge_groups,
+    read_ascii,
+    set_array_labels,
+)
 from larch.symboltable import Group
 from larch.xafs import pre_edge, rebin_xafs
 

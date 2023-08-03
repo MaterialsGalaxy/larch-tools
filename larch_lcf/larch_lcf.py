@@ -84,7 +84,9 @@ if __name__ == "__main__":
     component_groups = []
     for component in input_values["components"]:
         component_group = extract_group(
-            component["component_file"], component["extract_group"], component["label"]
+            component["component_file"],
+            component["extract_group"],
+            component["label"],
         )
         component_groups.append(component_group)
 

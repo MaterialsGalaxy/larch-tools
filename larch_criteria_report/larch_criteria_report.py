@@ -44,7 +44,9 @@ def parse_reports(input_data: str) -> "dict[str, list[float]]":
         writer.writerow([f"{h:>12s}" for h in headers])
 
         if os.path.isdir(input_data):
-            input_files = [os.path.join(input_data, f) for f in os.listdir(input_data)]
+            input_files = [
+                os.path.join(input_data, f) for f in os.listdir(input_data)
+            ]
         else:
             input_files = input_data.split(",")
 
@@ -72,14 +74,17 @@ def parse_row(
                     if all(row):
                         return row
             except IndexError:
-                # Not all lines will have potential variables/values, so just pass
+                # Not all lines will have potential variables/values
+                # so just pass
                 pass
 
             line = f_in.readline()
 
-    # Only reach here if we run out of lines without finding a value for each variable
+    # Only reach here if we run out of lines without finding a value for each
+    # variable
     raise RuntimeError(
-        f"One or more criteria missing, was looking for {headers} but found {row}"
+        f"One or more criteria missing, was looking for {headers} but found "
+        f"{row}"
     )
 
 
