@@ -1,0 +1,78 @@
+<tool id="larch_plot" name="Larch Plot" version="@TOOL_VERSION@+galaxy@WRAPPER_VERSION@" python_template_version="3.5" profile="22.05" license="MIT">
+    <description>plot Athena projects</description>
+    <macros>
+        <!-- version of underlying tool (PEP 440) -->
+        <token name="@TOOL_VERSION@">0.9.66</token>
+        <!-- version of this tool wrapper (integer) -->
+        <token name="@WRAPPER_VERSION@">0</token>
+        <!-- citation should be updated with every underlying tool version -->
+        <!-- typical fields to update are version, month, year, and doi -->
+        <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+    </macros>
+    <creator>
+        <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
+        <!-- xraydb 4.5.0 is compatible with sqlalchemy 2, but is not yet available on condaforge so pin it -->
+        <requirement type="package" version="4.4.7">xraydb</requirement>
+        <requirement type="package" version="1.4.46">sqlalchemy</requirement>
+        <requirement type="package" version="3.5.2">matplotlib</requirement>
+    </requirements>
+    <required_files>
+        <include type="literal" path="larch_plot.py"/>
+        <include type="literal" path="common.py"/>
+    </required_files>
+    <command detect_errors="exit_code"><![CDATA[
+        mkdir plots
+        && python '${__tool_directory__}/larch_plot.py' '$dat_files' '$inputs'
+    ]]></command>
+    <configfiles>
+        <inputs name="inputs"/>
+    </configfiles>
+    <inputs>
+        <param name="dat_files" type="data" format="prj" multiple="true" min="1" label="Athena projects" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
+        <repeat name="plots" title="Plots" min="1" default="1" help="Each additional entry will create another output plot">
+            <param name="variable" type="select" display="radio" label="Variable" help="Variable to plot on the y axis">
+                <option value="norm" selected="true">Normalised xμ</option>
+                <option value="dmude">Derivative of xμ</option>
+            </param>
+            <param name="limits" type="select" display="radio" label="Energy limits" help="Whether to limit the energy relative to the absorption edge or with absolute values.">
+                <option value="relative" selected="true">Relative</option>
+                <option value="absolute">Absolute</option>
+            </param>
+            <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts."/>
+            <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts."/>
+        </repeat>
+    </inputs>
+    <outputs>
+        <collection name="plot_collection" format="png" type="list">
+            <discover_datasets pattern="__name_and_ext__" directory="plots"/>
+        </collection>
+    </outputs>
+    <tests>
+        <test expect_num_outputs="1">
+            <param name="dat_files" value="test.prj"/>
+            <param name="variable" value="norm"/>
+            <param name="limits" value="absolute"/>
+            <param name="energy_min" value="7000"/>
+            <param name="variable" value="dmude"/>
+            <param name="limits" value="relative"/>
+            <param name="energy_max" value="10"/>
+            <output_collection name="plot_collection" type="list" count="2"/>
+        </test>
+    </tests>
+    <help><![CDATA[
+        Using Larch, read Athena project files and plot data from them.
+
+        Only Athena project files are accepted as input. If data is plaintext,
+        first load it using the Larch Athena tool.
+        All input files will appear on the same plot(s).
+        To generate multiple types of plot with the same set of files,
+        add additional sections to the form.
+    ]]></help>
+    <citations>
+        <citation type="doi">@TOOL_CITATION@</citation>
+        <citation type="doi">10.1107/S0909049505012719</citation>
+    </citations>
+</tool>

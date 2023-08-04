@@ -6,6 +6,8 @@ import shutil
 import sys
 from zipfile import ZipFile
 
+from common import read_group
+
 from larch.io import (
     create_athena,
     h5group,
@@ -26,6 +28,7 @@ def calibrate_energy(
     xafs_group: Group, energy_0: float, energy_min: float, energy_max: float
 ):
     if energy_0 is not None:
+        print(f"Recalibrating energy edge from {xafs_group.e0} to {energy_0}")
         xafs_group.energy = xafs_group.energy + energy_0 - xafs_group.e0
         xafs_group.e0 = energy_0
 
@@ -51,6 +54,61 @@ def calibrate_energy(
     return xafs_group
 
 
+def load_data(
+    dat_file: str,
+    merge_inputs: bool,
+    extension: str,
+    extract_group: str = None,
+) -> "dict[str, Group]":
+    if merge_inputs:
+        return {"out": merge_files(dat_file)}
+    else:
+        return load_single_file(dat_file, extension, extract_group)
+
+
+def merge_files(dat_files: str) -> Group:
+    all_groups = []
+    for filepath in dat_files.split(","):
+        try:
+            group = load_single_file(filepath)["out"]
+            all_groups.append(group)
+        except OSError:
+            # Indicates it is actually a zip, so unzip it
+            os.mkdir("dat_files")
+            with ZipFile(filepath) as z:
+                z.extractall("dat_files")
+            keyed_groups = load_zipped_files()
+            all_groups.extend(keyed_groups.values())
+            shutil.rmtree("dat_files")
+
+    return merge_groups(all_groups, xarray="energy", yarray="mu")
+
+
+def load_single_file(
+    filepath: str,
+    extension: str = None,
+    extract_group: str = None,
+) -> "dict[str,Group]":
+    if extension == "zip":
+        return load_zipped_files(extract_group)
+
+    print(f"Attempting to read from {filepath}")
+    if extension == "prj":
+        group = read_group(filepath, extract_group)
+    elif extension == "h5":
+        group = load_h5(filepath)
+    elif extension == "txt":
+        group = load_ascii(filepath)
+    else:
+        # Try ascii anyway
+        try:
+            group = load_ascii(filepath)
+        except TypeError:
+            # Indicates this isn't plaintext, try h5
+            group = load_h5(filepath)
+    return {"out": group}
+
+
 def load_ascii(dat_file):
     xas_data = read_ascii(dat_file)
     xas_data = rename_cols(xas_data)
@@ -66,16 +124,7 @@ def load_h5(dat_file):
     return xafs_group
 
 
-def load_single_file(filepath: str) -> Group:
-    try:
-        group = load_ascii(filepath)
-    except TypeError:
-        # Indicates this isn't plaintext, try h5
-        group = load_h5(filepath)
-    return group
-
-
-def load_zipped_files() -> "dict[str, Group]":
+def load_zipped_files(extract_group: str = None) -> "dict[str, Group]":
     all_paths = list(os.walk("dat_files"))
     all_paths.sort(key=lambda x: x[0])
     file_total = sum([len(f) for _, _, f in all_paths])
@@ -95,8 +144,8 @@ def load_zipped_files() -> "dict[str, Group]":
         for filename in filenames:
             key = str(i).zfill(key_length)
             filepath = os.path.join(dirpath, filename)
-            xas_data = load_single_file(filepath)
-            keyed_data[key] = xas_data
+            xas_data = load_single_file(filepath, None, extract_group)
+            keyed_data[key] = xas_data["out"]
             i += 1
 
     return keyed_data
@@ -109,27 +158,28 @@ def main(
     energy_0: float,
     energy_min: float,
     energy_max: float,
-    prj_path: str = "prj/athena.prj",
-    edge_plot_path: str = "edge/edge.png",
-    flat_plot_path: str = "flat/flat.png",
-    derivative_plot_path: str = "derivative/derivative.png",
+    annotation: str = None,
+    path_key: str = "out",
 ):
     pre_edge(energy=xas_data.energy, mu=xas_data.mu, group=xas_data)
     xas_data = calibrate_energy(xas_data, energy_0, energy_min, energy_max)
 
     if rebin:
         rebin_xafs(energy=xas_data.energy, mu=xas_data.mu, group=xas_data)
-        # xas_data = rename_cols(xas_data.rebinned, xas_data.array_labels)
         xas_data = xas_data.rebinned
         pre_edge(energy=xas_data.energy, mu=xas_data.mu, group=xas_data)
 
     if plot_graph:
-        plot_edge_fits(edge_plot_path, xas_data)
-        plot_flattened(flat_plot_path, xas_data)
-        plot_derivative(derivative_plot_path, xas_data)
+        plot_edge_fits(f"edge/{path_key}.png", xas_data)
+        plot_flattened(f"flat/{path_key}.png", xas_data)
+        plot_derivative(f"derivative/{path_key}.png", xas_data)
 
-    xas_project = create_athena(prj_path)
+    xas_project = create_athena(f"prj/{path_key}.prj")
     xas_project.add_group(xas_data)
+    if annotation:
+        group = next(iter(xas_project.groups.values()))
+        group.args["annotation"] = annotation
+        print(group.x)
     xas_project.save()
 
     # Ensure that we do not run out of memory when running on large zips
@@ -174,9 +224,9 @@ def rename_cols(xafs_group: Group, array_labels: "list[str]" = None) -> Group:
     labels = array_labels or xafs_group.array_labels
     new_labels = []
     for label in labels:
-        if label == "col1":
+        if label == "col1" or label.endswith("energy"):
             new_labels.append("energy")
-        elif label == "col2" or label == "xmu":
+        elif label == "col2" or label == "xmu" or label == "lni0it":
             new_labels.append("mu")
         else:
             new_labels.append(label)
@@ -191,24 +241,6 @@ def sorting_key(filename: str) -> str:
     return re.findall(r"\d+", filename)[-1]
 
 
-def merge_files(dat_files: str) -> Group:
-    all_groups = []
-    for filepath in dat_files.split(","):
-        try:
-            group = load_single_file(filepath)
-            all_groups.append(group)
-        except OSError:
-            # Indicates it is actually a zip, so unzip it
-            os.mkdir("dat_files")
-            with ZipFile(filepath) as z:
-                z.extractall("dat_files")
-            keyed_groups = load_zipped_files()
-            all_groups.extend(keyed_groups.values())
-            shutil.rmtree("dat_files")
-
-    return merge_groups(all_groups, xarray="energy", yarray="mu")
-
-
 if __name__ == "__main__":
     # larch imports set this to an interactive backend, so need to change it
     matplotlib.use("Agg")
@@ -216,39 +248,30 @@ if __name__ == "__main__":
     dat_file = sys.argv[1]
     extension = sys.argv[2]
     input_values = json.load(open(sys.argv[3], "r", encoding="utf-8"))
-    rebin = input_values["rebin"]
-    energy_0 = input_values["energy_0"]
-    energy_min = input_values["energy_min"]
-    energy_max = input_values["energy_max"]
-    plot_graph = input_values["plot_graph"]
-    zip_outputs = input_values["zip_outputs"]
     merge_inputs = input_values["merge_inputs"]["merge_inputs"]
+    data_format = input_values["merge_inputs"]["format"]["format"]
+    extract_group = None
+    if "extract_group" in input_values["merge_inputs"]["format"]:
+        extract_group = input_values["merge_inputs"]["format"]["extract_group"]
+    
+    if data_format == "athena":
+        extension = "prj"  # Can be sure of extension, even if merging
 
-    if merge_inputs:
-        merged_group = merge_files(dat_file)
-        main(merged_group, plot_graph, rebin, energy_0, energy_min, energy_max)
-
+    if extension == "None":
+        keyed_data = load_data(dat_file, merge_inputs, None, extract_group)
     else:
-        if extension == "zip":
-            keyed_data = load_zipped_files()
-            for key, group in keyed_data.items():
-                main(
-                    group,
-                    plot_graph,
-                    rebin,
-                    energy_0,
-                    energy_min,
-                    energy_max,
-                    f"prj/{key}.prj",
-                    f"edge/{key}.png",
-                    f"flat/{key}.png",
-                    f"derivative/{key}.png",
-                )
+        keyed_data = load_data(
+            dat_file, merge_inputs, extension, extract_group
+        )
 
-        elif extension == "h5":
-            xas_data = load_h5(dat_file)
-            main(xas_data, plot_graph, rebin, energy_0, energy_min, energy_max)
-
-        else:
-            xas_data = load_ascii(dat_file)
-            main(xas_data, plot_graph, rebin, energy_0, energy_min, energy_max)
+    for key, group in keyed_data.items():
+        main(
+            group,
+            plot_graph=input_values["plot_graph"],
+            rebin=input_values["rebin"],
+            energy_0=input_values["energy_0"],
+            energy_min=input_values["energy_min"],
+            energy_max=input_values["energy_max"],
+            annotation=input_values["annotation"],
+            path_key=key,
+        )

@@ -5,8 +5,10 @@ import json
 import os
 import sys
 
+from common import get_group
+
 from larch.fitting import guess, param, param_group
-from larch.io import extract_athenagroup, read_athena
+from larch.io import read_athena
 from larch.symboltable import Group
 from larch.xafs import (
     FeffPathGroup,
@@ -23,15 +25,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 import numpy as np
-
-
-def get_groups(athena_project):
-    athena_groups = []
-    group_keys = list(athena_project._athena_groups.keys())
-    for group_key in group_keys:
-        gr_0 = extract_athenagroup(athena_project._athena_groups[group_key])
-        athena_groups.append(gr_0)
-    return athena_groups
 
 
 def read_csv_data(input_file, id_field="id"):
@@ -215,8 +208,8 @@ def main(
     chikr_path = f"chikr/chikr{series_id}.png"
 
     athena_project = read_athena(prj_file)
-    athena_groups = get_groups(athena_project=athena_project)
-    data_group = calc_with_defaults(athena_groups[0])
+    athena_group = get_group(athena_project)
+    data_group = calc_with_defaults(athena_group)
 
     print(f"Fitting project from file {data_group.filename}")
 

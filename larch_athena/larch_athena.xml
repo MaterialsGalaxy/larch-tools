@@ -8,6 +8,15 @@
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+        <xml name="format">
+            <param name="format" type="select" display="radio" label="Input format" help="Whether data is in plaintext or already saved as an Athena project">
+                <option value="plaintext" selected="true">Plaintext</option>
+                <option value="athena">Athena project</option>
+            </param> 
+        </xml>
+        <xml name="extract_group">
+            <param name="extract_group" type="text" optional="true" label="Extract group" help="Which group to extract and process from the Athena project (will use first group in file if unset)"/>
+        </xml>
     </macros>
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
@@ -26,15 +35,15 @@
     <command detect_errors="exit_code"><![CDATA[
         mkdir prj edge flat derivative
         #if $merge_inputs.merge_inputs == "":
-            #if $merge_inputs.dat_file.extension=="zip":
-                && unzip '$merge_inputs.dat_file' -d dat_files
+            #if $merge_inputs.format.dat_file.extension=="zip":
+                && unzip '$merge_inputs.format.dat_file' -d dat_files
             #end if
-            && python '${__tool_directory__}/larch_athena.py' '$merge_inputs.dat_file' '$merge_inputs.dat_file.extension' '$inputs'
+            && python '${__tool_directory__}/larch_athena.py' '$merge_inputs.format.dat_file' '$merge_inputs.format.dat_file.extension' '$inputs'
         #else
-            && python '${__tool_directory__}/larch_athena.py' '$merge_inputs.dat_file' 'NA' '$inputs'
+            && python '${__tool_directory__}/larch_athena.py' '$merge_inputs.format.dat_file' 'None' '$inputs'
         #end if
         #if $zip_outputs:
-            && zip out_zip.zip prj/* edge/* flat/*
+            && zip out_zip.zip prj/* edge/* flat/* derivative/*
         #end if
     ]]></command>
     <configfiles>
@@ -42,17 +51,35 @@
     </configfiles>
     <inputs>
         <conditional name="merge_inputs" >
-            <param name="merge_inputs" type="select" display="radio" label="Merge inputs" help="Whether to merge input data into one Athena project, by default each dataset or file in a zip will result in a separate output.">
+            <param name="merge_inputs" type="select" display="radio" label="Merge multiple inputs" help="Whether to merge all input data into one Athena project, by default each dataset or file in a zip will result in a separate output.">
                 <option value="" selected="true">No</option>
                 <option value="true">Yes</option>
             </param>
             <when value="">
-                <param name="dat_file" type="data" format="zip,h5,txt" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext. Accepts individual file(s) or a zip."/>
+                <conditional name="format" >
+                    <expand macro="format"/>
+                    <when value="plaintext">
+                        <param name="dat_file" type="data" format="zip,h5,txt" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext. Accepts individual file(s) or a zip."/>
+                    </when>
+                    <when value="athena">
+                        <param name="dat_file" type="data" format="prj" label="Athena project" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
+                        <expand macro="extract_group"/>
+                    </when>
+                </conditional>
             </when>
             <when value="true">
-                <param name="dat_file" type="data" format="zip,h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext, which will be merged. Accepts individual files or a zip."/>
+                <conditional name="format" >
+                    <expand macro="format"/>
+                    <when value="plaintext">
+                        <param name="dat_file" type="data" format="zip,h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext, which will be merged. Accepts individual files or a zip."/>                    </when>
+                    <when value="athena">
+                        <param name="dat_file" type="data" format="prj" multiple="true" label="Athena project" help="X-ray Absorption Spectroscopy (XAS) data, which will be merged, in Athena project format"/>
+                        <expand macro="extract_group"/>
+                    </when>
+                </conditional>
             </when>
         </conditional>
+        <param name="annotation" type="text" label="Annotation" optional="true" help="If set, will annotate the output project(s) with this string. This will be used to generate legends when plotting data."/>
         <param name="energy_0" type="float" label="Edge energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant)."/>
         <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts."/>
         <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts."/>
@@ -61,50 +88,50 @@
         <param name="zip_outputs" type="boolean" label="Zip outputs" help="Whether to zip all outputs into one dataset."/>
     </inputs>
     <outputs>
-        <data name="out_zip" format="zip" from_work_dir="out_zip.zip" label="Zipped Athena project(s) of ${on_string}">
+        <data name="out_zip" format="zip" from_work_dir="out_zip.zip" label="Zipped Athena project(s) ${annotation} ${on_string}">
             <filter>zip_outputs</filter>
         </data>
-        <data name="athena_project_file" format="prj" from_work_dir="prj/athena.prj" label="Athena project of ${on_string}">
+        <data name="athena_project_file" format="prj" from_work_dir="prj/out.prj" label="Athena project ${annotation} ${on_string}">
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or merge_inputs["dat_file"].extension != "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] or merge_inputs["format"]["dat_file"].extension != "zip"</filter>
         </data>
-        <data name="edge_plot" format="png" from_work_dir="edge/edge.png" label="Edge fitting of ${on_string}">
+        <data name="edge_plot" format="png" from_work_dir="edge/out.png" label="Edge fitting ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or merge_inputs["dat_file"].extension != "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] or merge_inputs["format"]["dat_file"].extension != "zip"</filter>
         </data>
-        <data name="flat_plot" format="png" from_work_dir="flat/flat.png" label="Flattened plot of ${on_string}">
+        <data name="flat_plot" format="png" from_work_dir="flat/out.png" label="Flattened plot ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or merge_inputs["dat_file"].extension != "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] or merge_inputs["format"]["dat_file"].extension != "zip"</filter>
         </data>
-        <data name="derivative_plot" format="png" from_work_dir="derivative/derivative.png" label="Derivative plot of ${on_string}">
+        <data name="derivative_plot" format="png" from_work_dir="derivative/out.png" label="Derivative plot ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or merge_inputs["dat_file"].extension != "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] or merge_inputs["format"]["dat_file"].extension != "zip"</filter>
         </data>
-        <collection name="athena_project_file_collection" format="prj" type="list" label="Athena projects of ${on_string}">
+        <collection name="athena_project_file_collection" format="prj" type="list" label="Athena projects ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="prj"/>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["dat_file"].extension == "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["dat_file"].extension == "zip"</filter>
         </collection>
-        <collection name="edge_plot_collection" format="png" type="list" label="Edge fittings of ${on_string}">
+        <collection name="edge_plot_collection" format="png" type="list" label="Edge fittings ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="edge"/>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["dat_file"].extension == "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["dat_file"].extension == "zip"</filter>
         </collection>
-        <collection name="flat_plot_collection" format="png" type="list" label="Flattened plots of ${on_string}">
+        <collection name="flat_plot_collection" format="png" type="list" label="Flattened plots ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="flat"/>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["dat_file"].extension == "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["dat_file"].extension == "zip"</filter>
         </collection>
-        <collection name="derivative_plot_collection" format="png" type="list" label="Derivative plots of ${on_string}">
+        <collection name="derivative_plot_collection" format="png" type="list" label="Derivative plots ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="derivative"/>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["dat_file"].extension == "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["dat_file"].extension == "zip"</filter>
         </collection>
     </outputs>
     <tests>
@@ -154,7 +181,7 @@
             <param name="zip_outputs" value="true"/>
             <output name="out_zip">
                 <assert_contents>
-                    <has_size value="118500" delta="100"/>
+                    <has_size value="155600" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -228,6 +255,15 @@
             <output name="athena_project_file">
                 <assert_contents>
                     <has_size value="17989" delta="10"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="format" value="athena"/>
+            <param name="dat_file" value="test.prj"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="5370" delta="10"/>
                 </assert_contents>
             </output>
         </test>
