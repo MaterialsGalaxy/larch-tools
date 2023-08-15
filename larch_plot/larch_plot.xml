@@ -8,6 +8,7 @@
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+        <import>macros.xml</import>
     </macros>
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
@@ -33,16 +34,23 @@
     <inputs>
         <param name="dat_files" type="data" format="prj" multiple="true" min="1" label="Athena projects" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
         <repeat name="plots" title="Plots" min="1" default="1" help="Each additional entry will create another output plot">
-            <param name="variable" type="select" display="radio" label="Variable" help="Variable to plot on the y axis">
-                <option value="norm" selected="true">Normalised xμ</option>
-                <option value="dmude">Derivative of xμ</option>
-            </param>
-            <param name="limits" type="select" display="radio" label="Energy limits" help="Whether to limit the energy relative to the absorption edge or with absolute values.">
-                <option value="relative" selected="true">Relative</option>
-                <option value="absolute">Absolute</option>
-            </param>
-            <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts."/>
-            <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts."/>
+            <conditional name="variable">
+                <param name="variable" type="select" display="radio" label="Variable" help="Variable to plot on the y axis">
+                    <option value="norm" selected="true">Normalised xμ</option>
+                    <option value="dmude">Derivative of xμ</option>
+                    <option value="chir_mag">Magnitude of χ(r)</option>
+                </param>
+                <when value="norm">
+                    <expand macro="energy_limits"/>
+                </when>
+                <when value="dmude">
+                    <expand macro="energy_limits"/>
+                </when>
+                <when value="chir_mag">
+                    <param name="energy_min" type="float" label="Minimum r (ang)" optional="true" help="If set, data will be cropped below this value in angstroms."/>
+                    <param name="energy_max" type="float" label="Maximum r (ang)" optional="true" help="If set, data will be cropped above this value in angstroms."/>
+                </when>
+            </conditional>
         </repeat>
     </inputs>
     <outputs>
@@ -54,10 +62,10 @@
         <test expect_num_outputs="1">
             <param name="dat_files" value="test.prj"/>
             <param name="variable" value="norm"/>
-            <param name="limits" value="absolute"/>
+            <param name="energy_format" value="absolute"/>
             <param name="energy_min" value="7000"/>
             <param name="variable" value="dmude"/>
-            <param name="limits" value="relative"/>
+            <param name="energy_format" value="relative"/>
             <param name="energy_max" value="10"/>
             <output_collection name="plot_collection" type="list" count="2"/>
         </test>

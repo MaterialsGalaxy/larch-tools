@@ -17,6 +17,11 @@
         <xml name="extract_group">
             <param name="extract_group" type="text" optional="true" label="Extract group" help="Which group to extract and process from the Athena project (will use first group in file if unset)"/>
         </xml>
+        <xml name="columns">
+            <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify columns ending with 'energy' or labelled 'col1'."/>
+            <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify columns labelled 'col2', 'xmu' or 'lni0it'."/>
+        </xml>
+        <import>macros.xml</import>
     </macros>
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
@@ -60,6 +65,7 @@
                     <expand macro="format"/>
                     <when value="plaintext">
                         <param name="dat_file" type="data" format="zip,h5,txt" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext. Accepts individual file(s) or a zip."/>
+                        <expand macro="columns"/>
                     </when>
                     <when value="athena">
                         <param name="dat_file" type="data" format="prj" label="Athena project" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
@@ -71,7 +77,9 @@
                 <conditional name="format" >
                     <expand macro="format"/>
                     <when value="plaintext">
-                        <param name="dat_file" type="data" format="zip,h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext, which will be merged. Accepts individual files or a zip."/>                    </when>
+                        <param name="dat_file" type="data" format="zip,h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext, which will be merged. Accepts individual files or a zip."/>
+                        <expand macro="columns"/>
+                    </when>
                     <when value="athena">
                         <param name="dat_file" type="data" format="prj" multiple="true" label="Athena project" help="X-ray Absorption Spectroscopy (XAS) data, which will be merged, in Athena project format"/>
                         <expand macro="extract_group"/>
@@ -80,9 +88,15 @@
             </when>
         </conditional>
         <param name="annotation" type="text" label="Annotation" optional="true" help="If set, will annotate the output project(s) with this string. This will be used to generate legends when plotting data."/>
-        <param name="energy_0" type="float" label="Edge energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant)."/>
-        <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts."/>
-        <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts."/>
+        <section name="variables" title="Processing Options">
+            <param name="energy_0" type="float" label="Edge energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant)."/>
+            <expand macro="energy_limits"/>
+            <param name="pre1" type="float" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower edge of the region used for the pre-edge fitting, if unset will either use existing value or a default based on the data."/>
+            <param name="pre2" type="float" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper edge of the region used for the pre-edge fitting, if unset will either use existing value or a default based on the data."/>
+            <section name="xftf" title="XFTF">
+                <expand macro="xftf_params"/>
+            </section>
+        </section>
         <param name="rebin" type="boolean" label="Re-bin data" help="Whether to re-bin along the energy axis to ensure appropriate levels of precision in the pre-edge, near-edge and extended region of the spectrum."/>
         <param name="plot_graph" type="boolean" label="Plot graph" help="Whether to plot the pre/post edge fitting and the normalised xμ data."/>
         <param name="zip_outputs" type="boolean" label="Zip outputs" help="Whether to zip all outputs into one dataset."/>

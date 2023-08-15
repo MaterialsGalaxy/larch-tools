@@ -8,6 +8,7 @@
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+        <import>macros.xml</import>
     </macros>
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
@@ -34,32 +35,22 @@
         <repeat name="components" title="Fit components">
             <param name="label" type="text" optional="true" label="Component label" help="The label to use for this component. If unset, the label will be taken from the Athena project metadata."/>
             <param name="component_file" type="data" format="prj" label="Athena project to fit" help="Reference X-ray Absorption Fine Structure (XAFS) data, in Athena project format, to be used as components in the fit."/>
-            <param name="extract_group" type="text" optional="true" label="Extract group" help="Extract a Group nested within the project to use for the LCF. This Group should have the 'norm' attribute. If unset, the first Athena Group will be used."/>
         </repeat>
+        <expand macro="energy_limits"/>
     </inputs>
     <outputs>
-        <data name="plot" format="png" from_work_dir="plot.png"/>
+        <data name="plot" format="png" from_work_dir="plot.png" label="Larch LCF ${label} ${on_string}"/>
     </outputs>
     <tests>
         <test expect_num_outputs="1">
             <param name="prj_file" value="PtSn_OCO_Abu_1.prj"/>
             <param name="component_file" value="Sn_foil_extracted.prj"/>
             <param name="component_file" value="SnO2_extracted.prj"/>
+            <param name="energy_format" value="relative"/>
+            <param name="energy_max" value="10"/>
             <output name="plot">
                 <assert_contents>
                     <has_size value="62600" delta="100"/>
-                </assert_contents>
-            </output>
-        </test>
-        <test expect_num_outputs="1">
-            <param name="prj_file" value="PtSn_OCO_Abu_1.prj"/>
-            <param name="component_file" value="Sn_foil.prj"/>
-            <param name="extract_group" value="merge"/>
-            <param name="component_file" value="SnO2.prj"/>
-            <param name="extract_group" value="SnO2_0_9_2_6_13_5_0_8_1_0_with_theory"/>
-            <output name="plot">
-                <assert_contents>
-                    <has_size value="64200" delta="100"/>
                 </assert_contents>
             </output>
         </test>

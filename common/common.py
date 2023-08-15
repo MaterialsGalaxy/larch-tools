@@ -3,7 +3,7 @@ from typing import Iterable
 from larch.io import extract_athenagroup, read_athena
 from larch.io.athena_project import AthenaGroup
 from larch.symboltable import Group
-from larch.xafs import pre_edge
+from larch.xafs import autobk, pre_edge, xftf
 
 
 def get_group(athena_group: AthenaGroup, key: str = None) -> Group:
@@ -13,10 +13,12 @@ def get_group(athena_group: AthenaGroup, key: str = None) -> Group:
     return extract_athenagroup(athena_group._athena_groups[key])
 
 
-def read_group(dat_file: str, key: str = None):
+def read_group(dat_file: str, key: str = None, xftf_params: dict = None):
     athena_group = read_athena(dat_file)
     group = get_group(athena_group, key)
     bkg_parameters = group.athena_params.bkg
+    print(group.athena_params.fft)
+    print(group.athena_params.fft.__dict__)
     pre_edge(
         group,
         e0=bkg_parameters.e0,
@@ -27,6 +29,15 @@ def read_group(dat_file: str, key: str = None):
         nnorm=bkg_parameters.nnorm,
         make_flat=bkg_parameters.flatten,
     )
+    autobk(group)
+    if xftf_params is None:
+        xftf(group)
+    else:
+        print(xftf_params)
+        xftf(group, **xftf_params)
+        xftf_details = Group()
+        setattr(xftf_details, "call_args", xftf_params)
+        group.xftf_details = xftf_details
     return group
 
 
