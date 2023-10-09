@@ -2,7 +2,7 @@
     <description>plot Athena projects</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.66</token>
+        <token name="@TOOL_VERSION@">0.9.71</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -15,9 +15,6 @@
     </creator>
     <requirements>
         <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <!-- xraydb 4.5.0 is compatible with sqlalchemy 2, but is not yet available on condaforge so pin it -->
-        <requirement type="package" version="4.4.7">xraydb</requirement>
-        <requirement type="package" version="1.4.46">sqlalchemy</requirement>
         <requirement type="package" version="3.5.2">matplotlib</requirement>
     </requirements>
     <required_files>

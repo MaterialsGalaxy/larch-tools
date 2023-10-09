@@ -142,7 +142,7 @@ class Reader:
         else:
             for i, label in enumerate(labels):
                 if label == "col1" or label.endswith("energy"):
-                    labels[i] == "energy"
+                    labels[i] = "energy"
 
         if "mu" in labels:
             print("'mu' present in column headers")
@@ -154,7 +154,7 @@ class Reader:
         else:
             for i, label in enumerate(labels):
                 if label in ["col2", "xmu", "lni0it"]:
-                    labels[i] == "mu"
+                    labels[i] = "mu"
 
         if labels != xafs_group.array_labels:
             print(f"Renaming columns to: {labels}")
