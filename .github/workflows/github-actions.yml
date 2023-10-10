@@ -196,6 +196,8 @@ jobs:
       with:
         path: ~/.planemo
         key: planemo_cache_py_${{ matrix.python-version }}_gxy_${{ needs.setup.outputs.galaxy-head-sha }}
+    - name: DEBUG
+      run: printenv
     - name: Planemo test
       uses: galaxyproject/planemo-ci-action@v1
       id: test
@@ -206,7 +208,6 @@ jobs:
         galaxy-branch: ${{ env.GALAXY_BRANCH }}
         chunk: ${{ matrix.chunk }}
         chunk-count: ${{ needs.setup.outputs.chunk-count }}
-        additional-planemo-options: --no_docker
     - uses: actions/upload-artifact@v3
       with:
         name: 'Tool test output ${{ matrix.chunk }}'
