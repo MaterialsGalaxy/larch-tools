@@ -47,6 +47,7 @@ def parse_reports(input_data: str) -> "dict[str, list[float]]":
             input_files = [
                 os.path.join(input_data, f) for f in os.listdir(input_data)
             ]
+            input_files.sort()
         else:
             input_files = input_data.split(",")
 

@@ -16,6 +16,7 @@
         <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
         <requirement type="package" version="3.5.2">matplotlib</requirement>
         <requirement type="package" version="2023.3.23">pymatgen</requirement>
+        <requirement type="package" version="3.0">zip</requirement>
     </requirements>
     <required_files>
         <include type="literal" path="larch_feff.py"/>

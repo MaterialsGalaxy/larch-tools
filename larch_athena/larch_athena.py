@@ -25,60 +25,66 @@ import numpy as np
 
 
 class Reader:
-    def __init__(self, energy_column: str, mu_column: str, xftf_params: dict):
+    def __init__(
+        self,
+        energy_column: str,
+        mu_column: str,
+        xftf_params: dict,
+        data_format: str,
+        extract_group: str = None,
+    ):
         self.energy_column = energy_column
         self.mu_column = mu_column
         self.xftf_params = xftf_params
+        self.data_format = data_format
+        self.extract_group = extract_group
 
     def load_data(
         self,
         dat_file: str,
         merge_inputs: bool,
-        extension: str,
-        extract_group: str = None,
+        is_zipped: bool,
     ) -> "dict[str, Group]":
         if merge_inputs:
-            return {"out": self.merge_files(dat_file)}
+            out_group = self.merge_files(dat_files=dat_file, is_zipped=is_zipped)
+            return {"out": out_group}
         else:
-            return self.load_single_file(dat_file, extension, extract_group)
+            return self.load_single_file(filepath=dat_file, is_zipped=is_zipped)
 
-    def merge_files(self, dat_files: str) -> Group:
-        all_groups = []
-        for filepath in dat_files.split(","):
-            try:
+    def merge_files(
+        self,
+        dat_files: str,
+        is_zipped: bool,
+    ) -> Group:
+        if is_zipped:
+            all_groups = list(self.load_zipped_files().values())
+        else:
+            all_groups = []
+            for filepath in dat_files.split(","):
                 group = self.load_single_file(filepath)["out"]
                 all_groups.append(group)
-            except OSError:
-                # Indicates it is actually a zip, so unzip it
-                os.mkdir("dat_files")
-                with ZipFile(filepath) as z:
-                    z.extractall("dat_files")
-                keyed_groups = self.load_zipped_files()
-                all_groups.extend(keyed_groups.values())
-                shutil.rmtree("dat_files")
 
         return merge_groups(all_groups, xarray="energy", yarray="mu")
 
     def load_single_file(
         self,
         filepath: str,
-        extension: str = None,
-        extract_group: str = None,
+        is_zipped: bool = False,
     ) -> "dict[str,Group]":
-        if extension == "zip":
-            return self.load_zipped_files(extract_group)
+        if is_zipped:
+            return self.load_zipped_files()
 
         print(f"Attempting to read from {filepath}")
-        if extension == "prj":
-            group = read_group(filepath, extract_group, self.xftf_params)
-        elif extension == "h5":
-            group = self.load_h5(filepath)
-        elif extension == "txt":
-            group = self.load_ascii(filepath)
+        if self.data_format == "athena":
+            group = read_group(filepath, self.extract_group, self.xftf_params)
         else:
             # Try ascii anyway
             try:
                 group = self.load_ascii(filepath)
+                if not group.array_labels:
+                    # In later versions of larch, won't get a type error it will just
+                    # fail to load any data
+                    group = self.load_h5(filepath)
             except TypeError:
                 # Indicates this isn't plaintext, try h5
                 group = self.load_h5(filepath)
@@ -97,15 +103,14 @@ class Reader:
         set_array_labels(xafs_group, ["energy", "mu"])
         return xafs_group
 
-    def load_zipped_files(
-        self, extract_group: str = None
-    ) -> "dict[str, Group]":
-        def sorting_key(self, filename: str) -> str:
+    def load_zipped_files(self) -> "dict[str, Group]":
+        def sorting_key(filename: str) -> str:
             return re.findall(r"\d+", filename)[-1]
 
         all_paths = list(os.walk("dat_files"))
         all_paths.sort(key=lambda x: x[0])
         file_total = sum([len(f) for _, _, f in all_paths])
+        print(f"{file_total} files found")
         key_length = len(str(file_total))
         i = 0
         keyed_data = {}
@@ -122,7 +127,7 @@ class Reader:
             for filename in filenames:
                 key = str(i).zfill(key_length)
                 filepath = os.path.join(dirpath, filename)
-                xas_data = self.load_single_file(filepath, None, extract_group)
+                xas_data = self.load_single_file(filepath)
                 keyed_data[key] = xas_data["out"]
                 i += 1
 
@@ -192,6 +197,10 @@ def calibrate_energy(
     else:
         index_max = len(xafs_group.energy)
 
+    print(
+        f"Cropping energy range from {energy_min} to {energy_max}, "
+        f"index {index_min} to {index_max}"
+    )
     try:
         xafs_group.dmude = xafs_group.dmude[index_min:index_max]
         xafs_group.pre_edge = xafs_group.pre_edge[index_min:index_max]
@@ -202,6 +211,11 @@ def calibrate_energy(
 
     xafs_group.energy = xafs_group.energy[index_min:index_max]
     xafs_group.mu = xafs_group.mu[index_min:index_max]
+
+    # Sanity check
+    if len(xafs_group.energy) == 0:
+        raise ValueError("Energy cropping led to an empty array")
+
     return xafs_group
 
 
@@ -245,7 +259,13 @@ def main(
         xas_data = xas_data.rebinned
         pre_edge(energy=xas_data.energy, mu=xas_data.mu, group=xas_data)
 
-    autobk(xas_data)
+    try:
+        autobk(xas_data)
+    except ValueError as e:
+        raise ValueError(
+            f"autobk failed with energy={xas_data.energy}, mu={xas_data.mu}.\n"
+            "This may occur if the edge is not included in the above ranges."
+        ) from e
     xftf(xas_data, **xftf_params)
 
     if input_values["plot_graph"]:
@@ -315,21 +335,20 @@ if __name__ == "__main__":
     matplotlib.use("Agg")
 
     dat_file = sys.argv[1]
-    extension = sys.argv[2]
-    input_values = json.load(open(sys.argv[3], "r", encoding="utf-8"))
+    input_values = json.load(open(sys.argv[2], "r", encoding="utf-8"))
     merge_inputs = input_values["merge_inputs"]["merge_inputs"]
     data_format = input_values["merge_inputs"]["format"]["format"]
+    if "is_zipped" in input_values["merge_inputs"]["format"]:
+        is_zipped = bool(
+            input_values["merge_inputs"]["format"]["is_zipped"]["is_zipped"]
+        )
+    else:
+        is_zipped = False
     xftf_params = input_values["variables"]["xftf"]
     extract_group = None
 
     if "extract_group" in input_values["merge_inputs"]["format"]:
         extract_group = input_values["merge_inputs"]["format"]["extract_group"]
-
-    if data_format == "athena":
-        extension = "prj"  # Can be sure of extension, even if merging
-
-    if extension == "None":
-        extension = None
 
     energy_column = None
     mu_column = None
@@ -342,9 +361,13 @@ if __name__ == "__main__":
         energy_column=energy_column,
         mu_column=mu_column,
         xftf_params=xftf_params,
+        data_format=data_format,
+        extract_group=extract_group,
     )
     keyed_data = reader.load_data(
-        dat_file, merge_inputs, extension, extract_group
+        dat_file=dat_file,
+        merge_inputs=merge_inputs,
+        is_zipped=is_zipped,
     )
     for key, group in keyed_data.items():
         main(

@@ -162,8 +162,10 @@ def read_selected_paths_list(file_name):
     sp_dict = read_csv_data(file_name)
     sp_list = []
     for path_id in sp_dict:
+        filename = sp_dict[path_id]["filename"]
+        print(f"Reading selected path for file {filename}")
         new_path = FeffPathGroup(
-            filename=sp_dict[path_id]["filename"],
+            filename=f"feff/{filename}",
             label=sp_dict[path_id]["label"],
             s02=sp_dict[path_id]["s02"],
             e0=sp_dict[path_id]["e0"],
@@ -209,6 +211,8 @@ def main(
 
     athena_project = read_athena(prj_file)
     athena_group = get_group(athena_project)
+    # calc_with_defaults will hang indefinitely (>6 hours recorded) if the data contains
+    # any NaNs - consider adding an early error here if this is not fixed in Larch?
     data_group = calc_with_defaults(athena_group)
 
     print(f"Fitting project from file {data_group.filename}")

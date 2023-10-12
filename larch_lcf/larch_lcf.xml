@@ -47,7 +47,7 @@
             <param name="energy_max" value="10"/>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="62600" delta="100"/>
+                    <has_size value="55100" delta="100"/>
                 </assert_contents>
             </output>
         </test>

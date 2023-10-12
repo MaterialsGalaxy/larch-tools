@@ -15,14 +15,14 @@
    k window, dk       = 'hanning', 1\.000
    paths used in fit  = \['feff/feff0001\.dat', 'feff/feff0002\.dat', 'feff/feff0003\.dat', 'feff/feff0004\.dat'\]
    k-weight           = 2
-   epsilon_k          = Array\(mean=5\.1913e-04, std=4\.5676e-04\)
+   epsilon_k          = Array\(mean=5\.19133e-4, std=4\.56760e-4\)
    epsilon_r          = [\d\.]{10}
    n_independent      = 12\.205
 
 \[\[Variables\]\]
-   alpha          = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.0000e-07\)
+   alpha          = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.00000e-7\)
    amp            = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.00000000\)
-   enot           = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.0000e-07\)
+   enot           = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  1\.00000e-7\)
    ss             = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  0\.00300000\)
    ss2            = [-\s][\d\.]{10} \+/- [\d\.]{10}   \(init=  0\.00300000\)
    ss3            = [-\s][\d\.]{10} \+/- [\d\.]{10}  = 'ss2'
@@ -83,7 +83,7 @@
      e0     = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'enot'
      r      = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'reff \+ alpha\*reff'
      deltar = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'alpha\*reff'
-     sigma2 = [-\s][\d\.]{10}  := 'ss3'
+     sigma2 = [-\s][\d\.]{10} \+/- [\d\.]{10}  := 'ss3'
 
  = Path 'Fe' = Rh K Edge
     feffdat file = feff/feff0004\.dat, from feff run 'feff'
