@@ -2,9 +2,7 @@ import gc
 import json
 import os
 import re
-import shutil
 import sys
-from zipfile import ZipFile
 
 from common import read_group
 
@@ -46,10 +44,14 @@ class Reader:
         is_zipped: bool,
     ) -> "dict[str, Group]":
         if merge_inputs:
-            out_group = self.merge_files(dat_files=dat_file, is_zipped=is_zipped)
+            out_group = self.merge_files(
+                dat_files=dat_file, is_zipped=is_zipped
+            )
             return {"out": out_group}
         else:
-            return self.load_single_file(filepath=dat_file, is_zipped=is_zipped)
+            return self.load_single_file(
+                filepath=dat_file, is_zipped=is_zipped
+            )
 
     def merge_files(
         self,
@@ -82,8 +84,8 @@ class Reader:
             try:
                 group = self.load_ascii(filepath)
                 if not group.array_labels:
-                    # In later versions of larch, won't get a type error it will just
-                    # fail to load any data
+                    # In later versions of larch, won't get a type error it
+                    # will just fail to load any data
                     group = self.load_h5(filepath)
             except TypeError:
                 # Indicates this isn't plaintext, try h5
@@ -96,7 +98,7 @@ class Reader:
         return xas_data
 
     def load_h5(self, dat_file):
-        h5_group = h5group(dat_file)
+        h5_group = h5group(fname=dat_file, mode="r")
         energy = h5_group.entry1.instrument.qexafs_energy.qexafs_energy
         mu = h5_group.entry1.instrument.qexafs_counterTimer01.lnI0It
         xafs_group = Group(data=np.array([energy[:], mu[:]]))

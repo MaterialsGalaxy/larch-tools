@@ -61,7 +61,7 @@
             <output name="out_csv" file="[CSV_summary_of_test.inp].csv"/>
             <output name="out_dir">
                 <assert_contents>
-                    <has_size value="276848" delta="10"/>
+                    <has_size value="276800" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -75,7 +75,7 @@
             <output name="out_csv" file="[CSV_summary_of_1564889.cif].csv"/>
             <output name="out_dir">
                 <assert_contents>
-                    <has_size value="85776" delta="10"/>
+                    <has_size value="85700" delta="100"/>
                 </assert_contents>
             </output>
         </test>

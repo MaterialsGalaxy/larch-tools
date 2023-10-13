@@ -211,8 +211,9 @@ def main(
 
     athena_project = read_athena(prj_file)
     athena_group = get_group(athena_project)
-    # calc_with_defaults will hang indefinitely (>6 hours recorded) if the data contains
-    # any NaNs - consider adding an early error here if this is not fixed in Larch?
+    # calc_with_defaults will hang indefinitely (>6 hours recorded) if the
+    # data contains any NaNs - consider adding an early error here if this is
+    # not fixed in Larch?
     data_group = calc_with_defaults(athena_group)
 
     print(f"Fitting project from file {data_group.filename}")
