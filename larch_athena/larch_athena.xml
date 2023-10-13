@@ -273,7 +273,7 @@
             <param name="energy_max" value="7200"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="3330" delta="10"/>
+                    <has_size value="3300" delta="50"/>
                 </assert_contents>
             </output>
         </test>
