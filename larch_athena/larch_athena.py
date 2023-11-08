@@ -87,13 +87,26 @@ class Reader:
                     # In later versions of larch, won't get a type error it
                     # will just fail to load any data
                     group = self.load_h5(filepath)
-            except TypeError:
+            except (UnicodeDecodeError, TypeError):
                 # Indicates this isn't plaintext, try h5
                 group = self.load_h5(filepath)
         return {"out": group}
 
     def load_ascii(self, dat_file):
-        xas_data = read_ascii(dat_file)
+        with open(dat_file) as f:
+            labels = None
+            last_line = None
+            line = f.readline()
+            while line:
+                if not line.startswith("#"):
+                    if last_line is not None and last_line.find("\t") > 0:
+                        labels = [label.strip() for label in last_line.split("\t")]
+                    break
+
+                last_line = line
+                line = f.readline()
+
+        xas_data = read_ascii(filename=dat_file, labels=labels)
         xas_data = self.rename_cols(xas_data)
         return xas_data
 
@@ -136,7 +149,7 @@ class Reader:
         return keyed_data
 
     def rename_cols(self, xafs_group: Group) -> Group:
-        labels = list(xafs_group.array_labels)
+        labels = [label.lower() for label in xafs_group.array_labels]
         print(f"Read columns: {labels}")
 
         if "energy" in labels:
@@ -150,6 +163,7 @@ class Reader:
             for i, label in enumerate(labels):
                 if label == "col1" or label.endswith("energy"):
                     labels[i] = "energy"
+                    break
 
         if "mu" in labels:
             print("'mu' present in column headers")
@@ -160,8 +174,9 @@ class Reader:
                 raise ValueError(f"{self.mu_column} not found in {labels}")
         else:
             for i, label in enumerate(labels):
-                if label in ["col2", "xmu", "lni0it"]:
+                if label in ["col2", "xmu", "lni0it", "ffi0"]:
                     labels[i] = "mu"
+                    break
 
         if labels != xafs_group.array_labels:
             print(f"Renaming columns to: {labels}")

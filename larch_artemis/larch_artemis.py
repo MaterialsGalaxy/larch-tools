@@ -165,7 +165,7 @@ def read_selected_paths_list(file_name):
         filename = sp_dict[path_id]["filename"]
         print(f"Reading selected path for file {filename}")
         new_path = FeffPathGroup(
-            filename=f"feff/{filename}",
+            filename=filename,
             label=sp_dict[path_id]["label"],
             s02=sp_dict[path_id]["s02"],
             e0=sp_dict[path_id]["e0"],
