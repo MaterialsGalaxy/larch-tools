@@ -1,7 +1,6 @@
   id,                     name, value, expr, vary
-   1,                      amp,   1.0,     , True
-   2,                     enot, 1e-07,     , True
-   3,                    alpha, 1e-07,     , True
-   4,              custom_name, 0.005,     , False
-   5,                    ssfe1, 0.003,     , True
-   6,                    ssfe2, 0.003,     , True
+   1,                      s02,   1.0,     , True
+   2,                       e0,   0.0,     , True
+   3,                    alpha,   0.0,     , True
+   4,                   sigma2, 0.003,     , True
+   5,              custom_name, 0.005,     , False

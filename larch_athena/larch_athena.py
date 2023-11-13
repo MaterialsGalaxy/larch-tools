@@ -100,7 +100,7 @@ class Reader:
             while line:
                 if not line.startswith("#"):
                     if last_line is not None and last_line.find("\t") > 0:
-                        labels = [label.strip() for label in last_line.split("\t")]
+                        labels = [l.strip() for l in last_line.split("\t")]
                     break
 
                 last_line = line

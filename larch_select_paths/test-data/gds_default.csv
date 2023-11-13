@@ -1,12 +1,5 @@
   id,                     name, value, expr, vary
-   1,                      amp,   1.0,     , True
-   2,                     enot, 1e-07,     , True
-   3,                    alpha, 1e-07,     , True
-   4,                    ssfe1, 0.003,     , True
-   5,                    ssfe2, 0.003,     , True
-   6,                   sfefe3, 0.003,     , True
-   7,                    ssfe4, 0.003,     , True
-   8,                    ssfe5, 0.003,     , True
-   9,                   sssfe6, 0.003,     , True
-  10,                   sssfe7, 0.003,     , True
-  11,                   sfefe8, 0.003,     , True
+   1,                      s02,   1.0,     , True
+   2,                       e0,   0.0,     , True
+   3,                    alpha,   0.0,     , True
+   4,                   sigma2, 0.003,     , True

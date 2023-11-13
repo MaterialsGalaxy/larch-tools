@@ -6,123 +6,260 @@ import sys
 from zipfile import ZIP_DEFLATED, ZipFile
 
 
-SP_DATA = [
-    f"{'id':>4s}, {'filename':>24s}, {'label':>24s}, {'s02':>3s}, {'e0':>4s}, "
-    f"{'sigma2':>24s}, {'deltar':>10s}\n"
-]
-GDS_DATA = [
-    f"{'id':>4s}, {'name':>24s}, {'value':>5s}, {'expr':>4s}, {'vary':>4s}\n"
-]
-SP_ROW_ID = 1
-GDS_ROW_ID = 1
-AMP = "amp"
-ENOT = "enot"
-ALPHA = "alpha"
-ALPHA_REFF = "alpha*reff"
+class GDSWriter:
+    def __init__(self, default_variables: "dict[str, dict]"):
+        self.default_properties = {
+            "s02": {"name": "s02"},
+            "e0": {"name": "e0"},
+            "deltar": {"name": "alpha*reff"},
+            "sigma2": {"name": "sigma2"},
+        }
+        self.rows = [
+            f"{'id':>4s}, {'name':>24s}, {'value':>5s}, {'expr':>4s}, "
+            f"{'vary':>4s}\n"
+        ]
+        self.names = set()
+
+        for property in self.default_properties:
+            name = self.default_properties[property]["name"]
+            value = default_variables[property]["value"]
+            vary = default_variables[property]["vary"]
+            is_common = default_variables[property]["is_common"]
+
+            self.default_properties[property]["value"] = value
+            self.default_properties[property]["vary"] = vary
+            self.default_properties[property]["is_common"] = is_common
+
+            if is_common:
+                self.append_gds(name=name, value=value, vary=vary)
+
+    def append_gds(
+        self,
+        name: str,
+        value: float = 0.,
+        expr: str = None,
+        vary: bool = True,
+        label: str = "",
+    ):
+        """Append a single GDS variable to the list of rows, later to be
+        written to file.
+
+        Args:
+            name (str): Name of the GDS variable.
+            value (float, optional): Starting value for variable.
+                Defaults to 0.
+            expr (str, optional): Expression for setting the variable.
+                Defaults to None.
+            vary (bool, optional): Whether the variable is optimised during the
+                fit. Defaults to True.
+            label (str, optional): Label to keep variables for different FEFF
+                directories distinct. Defaults to "".
+        """
+        formatted_name = name if (label is None) else label + name
+        formatted_name = formatted_name.replace("*reff", "")
+        if not expr:
+            expr = "    "
+
+        if formatted_name in self.names:
+            raise ValueError(f"{formatted_name} already used as variable name")
+        self.names.add(formatted_name)
+
+        self.rows.append(
+            f"{len(self.rows):4d}, {formatted_name:>24s}, {str(value):>5s}, "
+            f"{expr:>4s}, {str(vary):>4s}\n"
+        )
+
+    def parse_gds(
+        self,
+        property_name: str,
+        variable_name: str = None,
+        path_variable: dict = None,
+        directory_label: str = None,
+        path_label: str = None,
+    ) -> str:
+        """Parse and append a row defining a GDS variable for a particular
+        path.
+
+        Args:
+            property_name (str): The property to which the variable
+                corresponds. Should be a key in `self.default_properties`.
+            variable_name (str, optional): Custom name for this variable.
+                Defaults to None.
+            path_variable (dict, optional): Dictionary defining the GDS
+                settings for this path's variable. Defaults to None.
+            directory_label (str, optional): Label to indicate paths from a
+                separate directory. Defaults to None.
+            path_label (str, optional): Label indicating the atoms involved in
+                this path. Defaults to None.
+
+        Returns:
+            str: Either `variable_name`, the name used as a default globally
+                for this `property_name`, or an automatically generated unique
+                name.
+        """
+        if variable_name:
+            self.append_gds(
+                name=variable_name,
+                value=path_variable["value"],
+                expr=path_variable["expr"],
+                vary=path_variable["vary"],
+            )
+            return variable_name
+        elif self.default_properties[property_name]["is_common"]:
+            return self.default_properties[property_name]["name"]
+        else:
+            auto_name = self.default_properties[property_name]["name"]
+            if directory_label:
+                auto_name += f"_{directory_label}"
+            if path_label:
+                auto_name += f"_{path_label.lower().replace('.', '')}"
+
+            self.append_gds(
+                name=auto_name,
+                value=self.default_properties[property_name]["value"],
+                vary=self.default_properties[property_name]["vary"],
+            )
+            return auto_name
+
+    def write(self):
+        """Write GDS rows to file.
+        """
+        with open("gds.csv", "w") as out:
+            out.writelines(self.rows)
 
 
-def write_selected_path(
-    row: "list[str]",
-    s02: str = AMP,
-    e0: str = ENOT,
-    sigma2: str = "",
-    deltar: str = ALPHA_REFF,
-    directory_label: str = "",
-):
-    global SP_ROW_ID
-    filename = row[0].strip()
-    label = row[-2].strip()
+class PathsWriter:
+    def __init__(self, default_variables: "dict[str, dict]"):
+        self.rows = [
+            f"{'id':>4s}, {'filename':>24s}, {'label':>24s}, {'s02':>3s}, "
+            f"{'e0':>4s}, {'sigma2':>24s}, {'deltar':>10s}\n"
+        ]
+        self.gds_writer = GDSWriter(default_variables=default_variables)
 
-    if directory_label:
-        filename = os.path.join(directory_label, filename)
-        label = f"{directory_label}.{label}"
-    else:
-        filename = os.path.join("feff", filename)
+    def parse_feff_output(
+        self,
+        paths_file: str,
+        selection: "dict[str, str|list]",
+        directory_label: str = "",
+    ):
+        """Parse selected paths from CSV summary and define GDS variables.
 
-    if not sigma2:
-        sigma2 = "s" + label.replace(".", "").lower()
-        write_gds(sigma2)
+        Args:
+            paths_file (str): CSV summary filename.
+            selection (dict[str, str|list]): Dictionary indicating which paths
+                to select, and how to define their variables.
+            directory_label (str, optional): Label to indicate paths from a
+                separate directory. Defaults to "".
+        """
+        paths = selection["paths"]
+        path_values_ids = [path_value["id"] for path_value in paths]
 
-    # If using the defaults, these are shared across all FEFF outputs and do
-    # not need to be labelled. If they were modified, they will need to be
-    # identified with this FEFF output.
-    if s02 != AMP:
-        s02 = label + s02
-    if e0 != ENOT:
-        e0 = label + e0
-    if deltar != ALPHA_REFF:
-        deltar = label + deltar
+        with open(paths_file) as file:
+            reader = csv.reader(file)
+            for row in reader:
+                id_match = re.search(r"\d+", row[0])
+                if id_match:
+                    path_id = int(id_match.group())
+                    filename = row[0].strip()
+                    path_label = row[-2].strip()
+                    variables = {}
 
-    SP_DATA.append(
-        f"{SP_ROW_ID:>4d}, {filename:>24s}, {label:>24s}, {s02:>3s}, "
-        f"{e0:>4s}, {sigma2:>24s}, {deltar:>10s}\n"
-    )
-    SP_ROW_ID += 1
+                    if path_id in path_values_ids:
+                        path_value = paths[path_values_ids.index(path_id)]
+                        for property in self.gds_writer.default_properties:
+                            variables[property] = self.gds_writer.parse_gds(
+                                property_name=property,
+                                variable_name=path_value[property]["name"],
+                                path_variable=path_value[property],
+                                directory_label=directory_label,
+                                path_label=path_label,
+                            )
+                        self.parse_selected_path(
+                            filename=filename,
+                            path_label=path_label,
+                            directory_label=directory_label,
+                            **variables,
+                        )
+                    elif selection["selection"] == "all" or int(row[-1]):
+                        path_value = None
+                        for property in self.gds_writer.default_properties:
+                            variables[property] = self.gds_writer.parse_gds(
+                                property_name=property,
+                                directory_label=directory_label,
+                                path_label=path_label,
+                            )
+                        self.parse_selected_path(
+                            filename=filename,
+                            path_label=path_label,
+                            directory_label=directory_label,
+                            **variables,
+                        )
+
+    def parse_selected_path(
+        self,
+        filename: str,
+        path_label: str,
+        directory_label: str = "",
+        s02: str = "s02",
+        e0: str = "e0",
+        sigma2: str = "sigma2",
+        deltar: str = "alpha*reff",
+    ):
+        """Format and append row representing a selected FEFF path.
+
+        Args:
+            filename (str): Name of the underlying FEFF path file, without
+                parent directory.
+            path_label (str): Label indicating the atoms involved in this path.
+            directory_label (str, optional): Label to indicate paths from a
+                separate directory. Defaults to "".
+            s02 (str, optional): Electron screening factor variable name.
+                Defaults to "s02".
+            e0 (str, optional): Energy shift variable name. Defaults to "e0".
+            sigma2 (str, optional): Mean squared displacement variable name.
+                Defaults to "sigma2".
+            deltar (str, optional): Change in path length variable.
+                Defaults to "alpha*reff".
+        """
+        if directory_label:
+            filename = os.path.join(directory_label, filename)
+            label = f"{directory_label}.{path_label}"
+        else:
+            filename = os.path.join("feff", filename)
+            label = path_label
+
+        self.rows.append(
+            f"{len(self.rows):>4d}, {filename:>24s}, {label:>24s}, "
+            f"{s02:>3s}, {e0:>4s}, {sigma2:>24s}, {deltar:>10s}\n"
+        )
+
+    def write(self):
+        """Write selected path and GDS rows to file.
+        """
+        self.gds_writer.write()
+        with open("sp.csv", "w") as out:
+            out.writelines(self.rows)
 
 
-def write_gds(
-    name: str,
-    value: float = 0.003,
-    expr: str = None,
-    vary: bool = True,
-    label: str = "",
-):
-    global GDS_ROW_ID
-    if not expr:
-        expr = "    "
+def main(input_values: dict):
+    """Select paths and define GDS parameters.
 
-    formatted_name = name if (label is None) else label + name
+    Args:
+        input_values (dict): All input values from the Galaxy tool UI.
 
-    GDS_DATA.append(
-        f"{GDS_ROW_ID:4d}, {formatted_name:>24s}, {str(value):>5s}, "
-        f"{expr:>4s}, {str(vary):>4s}\n"
-    )
-    GDS_ROW_ID += 1
+    Raises:
+        ValueError: If a FEFF label is not unique.
+    """
+    default_variables = input_values["variables"]
 
-
-def write_feff_output(
-    paths_file: str,
-    select_all: bool,
-    paths: list,
-    gds: list,
-    label: str = "",
-    **kwargs,
-):
-    path_values_ids = [path_value["id"] for path_value in paths]
-    gds_names = [gds_value["name"] for gds_value in gds]
-
-    for gds_value in gds:
-        write_gds(label=label, **gds_value)
-
-    with open(paths_file) as file:
-        reader = csv.reader(file)
-        for row in reader:
-            id_match = re.search(r"\d+", row[0])
-            if id_match:
-                path_id = int(id_match.group())
-                if path_id in path_values_ids:
-                    path_value = paths[path_values_ids.index(path_id)]
-                    s02 = path_value["s02"]
-                    e0 = path_value["e0"]
-                    sigma2 = path_value["sigma2"]
-                    if sigma2 and sigma2 not in gds_names:
-                        write_gds(sigma2, label=label)
-                    deltar = path_value["deltar"]
-                    write_selected_path(
-                        row, s02, e0, sigma2, deltar, directory_label=label
-                    )
-                elif select_all or int(row[-1]):
-                    write_selected_path(row, directory_label=label)
-
-
-def main(input_values):
-    write_gds(name=AMP, **input_values["amp"])
-    write_gds(name=ENOT, **input_values["enot"])
-    write_gds(name=ALPHA, **input_values["alpha"])
+    writer = PathsWriter(default_variables=default_variables)
 
     if len(input_values["feff_outputs"]) == 1:
         feff_output = input_values["feff_outputs"][0]
-        write_feff_output(**feff_output)
+        writer.parse_feff_output(
+            paths_file=feff_output["paths_file"],
+            selection=feff_output["selection"],
+        )
     else:
         zfill_length = len(str(len(input_values["feff_outputs"])))
         labels = set()
@@ -135,7 +272,11 @@ def main(input_values):
                     raise ValueError(f"Label '{label}' is not unique")
                 labels.add(label)
 
-                write_feff_output(label=label, **feff_output)
+                writer.parse_feff_output(
+                    directory_label=label,
+                    paths_file=feff_output["paths_file"],
+                    selection=feff_output["selection"],
+                )
 
                 with ZipFile(feff_output["paths_zip"]) as z:
                     for zipinfo in z.infolist():
@@ -146,12 +287,7 @@ def main(input_values):
                                 os.path.join(label, zipinfo.filename)
                             )
 
-    with open("sp.csv", "w") as out:
-        out.writelines(SP_DATA)
-
-    with open("gds.csv", "w") as out:
-        out.writelines(GDS_DATA)
-
+    writer.write()
 
 if __name__ == "__main__":
     input_values = json.load(open(sys.argv[1], "r", encoding="utf-8"))

@@ -8,6 +8,15 @@
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+        <xml name="name">
+            <param name="name" type="text" optional="true" label="Name" help="The name of the variable should be unique, and can be used in expressions for other paths. If name is set, will overwrite the default bevaviour for this variable."/>
+        </xml>
+        <xml name="expr">
+            <param name="expr" type="text" optional="true" label="Expression" help="If set, the variable will be 'Defined' by the expression. This can include other variable name, for example in order to set two paths to use the same variable."/>
+        </xml>
+        <xml name="vary">
+            <param name="vary" type="boolean" checked="true" label="Vary" help="If True, the initial 'Guess' will be optimised in the fitting. If False, the value will be 'Set' instead and not optimised."/>
+        </xml>
     </macros>
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
@@ -26,40 +35,103 @@
         <inputs name="inputs" data_style="paths"/>
     </configfiles>
     <inputs>
+        <section name="variables" expanded="false" title="GDS variable defaults" help="Define default values for variables in the EXAFS equation to use for the paths selected below.">
+            <section name="s02" expanded="false" title="S02: passive electron reduction factor">
+                <param name="is_common" type="boolean" checked="true" label="Common to all paths" help="If set, a single variable 's02' will be used for all paths. Otherwise, each path has a distinct variable."/>
+                <param name="value" type="float" value="1.0" min="0.0" max="1.0" label="Value" help="The initial value for 's02'. This is typically between 0.7 and 1.0."/>
+                <expand macro="vary"/>
+            </section>
+            <section name="e0" expanded="false" title="E0: energy shift">
+                <param name="is_common" type="boolean" checked="true" label="Common to all paths" help="If set, a single variable 'e0' will be used for all paths. Otherwise, each path has a distinct variable."/>
+                <param name="value" type="float" value="0.0" label="Value" help="The initial value for 'e0'. This should be close to zero, as it represents the difference in the absorption edge positions between simulation and experiment."/>
+                <expand macro="vary"/>
+            </section>
+            <section name="deltar" expanded="false" title="Delta R: change in path length">
+                <param name="is_common" type="boolean" checked="true" label="Common to all paths" help="If set, a single variable 'alpha*reff' will be used for all paths (where 'reff' is the effective path length). Otherwise, each path has a distinct variable."/>
+                <param name="value" type="float" value="0.0" label="Value" help="The initial value for 'alpha'. This should be close to zero, as it represents the difference in the FEFF path and fitted (experimental) path length."/>
+                <expand macro="vary"/>
+            </section>
+            <section name="sigma2" expanded="false" title="Sigma2: mean squared displacement">
+                <param name="is_common" type="boolean" checked="true" label="Common to all paths" help="If set, a single variable 'sigma2' will be used for all paths. Otherwise, each path has a distinct variable."/>
+                <param name="value" type="float" value="0.003" label="Value" help="The initial value for 'sigma2'. This should be small, but non-zero, as atomic vibrations will result in variation in exact positions."/>
+                <expand macro="vary"/>
+            </section>
+        </section>
         <repeat name="feff_outputs" title="Distinct FEFF outputs" min="1" help="If FEFF has been used on multiple structures, the paths from each can be merged into one input to provide to Larch Artemis. If only one entry is provided, then the zipped directory of paths will be unchanged.">
+            <param name="label" type="text" optional="true" label="Label" help="Short label to use when merging different FEFF outputs to ensure they remain distinct. Not required if only providing a single output, and will default to the index in this list."/>
             <param name="paths_zip" type="data" format="zip" label="Zipped paths directory" help="Zipped directory containing the actual path files output by FEFF."/>
             <param name="paths_file" type="data" format="feff" label="Paths file" help="CSV file detailing the possible scattering paths. Note that rows with '1' in the 'select' column will be selected with default values for their parameters automatically."/>
-            <param name="label" type="text" optional="true" label="Label" help="Short label to use when merging different FEFF outputs to ensure they remain distinct. Not required if only providing a single output, and will default to the index in this list."/>
-            <param name="select_all" type="boolean" checked="true" label="Select all" help="All paths will be selected, with default values used unless specified manually below."/>
-            <repeat name="paths" title="Select paths" help="Identify paths to use in the fitting by their id, and define their fitting parameter names. Defaults can be used, but if custom values are needed define a new name and create an entry in Custom GDS variables.">
-                <param name="id" type="integer" value="1" min="1" label="Path ID" help="Numerical id of a path to select, this appears at the end of the label and filename in the path summary CSV."/>
-                <param name="s02" type="text" value="amp" label="s02" help="The varaible name for the amplitude 's0 squared' (passive electron reduction factor) as it appears in the EXAFS equation. Default is 'amp'."/>
-                <param name="e0" type="text" value="enot" label="e0" help="The varaible name for the energy 'e0' (position of the absorption edge) as it appears in the EXAFS equation. Default is 'enot'."/>
-                <param name="sigma2" type="text" optional="true" label="sigma2" help="The variable name for 'sigma squared' (mean-square disorder in distance) as it appears in the EXAFS equation. By default (if left unset), each path will have a unique 'Custom GDS variable' 'name' with default 'value', 'expr' and 'vary' settings."/>
-                <param name="deltar" type="text" value="alpha*reff" label="deltar" help="The varaible name for 'delta r' (change in scattering path distance) as it appears in the EXAFS equation. Default is 'alpha*reff', where 'reff' is the path length used in the FEFF calculation."/>
-            </repeat>
-            <repeat name="gds" title="Custom GDS variables" help="Guess, Set, Define (GDS) variables for the selected paths.">
-                <param name="name" type="text" label="Name" help="The name of the variable should match what is used in the Select paths section"/>
-                <param name="value" type="float" value="0.003" label="Value" help="The initial value for the variable."/>
-                <param name="expr" type="text" optional="true" label="Expression" help="If set, the variable will be 'Defined' by the expression. This can include other variable name, for example in order to set two paths to use the same variable."/>
-                <param name="vary" type="boolean" checked="true" label="Vary" help="If True, the initial 'Guess' will be optimised in the fitting. If False, the value will be 'Set' instead and not optimised."/>
-            </repeat>
+            <conditional name="selection">
+                <param name="selection" type="select" label="Selection method">
+                    <option value="all" selected="true">All paths</option>
+                    <!-- <option value="number">Fixed number</option>
+                    <option value="combinations">Combinations</option> -->
+                    <option value="manual">Manual</option>
+                </param>
+                <when value="all">
+                    <repeat name="paths" title="Define path variables" help="Overwrite the default variables defined above for chosen paths.">
+                        <param name="id" type="integer" value="1" min="1" label="Path ID" help="Numerical id of a path to select, this appears at the end of the label and filename in the path summary CSV."/>
+                        <section name="s02" expanded="false" title="S02: passive electron reduction factor">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="1.0" min="0.0" max="1.0" label="Value" help="The initial value for 's02'. This is typically between 0.7 and 1.0."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                        <section name="e0" expanded="false" title="E0: energy shift">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="0.0" label="Value" help="The initial value for 'e0'. This should be close to zero, as it represents the difference in the absorption edge positions between simulation and experiment."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                        <section name="deltar" expanded="false" title="Delta R: change in path length">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="0.0" label="Value" help="The initial value for 'alpha'. This should be close to zero, as it represents the difference in the FEFF path and fitted (experimental) path length."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                        <section name="sigma2" expanded="false" title="Sigma2: mean squared displacement">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="0.003" label="Value" help="The initial value for 'sigma2'. This should be small, but non-zero, as atomic vibrations will result in variation in exact positions."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                    </repeat>
+                </when>
+                <!-- <when value="number">
+                </when>
+                <when value="combinations">
+                </when> -->
+                <when value="manual">
+                    <repeat name="paths" title="Select paths" help="Identify paths to use in the fitting by their id, and optionally define their variables. This will overwrite and defaults set above.">
+                        <param name="id" type="integer" value="1" min="1" label="Path ID" help="Numerical id of a path to select, this appears at the end of the label and filename in the path summary CSV."/>
+                        <section name="s02" expanded="false" title="S02: passive electron reduction factor">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="1.0" min="0.0" max="1.0" label="Value" help="The initial value for 's02'. This is typically between 0.7 and 1.0."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                        <section name="e0" expanded="false" title="E0: energy shift">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="0.0" label="Value" help="The initial value for 'e0'. This should be close to zero, as it represents the difference in the absorption edge positions between simulation and experiment."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                        <section name="deltar" expanded="false" title="Delta R: change in path length">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="0.0" label="Value" help="The initial value for 'alpha'. This should be close to zero, as it represents the difference in the FEFF path and fitted (experimental) path length."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                        <section name="sigma2" expanded="false" title="Sigma2: mean squared displacement">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="0.003" label="Value" help="The initial value for 'sigma2'. This should be small, but non-zero, as atomic vibrations will result in variation in exact positions."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
+                    </repeat>
+                </when>
+            </conditional>
         </repeat>
-        <section name="amp" title="GDS default (amp)" help="Default value used for the 's02' variable 'amp' for all paths. Changing this will affect all paths without a custom variable defined for 's02'.">
-            <param name="value" type="float" value="1.0" min="0.0" max="1.0" label="Value" help="The initial value for the variable. This is typically between 0.7 and 1.0."/>
-            <param name="expr" type="text" optional="true" label="Expression" help="If set, the variable will be 'Defined' by the expression. This can include other variable name, for example in order to set two paths to use the same variable."/>
-            <param name="vary" type="boolean" checked="true" label="Vary" help="If True, the initial 'Guess' will be optimised in the fitting. If False, the value will be 'Set' instead and not optimised."/>
-        </section>
-        <section name="enot" title="GDS default (enot)" help="Default value used for the 'e0' variable 'enot' for all paths. Changing this will affect all paths without a custom variable defined for 'e0'.">
-            <param name="value" type="float" value="1e-7" label="Value" help="The initial value for the variable. This should be close to zero, as it represents the difference in the absorption edge positions between simulation and experiment."/>
-            <param name="expr" type="text" optional="true" label="Expression" help="If set, the variable will be 'Defined' by the expression. This can include other variable name, for example in order to set two paths to use the same variable."/>
-            <param name="vary" type="boolean" checked="true" label="Vary" help="If True, the initial 'Guess' will be optimised in the fitting. If False, the value will be 'Set' instead and not optimised."/>
-        </section>
-        <section name="alpha" title="GDS default (alpha)" help="Default value used for the 'deltar' variable 'alpha' for all paths. Changing this will affect all paths without a custom variable defined for 'deltar'.">
-            <param name="value" type="float" value="1e-7" label="Value" help="The initial value for the variable. This should be close to zero, as it represents the difference in the FEFF path and fitted (experimental) path length."/>
-            <param name="expr" type="text" optional="true" label="Expression" help="If set, the variable will be 'Defined' by the expression. This can include other variable name, for example in order to set two paths to use the same variable."/>
-            <param name="vary" type="boolean" checked="true" label="Vary" help="If True, the initial 'Guess' will be optimised in the fitting. If False, the value will be 'Set' instead and not optimised."/>
-        </section>
     </inputs>
     <outputs>
         <data name="merged_directories" format="zip" from_work_dir="merged.zip" label="Merged directories from ${on_string}">
@@ -80,26 +152,28 @@
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
-            <param name="select_all" value="false"/>
-            <output name="gds_csv" file="gds_select_all_false.csv"/>
+            <param name="selection" value="manual"/>
+            <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_select_all_false.csv"/>
         </test>
         <!-- Test selected paths without custom GDS -->
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
-            <param name="select_all" value="false"/>
+            <param name="selection" value="manual"/>
             <param name="id" value="3"/>
-            <output name="gds_csv" file="gds_include_path_3.csv"/>
+            <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_include_path_3.csv"/>
         </test>
         <!-- Test selected paths with custom name but no GDS entry -->
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
-            <param name="select_all" value="false"/>
+            <param name="selection" value="manual"/>
             <param name="id" value="3"/>
-            <param name="sigma2" value="custom_name"/>
+            <section name="sigma2">
+                <param name="name" value="custom_name"/>
+            </section>
             <output name="gds_csv" file="gds_include_path_3_custom_name.csv"/>
             <output name="sp_csv" file="sp_include_path_3_custom_name.csv"/>
         </test>
@@ -107,36 +181,38 @@
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
-            <param name="select_all" value="false"/>
+            <param name="selection" value="manual"/>
             <param name="id" value="3"/>
-            <param name="sigma2" value="custom_name"/>
-            <param name="name" value="custom_name"/>
-            <param name="value" value="0.005"/>
-            <param name="expr" value=""/>
-            <param name="vary" value="false"/>
+            <repeat name="paths">
+                <section name="sigma2">
+                    <param name="name" value="custom_name"/>
+                    <param name="value" value="0.005"/>
+                    <param name="expr" value=""/>
+                    <param name="vary" value="false"/>
+                </section>
+            </repeat>
             <output name="gds_csv" file="gds_include_path_3_custom_name_value.csv"/>
             <output name="sp_csv" file="sp_include_path_3_custom_name.csv"/>
         </test>
         <!-- Test changing default GDS values -->
         <test expect_num_outputs="2">
+            <section name="variables">
+                <section name="s02">
+                    <param name="value" value="0.1"/>
+                    <param name="vary" value="false"/>
+                </section>
+                <section name="e0">
+                    <param name="value" value="0.1"/>
+                    <param name="vary" value="true"/>
+                </section>
+                <section name="deltar">
+                    <param name="value" value="10"/>
+                    <param name="vary" value="false"/>
+                </section>
+            </section>
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
-            <param name="select_all" value="false"/>
-            <section name="amp">
-                <param name="value" value="0.1"/>
-                <param name="expr" value="enot"/>
-                <param name="vary" value="false"/>
-            </section>
-            <section name="enot">
-                <param name="value" value="0.1"/>
-                <param name="expr" value=""/>
-                <param name="vary" value="true"/>
-            </section>
-            <section name="alpha">
-                <param name="value" value="10"/>
-                <param name="expr" value=""/>
-                <param name="vary" value="false"/>
-            </section>
+            <param name="selection" value="manual"/>
             <output name="gds_csv" file="gds_altered_defaults.csv"/>
             <output name="sp_csv" file="sp_select_all_false.csv"/>
         </test>
@@ -155,7 +231,7 @@
                     <has_size value="206000" delta="100"/>
                 </assert_contents>
             </output>
-            <output name="gds_csv" file="gds_merge_default.csv"/>
+            <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_merge_default.csv"/>
         </test>
         <!-- Test merging custom arguments -->
@@ -164,21 +240,29 @@
                 <param name="label" value="primary"/>
                 <param name="paths_zip" value="FEFF_paths.zip"/>
                 <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
-                <param name="select_all" value="false"/>
-                <repeat name="paths">
-                    <param name="id" value="3"/>
-                    <param name="sigma2" value="custom_name_1"/>
-                </repeat>
+                <conditional name="selection">
+                    <param name="selection" value="manual"/>
+                    <repeat name="paths">
+                        <param name="id" value="3"/>
+                        <section name="sigma2">
+                            <param name="name" value="custom_name_1"/>
+                        </section>
+                    </repeat>
+                </conditional>
             </repeat>
             <repeat name="feff_outputs">
                 <param name="label" value="secondary"/>
                 <param name="paths_zip" value="FEFF_paths.zip"/>
                 <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
-                <param name="select_all" value="false"/>
-                <repeat name="paths">
-                    <param name="id" value="3"/>
-                    <param name="sigma2" value="custom_name_2"/>
-                </repeat>
+                <conditional name="selection">
+                    <param name="selection" value="manual"/>
+                    <repeat name="paths">
+                        <param name="id" value="3"/>
+                        <section name="sigma2">
+                            <param name="name" value="custom_name_2"/>
+                        </section>
+                    </repeat>
+                </conditional>
             </repeat>
             <output name="merged_directories">
                 <assert_contents>
@@ -198,7 +282,7 @@
 
         If only one set of FEFF outputs is provided, labelling is not required and the existing zip file can be used as the input to Larch Artemis.
 
-        If "Select all" is checked, or an individual row in the CSV with ``select`` is set to ``1``, it will be automatically used, with the default values shown here.
+        If the selection method "All paths" is chosen, or an individual row in the CSV with ``select`` is set to ``1``, it will be automatically used, with the default values defined.
         This can be useful when many paths are needed and using the UI can be cumbersome.
 
         It is also possible to manually check and further modify the GDS and SP output CSVs to ensure the values are suitable, as an alternative to re-running this tool.
