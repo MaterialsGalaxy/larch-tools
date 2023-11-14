@@ -29,7 +29,6 @@
         <include type="literal" path="larch_select_paths.py"/>
     </required_files>
     <command detect_errors="exit_code"><![CDATA[
-        python -V && pip list && conda info && conda list &&
         python '${__tool_directory__}/larch_select_paths.py' '$inputs'
     ]]></command>
     <configfiles>
