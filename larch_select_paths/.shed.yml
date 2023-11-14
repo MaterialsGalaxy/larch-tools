@@ -1,0 +1,10 @@
+categories:
+- Materials science
+description: Select FEFF paths and define fitting variables
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given FEFF paths, select those of interest, and define GDS parameters for use in an
+  Artemis fitting.
+name: larch_select_paths
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_select_paths

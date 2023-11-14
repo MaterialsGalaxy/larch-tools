@@ -1,0 +1,10 @@
+categories:
+- Materials science
+description: Generates FEFF paths for a structure of interest
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given either a CIF or FEFF input file, generate paths for the atom of interest within
+  the specified radius.
+name: larch_feff
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_feff

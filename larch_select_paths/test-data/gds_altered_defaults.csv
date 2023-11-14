@@ -1,0 +1,5 @@
+  id,                     name, value, expr, vary
+   1,                      s02,   0.1,     , False
+   2,                       e0,   0.1,     , True
+   3,                    alpha,  10.0,     , False
+   4,                   sigma2, 0.003,     , True

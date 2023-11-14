@@ -1,0 +1,83 @@
+<tool id="larch_plot" name="Larch Plot" version="@TOOL_VERSION@+galaxy@WRAPPER_VERSION@" python_template_version="3.5" profile="22.05" license="MIT">
+    <description>plot Athena projects</description>
+    <macros>
+        <!-- version of underlying tool (PEP 440) -->
+        <token name="@TOOL_VERSION@">0.9.71</token>
+        <!-- version of this tool wrapper (integer) -->
+        <token name="@WRAPPER_VERSION@">0</token>
+        <!-- citation should be updated with every underlying tool version -->
+        <!-- typical fields to update are version, month, year, and doi -->
+        <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+        <import>macros.xml</import>
+    </macros>
+    <creator>
+        <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
+        <requirement type="package" version="3.5.2">matplotlib</requirement>
+    </requirements>
+    <required_files>
+        <include type="literal" path="larch_plot.py"/>
+        <include type="literal" path="common.py"/>
+    </required_files>
+    <command detect_errors="exit_code"><![CDATA[
+        mkdir plots
+        && python '${__tool_directory__}/larch_plot.py' '$dat_files' '$inputs'
+    ]]></command>
+    <configfiles>
+        <inputs name="inputs"/>
+    </configfiles>
+    <inputs>
+        <param name="dat_files" type="data" format="prj" multiple="true" min="1" label="Athena projects" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
+        <repeat name="plots" title="Plots" min="1" default="1" help="Each additional entry will create another output plot">
+            <conditional name="variable">
+                <param name="variable" type="select" display="radio" label="Variable" help="Variable to plot on the y axis">
+                    <option value="norm" selected="true">Normalised xμ</option>
+                    <option value="dmude">Derivative of xμ</option>
+                    <option value="chir_mag">Magnitude of χ(r)</option>
+                </param>
+                <when value="norm">
+                    <expand macro="energy_limits"/>
+                </when>
+                <when value="dmude">
+                    <expand macro="energy_limits"/>
+                </when>
+                <when value="chir_mag">
+                    <param name="energy_min" type="float" label="Minimum r (ang)" optional="true" help="If set, data will be cropped below this value in angstroms."/>
+                    <param name="energy_max" type="float" label="Maximum r (ang)" optional="true" help="If set, data will be cropped above this value in angstroms."/>
+                </when>
+            </conditional>
+        </repeat>
+    </inputs>
+    <outputs>
+        <collection name="plot_collection" format="png" type="list">
+            <discover_datasets pattern="__name_and_ext__" directory="plots"/>
+        </collection>
+    </outputs>
+    <tests>
+        <test expect_num_outputs="1">
+            <param name="dat_files" value="test.prj"/>
+            <param name="variable" value="norm"/>
+            <param name="energy_format" value="absolute"/>
+            <param name="energy_min" value="7000"/>
+            <param name="variable" value="dmude"/>
+            <param name="energy_format" value="relative"/>
+            <param name="energy_max" value="10"/>
+            <output_collection name="plot_collection" type="list" count="2"/>
+        </test>
+    </tests>
+    <help><![CDATA[
+        Using Larch, read Athena project files and plot data from them.
+
+        Only Athena project files are accepted as input. If data is plaintext,
+        first load it using the Larch Athena tool.
+        All input files will appear on the same plot(s).
+        To generate multiple types of plot with the same set of files,
+        add additional sections to the form.
+    ]]></help>
+    <citations>
+        <citation type="doi">@TOOL_CITATION@</citation>
+        <citation type="doi">10.1107/S0909049505012719</citation>
+    </citations>
+</tool>

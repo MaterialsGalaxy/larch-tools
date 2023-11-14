@@ -1,0 +1,10 @@
+categories:
+- Materials science
+description: Generates summary reports from multiple Artemis fittings
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given either a single CSV or multiple (possibly zipped) Artemis reports, produce plots
+  for criteria of interest.
+name: larch_criteria_report
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_criteria_report

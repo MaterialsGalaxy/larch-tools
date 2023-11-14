@@ -1,0 +1,9 @@
+categories:
+- Materials science
+description: Plot Athena project files
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given one or more Athena project files, read and plot data.
+name: larch_plot
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_plot

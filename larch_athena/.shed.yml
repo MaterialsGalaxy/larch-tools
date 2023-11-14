@@ -1,0 +1,10 @@
+categories:
+- Materials science
+description: Prepares Athena project files from XAS data
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given XAS data in plaintext or HDF5 format, process an Athena project file for further
+  analysis.
+name: larch_athena
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_athena

@@ -1,0 +1,10 @@
+categories:
+- Materials science
+description: Performs Linear Combination Fitting (LCF) on XAS data
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given a target Athena project, and multiple possible components, fit the components
+  with different weightings in order to sum to give the target.
+name: larch_lcf
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_lcf

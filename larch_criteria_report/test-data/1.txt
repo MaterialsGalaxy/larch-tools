@@ -1,0 +1,48 @@
+=================== FEFFIT RESULTS ====================
+[[Statistics]]
+   nvarys, npts       =  4, 650
+   n_independent      =  128.324
+   chi_square         =  2051.40364
+   reduced chi_square =  16.5004697
+   r-factor           =  0.98287213
+   Akaike info crit   =  363.678274
+   Bayesian info crit =  375.096506
+ 
+[[Data]]
+   fit space          = 'r'
+   r-range            = 0.000, 10.000
+   k-range            = 0.000, 20.000
+   k window, dk       = 'kaiser', 4.000
+   paths used in fit  = ['feff/feff0001.dat']
+   k-weight           = 2
+   epsilon_k          = Array(mean=0.00212337, std=5.2471e-04)
+   epsilon_r          = 0.10715072
+   n_independent      = 128.324
+ 
+[[Variables]]
+   alpha          = -0.04411765 +/- 0.03125420   (init=  1.0000e-07)
+   amp            =  0.84987801 +/- 1.49776699   (init=  1.00000000)
+   enot           = -44.0066655 +/- 42.3148172   (init=  1.0000e-07)
+   scrh1          = -0.00232543 +/- 0.00518279   (init=  0.00300000)
+ 
+[[Correlations]]    (unreported correlations are <  0.100)
+   amp, scrh1           =  0.922
+   alpha, enot          =  0.890
+   enot, scrh1          = -0.121
+   amp, enot            = -0.119
+ 
+[[Paths]]
+ = Path 'C.Rh.1' = Rh K Edge
+    feffdat file = feff/feff0001.dat, from feff run 'feff'
+    geometry  atom      x        y        z      ipot
+              Rh       0.0000,  0.0000,  0.0000  0 (absorber)
+               C       0.7410,  0.2885,  1.7419  1
+     reff   =  1.91490000
+     degen  =  1.00000000
+     n*s02  =  0.84987801 +/- 1.49776699  := 'amp'
+     e0     = -44.0066655 +/- 42.3148172  := 'enot'
+     r      =  1.83041912 +/- 0.05984867  := 'reff + alpha*reff'
+     deltar = -0.08448088 +/- 0.05984867  := 'alpha*reff'
+     sigma2 = -0.00232543 +/- 0.00518279  := 'scrh1'
+
+=======================================================

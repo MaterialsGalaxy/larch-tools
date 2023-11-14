@@ -1,0 +1,10 @@
+categories:
+- Materials science
+description: Performs fitting on XAS data
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given an Athena project file and FEFF path(s) information, perform a fitting against
+  the project data using the selected paths.
+name: larch_artemis
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_artemis

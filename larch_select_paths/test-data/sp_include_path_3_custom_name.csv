@@ -1,0 +1,4 @@
+  id,                 filename,                    label, s02,   e0,                   sigma2,     deltar
+   1,        feff/feff0001.dat,                   S.Fe.1, s02,   e0,                   sigma2, alpha*reff
+   2,        feff/feff0002.dat,                   S.Fe.2, s02,   e0,                   sigma2, alpha*reff
+   3,        feff/feff0003.dat,                  Fe.Fe.3, s02,   e0,              custom_name, alpha*reff

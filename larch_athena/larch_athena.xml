@@ -1,0 +1,342 @@
+<tool id="larch_athena" name="Larch Athena" version="@TOOL_VERSION@+galaxy@WRAPPER_VERSION@" python_template_version="3.5" profile="22.05" license="MIT">
+    <description>generate Athena projects from XAFS data</description>
+    <macros>
+        <!-- version of underlying tool (PEP 440) -->
+        <token name="@TOOL_VERSION@">0.9.71</token>
+        <!-- version of this tool wrapper (integer) -->
+        <token name="@WRAPPER_VERSION@">0</token>
+        <!-- citation should be updated with every underlying tool version -->
+        <!-- typical fields to update are version, month, year, and doi -->
+        <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
+        <xml name="format">
+            <param name="format" type="select" display="radio" label="Input format" help="Whether data is in plaintext or already saved as an Athena project">
+                <option value="plaintext" selected="true">Plaintext</option>
+                <option value="athena">Athena project</option>
+            </param> 
+        </xml>
+        <xml name="extract_group">
+            <param name="extract_group" type="text" optional="true" label="Extract group" help="Which group to extract and process from the Athena project (will use first group in file if unset)"/>
+        </xml>
+        <xml name="columns">
+            <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify columns ending with 'energy' or labelled 'col1'."/>
+            <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it' or 'FFI0'."/>
+        </xml>
+        <xml name="is_zipped">
+            <param name="is_zipped" type="select" display="radio" label="Inputs Zipped" help="Whether plaintext input files are zipped together into one directory, or not.">
+                <option value="" selected="true">No</option>
+                <option value="true">Yes</option>
+            </param>
+        </xml>
+        <import>macros.xml</import>
+    </macros>
+    <creator>
+        <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
+    </creator>
+    <requirements>
+        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
+        <requirement type="package" version="3.5.2">matplotlib</requirement>
+        <requirement type="package" version="3.0">zip</requirement>
+        <requirement type="package" version="6.0">unzip</requirement>
+    </requirements>
+    <required_files>
+        <include type="literal" path="larch_athena.py"/>
+    </required_files>
+    <command detect_errors="exit_code"><![CDATA[
+        mkdir prj edge flat derivative
+        #if $merge_inputs.format.format=="plaintext":
+            #if $merge_inputs.format.is_zipped.is_zipped=="true":
+                && echo Unzipping '$merge_inputs.format.is_zipped.dat_file.name'
+                && unzip '$merge_inputs.format.is_zipped.dat_file' -d dat_files
+                && python '${__tool_directory__}/larch_athena.py' dat_files '$inputs'
+            #else
+                && python '${__tool_directory__}/larch_athena.py' '$merge_inputs.format.is_zipped.dat_file' '$inputs'
+            #end if
+        #else
+            && python '${__tool_directory__}/larch_athena.py' '$merge_inputs.format.dat_file' '$inputs'
+        #end if
+        #if $zip_outputs:
+            && zip out_zip.zip prj/* edge/* flat/* derivative/*
+        #end if
+    ]]></command>
+    <configfiles>
+        <inputs name="inputs"/>
+    </configfiles>
+    <inputs>
+        <conditional name="merge_inputs" >
+            <param name="merge_inputs" type="select" display="radio" label="Merge multiple inputs" help="Whether to merge all input data into one Athena project, by default each dataset or file in a zip will result in a separate output.">
+                <option value="" selected="true">No</option>
+                <option value="true">Yes</option>
+            </param>
+            <when value="">
+                <conditional name="format" >
+                    <expand macro="format"/>
+                    <when value="plaintext">
+                        <conditional name="is_zipped" >
+                            <expand macro="is_zipped"/>
+                            <when value="">
+                                <param name="dat_file" type="data" format="h5,txt" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext."/>
+                            </when>
+                            <when value="true">
+                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext."/>
+                            </when>
+                        </conditional>
+                        <expand macro="columns"/>
+                    </when>
+                    <when value="athena">
+                        <param name="dat_file" type="data" format="prj" label="Athena project" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
+                        <expand macro="extract_group"/>
+                    </when>
+                </conditional>
+            </when>
+            <when value="true">
+                <conditional name="format" >
+                    <expand macro="format"/>
+                    <when value="plaintext">
+                        <conditional name="is_zipped" >
+                            <expand macro="is_zipped"/>
+                            <when value="">
+                                <param name="dat_file" type="data" format="h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext, which will be merged. Accepts individual files or a zip."/>
+                            </when>
+                            <when value="true">
+                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext. All files in the zip will be merged."/>
+                            </when>
+                        </conditional>
+                        <expand macro="columns"/>
+                    </when>
+                    <when value="athena">
+                        <param name="dat_file" type="data" format="prj" multiple="true" label="Athena project" help="X-ray Absorption Spectroscopy (XAS) data, which will be merged, in Athena project format"/>
+                        <expand macro="extract_group"/>
+                    </when>
+                </conditional>
+            </when>
+        </conditional>
+        <param name="annotation" type="text" label="Annotation" optional="true" help="If set, will annotate the output project(s) with this string. This will be used to generate legends when plotting data."/>
+        <section name="variables" title="Processing Options">
+            <param name="energy_0" type="float" label="Edge energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant)."/>
+            <expand macro="energy_limits"/>
+            <param name="pre1" type="float" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower edge of the region used for the pre-edge fitting, if unset will either use existing value or a default based on the data."/>
+            <param name="pre2" type="float" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper edge of the region used for the pre-edge fitting, if unset will either use existing value or a default based on the data."/>
+            <section name="xftf" title="XFTF">
+                <expand macro="xftf_params"/>
+            </section>
+        </section>
+        <param name="rebin" type="boolean" label="Re-bin data" help="Whether to re-bin along the energy axis to ensure appropriate levels of precision in the pre-edge, near-edge and extended region of the spectrum."/>
+        <param name="plot_graph" type="boolean" label="Plot graph" help="Whether to plot the pre/post edge fitting and the normalised xμ data."/>
+        <param name="zip_outputs" type="boolean" label="Zip outputs" help="Whether to zip all outputs into one dataset."/>
+    </inputs>
+    <outputs>
+        <!-- Single output if zipping outputs -->
+        <data name="out_zip" format="zip" from_work_dir="out_zip.zip" label="Zipped Athena project(s) ${annotation} ${on_string}">
+            <filter>zip_outputs</filter>
+        </data>
+        <!-- Single outputs of differnt types if merging, or not using a zip -->
+        <data name="athena_project_file" format="prj" from_work_dir="prj/out.prj" label="Athena project ${annotation} ${on_string}">
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+        </data>
+        <data name="edge_plot" format="png" from_work_dir="edge/out.png" label="Edge fitting ${annotation} ${on_string}">
+            <filter>plot_graph</filter>
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+        </data>
+        <data name="flat_plot" format="png" from_work_dir="flat/out.png" label="Flattened plot ${annotation} ${on_string}">
+            <filter>plot_graph</filter>
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+        </data>
+        <data name="derivative_plot" format="png" from_work_dir="derivative/out.png" label="Derivative plot ${annotation} ${on_string}">
+            <filter>plot_graph</filter>
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] or merge_inputs["format"]["dat_file"].extension != "zip"</filter>
+            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+        </data>
+        <!-- Directories of outputs if using single, non-merged zip as input -->
+        <collection name="athena_project_file_collection" format="prj" type="list" label="Athena projects ${annotation} ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="prj"/>
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+        </collection>
+        <collection name="edge_plot_collection" format="png" type="list" label="Edge fittings ${annotation} ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="edge"/>
+            <filter>plot_graph</filter>
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+        </collection>
+        <collection name="flat_plot_collection" format="png" type="list" label="Flattened plots ${annotation} ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="flat"/>
+            <filter>plot_graph</filter>
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+        </collection>
+        <collection name="derivative_plot_collection" format="png" type="list" label="Derivative plots ${annotation} ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="derivative"/>
+            <filter>plot_graph</filter>
+            <filter>not zip_outputs</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+        </collection>
+    </outputs>
+    <tests>
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="test.xmu"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="5405" delta="10"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="ffi0.tabular"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="34400" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="4">
+            <param name="dat_file" value="test.xmu"/>
+            <param name="plot_graph" value="true"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="5405" delta="10"/>
+                </assert_contents>
+            </output>
+            <output name="edge_plot">
+                <assert_contents>
+                    <has_size value="54036" delta="20"/>
+                </assert_contents>
+            </output>
+            <output name="flat_plot">
+                <assert_contents>
+                    <has_size value="39266" delta="20"/>
+                </assert_contents>
+            </output>
+            <output name="derivative_plot">
+                <assert_contents>
+                    <has_size value="42435" delta="20"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="4">
+            <param name="is_zipped" value="true"/>
+            <param name="dat_file" value="test.zip"/>
+            <param name="plot_graph" value="true"/>
+            <output_collection name="athena_project_file_collection" type="list" count="2"/>
+            <output_collection name="edge_plot_collection" type="list" count="2"/>
+            <output_collection name="flat_plot_collection" type="list" count="2"/>
+            <output_collection name="derivative_plot_collection" type="list" count="2"/>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="is_zipped" value="true"/>
+            <param name="dat_file" value="h5.zip"/>
+            <param name="plot_graph" value="true"/>
+            <param name="zip_outputs" value="true"/>
+            <output name="out_zip">
+                <assert_contents>
+                    <has_size value="312000" delta="500"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="test.xmu"/>
+            <param name="energy_format" value="absolute"/>
+            <param name="energy_min" value="7000"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="5300" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="4">
+            <param name="dat_file" value="test.xmu"/>
+            <param name="energy_format" value="absolute"/>
+            <param name="energy_min" value="7000"/>
+            <param name="energy_max" value="7200"/>
+            <param name="plot_graph" value="true"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="3300" delta="50"/>
+                </assert_contents>
+            </output>
+            <output name="edge_plot">
+                <assert_contents>
+                    <has_size value="44430" delta="10"/>
+                </assert_contents>
+            </output>
+            <output name="flat_plot">
+                <assert_contents>
+                    <has_size value="37310" delta="10"/>
+                </assert_contents>
+            </output>
+            <output name="derivative_plot">
+                <assert_contents>
+                    <has_size value="46390" delta="10"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="test.xmu"/>
+            <param name="energy_format" value="absolute"/>
+            <param name="energy_0" value="7050"/>
+            <param name="energy_min" value="7000"/>
+            <param name="energy_max" value="7200"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="3300" delta="50"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="test.xmu"/>
+            <param name="rebin" value="true"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="8413" delta="10"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="merge_inputs" value="true"/>
+            <param name="dat_file" value="262875_PtSn_OCO_Abu_1.nxs,262876_PtSn_OCO_Abu_2.nxs"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="37550" delta="50"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="merge_inputs" value="true"/>
+            <param name="is_zipped" value="true"/>
+            <param name="dat_file" value="test.zip"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="18000" delta="50"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="format" value="athena"/>
+            <param name="dat_file" value="test.prj"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="5400" delta="200"/>
+                </assert_contents>
+            </output>
+        </test>
+    </tests>
+    <help><![CDATA[
+        Using Larch, create an Athena project file from the input X-ray Absorption Fine Structure (XAFS) data file.
+        
+        Accepts both plaintext and HDF5 formatted data or a zip file containing these formats.
+        If column names are not present in plaintext data, then the first column is treated as `energy` and the second as `mu`.
+        Note that in order to ensure a consistent output, once unzipped all files will sorted first by their parent directories (alphabetically).
+        Within a given directory, if all filenames contain digits then the last block of digits will be used to sort the files numerically.
+        In the output, all files (regardless of initial filepath) are output in a flat hierarchy, with the number in which it was processed as the file name (zero-padded).
+        Care should therefore be taken to ensure input data is consistent with this treatment.
+
+        Optionally, plot the xμ data along with pre and post edge fitting lines for visual inspection. 
+    ]]></help>
+    <citations>
+        <citation type="doi">@TOOL_CITATION@</citation>
+        <citation type="doi">10.1107/S0909049505012719</citation>
+    </citations>
+</tool>
