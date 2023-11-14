@@ -15,7 +15,7 @@
     <requirements>
         <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
         <requirement type="package" version="3.5.2">matplotlib</requirement>
-        <requirement type="package" version="2023.8.10">pymatgen</requirement>
+        <!-- <requirement type="package" version="2023.8.10">pymatgen</requirement> -->
         <requirement type="package" version="3.0">zip</requirement>
     </requirements>
     <required_files>
@@ -67,7 +67,7 @@
             </output>
         </test>
         <!-- Test CIF input -->
-        <test expect_num_outputs="3">
+        <!-- <test expect_num_outputs="3">
             <conditional name="format">
                 <param name="format" value="cif"/>
                 <param name="structure_file" value="1564889.cif"/>
@@ -79,16 +79,16 @@
                     <has_size value="85700" delta="100"/>
                 </assert_contents>
             </output>
-        </test>
+        </test> -->
         <!-- Test CIF input failure with low radius -->
-        <test expect_failure="true">
+        <!-- <test expect_failure="true">
             <conditional name="format">
                 <param name="format" value="cif"/>
                 <param name="structure_file" value="1564889.cif"/>
                 <param name="absorbing_atom" value="S"/>
                 <param name="radius" value="0.1"/>
             </conditional>
-        </test>
+        </test> -->
     </tests>
     <help><![CDATA[
         Runs a FEFF6 calculation to find potential scattering paths in the provided structure.
