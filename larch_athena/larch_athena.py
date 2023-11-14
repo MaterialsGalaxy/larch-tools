@@ -94,12 +94,13 @@ class Reader:
 
     def load_ascii(self, dat_file):
         with open(dat_file) as f:
-            labels = []
+            labels = None
             last_line = None
             line = f.readline()
             while line:
                 if not line.startswith("#"):
                     if last_line is not None and last_line.find("\t") > 0:
+                        labels = []
                         for label in last_line.split("\t"):
                             labels.append(label.strip())
                     break

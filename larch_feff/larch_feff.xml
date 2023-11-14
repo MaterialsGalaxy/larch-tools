@@ -22,6 +22,7 @@
         <include type="literal" path="larch_feff.py"/>
     </required_files>
     <command detect_errors="exit_code"><![CDATA[
+        python -V && pip list && conda info && conda list &&
         python '${__tool_directory__}/larch_feff.py' '$format.structure_file' '$inputs'
         && zip -r out.zip feff
     ]]></command>
