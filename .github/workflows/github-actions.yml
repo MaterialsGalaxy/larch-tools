@@ -3,7 +3,7 @@ on: [push, pull_request]
 env:
   GALAXY_FORK: galaxyproject
   GALAXY_BRANCH: release_23.0
-  MAX_CHUNKS: 6
+  MAX_CHUNKS: 7
 jobs:
   # the setup job does two things:
   # 1. cache the pip cache and .planemo
@@ -23,7 +23,7 @@ jobs:
       chunk-list: ${{ steps.discover.outputs.chunk-list }}
     strategy:
       matrix:
-        python-version: ['3.7']
+        python-version: ['3.8']
     steps:
     - name: Print github context properties
       run: |
@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.7']
+        python-version: ['3.8']
     steps:
     # checkout the repository
     # and use it as the current working directory
@@ -132,7 +132,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.7']
+        python-version: ['3.8']
     steps:
     # checkout the repository to master
     # and use it as the current working directory
@@ -165,7 +165,7 @@ jobs:
       fail-fast: false
       matrix:
         chunk: ${{ fromJson(needs.setup.outputs.chunk-list) }}
-        python-version: ['3.7']
+        python-version: ['3.8']
     services:
       postgres:
         image: postgres:11
@@ -227,7 +227,7 @@ jobs:
     needs: [setup, test]
     strategy:
       matrix:
-        python-version: ['3.7']
+        python-version: ['3.8']
     # This job runs on Linux
     runs-on: ubuntu-latest
     steps:
@@ -267,7 +267,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.7']
+        python-version: ['3.8']
     steps:
     - uses: actions/checkout@v3
       with:

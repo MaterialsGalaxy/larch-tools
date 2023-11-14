@@ -289,6 +289,7 @@ def main(input_values: dict):
 
     writer.write()
 
+
 if __name__ == "__main__":
     input_values = json.load(open(sys.argv[1], "r", encoding="utf-8"))
     main(input_values)
