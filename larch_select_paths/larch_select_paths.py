@@ -1,9 +1,9 @@
 import csv
-from itertools import combinations
 import json
 import os
 import re
 import sys
+from itertools import combinations
 from zipfile import ZIP_DEFLATED, ZipFile
 
 
