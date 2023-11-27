@@ -156,7 +156,7 @@ class Reader:
 
         if "energy" in labels:
             print("'energy' present in column headers")
-        elif self.energy_column is not None:
+        elif self.energy_column:
             if self.energy_column.lower() in labels:
                 labels[labels.index(self.energy_column.lower())] = "energy"
             else:
@@ -169,14 +169,14 @@ class Reader:
 
         if "mu" in labels:
             print("'mu' present in column headers")
-        elif self.mu_column is not None:
+        elif self.mu_column:
             if self.mu_column.lower() in labels:
                 labels[labels.index(self.mu_column.lower())] = "mu"
             else:
                 raise ValueError(f"{self.mu_column} not found in {labels}")
         else:
             for i, label in enumerate(labels):
-                if label in ["col2", "xmu", "lni0it", "ffi0"]:
+                if label in ["col2", "xmu", "lni0it", "ffi0", "ff/i1"]:
                     labels[i] = "mu"
                     break
 
