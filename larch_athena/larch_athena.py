@@ -4,7 +4,7 @@ import os
 import re
 import sys
 
-from common import read_group
+from common import pre_edge_with_defaults, read_group, xftf_with_defaults
 
 from larch.io import (
     create_athena,
@@ -14,7 +14,7 @@ from larch.io import (
     set_array_labels,
 )
 from larch.symboltable import Group
-from larch.xafs import autobk, pre_edge, rebin_xafs, xftf
+from larch.xafs import rebin_xafs
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -27,13 +27,11 @@ class Reader:
         self,
         energy_column: str,
         mu_column: str,
-        xftf_params: dict,
         data_format: str,
         extract_group: str = None,
     ):
         self.energy_column = energy_column
         self.mu_column = mu_column
-        self.xftf_params = xftf_params
         self.data_format = data_format
         self.extract_group = extract_group
 
@@ -72,13 +70,13 @@ class Reader:
         self,
         filepath: str,
         is_zipped: bool = False,
-    ) -> "dict[str,Group]":
+    ) -> "tuple[dict, bool]":
         if is_zipped:
             return self.load_zipped_files()
 
         print(f"Attempting to read from {filepath}")
         if self.data_format == "athena":
-            group = read_group(filepath, self.extract_group, self.xftf_params)
+            group = read_group(filepath, self.extract_group)
         else:
             # Try ascii anyway
             try:
@@ -90,6 +88,9 @@ class Reader:
             except (UnicodeDecodeError, TypeError):
                 # Indicates this isn't plaintext, try h5
                 group = self.load_h5(filepath)
+            pre_edge_with_defaults(group)
+            xftf_with_defaults(group)
+
         return {"out": group}
 
     def load_ascii(self, dat_file):
@@ -189,29 +190,24 @@ class Reader:
 
 def calibrate_energy(
     xafs_group: Group,
-    energy_0: float,
-    energy_min: float,
-    energy_max: float,
-    energy_format: str,
+    calibration_e0: float = None,
+    energy_min: float = None,
+    energy_max: float = None,
 ):
-    if energy_0 is not None:
-        print(f"Recalibrating energy edge from {xafs_group.e0} to {energy_0}")
-        xafs_group.energy = xafs_group.energy + energy_0 - xafs_group.e0
-        xafs_group.e0 = energy_0
+    if calibration_e0 is not None:
+        print(f"Recalibrating edge from {xafs_group.e0} to {calibration_e0}")
+        xafs_group.energy = xafs_group.energy + calibration_e0 - xafs_group.e0
+        xafs_group.e0 = calibration_e0
 
     if not (energy_min or energy_max):
         return xafs_group
 
-    if energy_min:
-        if energy_format == "relative":
-            energy_min += xafs_group.e0
+    if energy_min is not None:
         index_min = np.searchsorted(xafs_group.energy, energy_min)
     else:
         index_min = 0
 
-    if energy_max:
-        if energy_format == "relative":
-            energy_max += xafs_group.e0
+    if energy_max is not None:
         index_max = np.searchsorted(xafs_group.energy, energy_max)
     else:
         index_max = len(xafs_group.energy)
@@ -240,79 +236,55 @@ def calibrate_energy(
 
 def main(
     xas_data: Group,
-    input_values: dict,
+    do_calibrate: bool,
+    calibrate_settings: dict,
+    do_rebin: bool,
+    do_pre_edge: bool,
+    pre_edge_settings: dict,
+    do_xftf: bool,
+    xftf_settings: dict,
+    plot_graph: bool,
+    annotation: str,
     path_key: str = "out",
 ):
-    energy_0 = input_values["variables"]["energy_0"]
-    if energy_0 is None and hasattr(xas_data, "e0"):
-        energy_0 = xas_data.e0
+    if do_calibrate:
+        print(f"Calibrating energy with {calibrate_settings}")
+        xas_data = calibrate_energy(xas_data, **calibrate_settings)
+        # After re-calibrating, will need to redo pre-edge with new range
+        do_pre_edge = True
 
-    energy_format = input_values["variables"]["energy_format"]
-    pre1 = input_values["variables"]["pre1"]
-    pre2 = input_values["variables"]["pre2"]
-    pre1 = validate_pre(pre1, energy_0, energy_format)
-    pre2 = validate_pre(pre2, energy_0, energy_format)
-
-    pre_edge(
-        energy=xas_data.energy,
-        mu=xas_data.mu,
-        group=xas_data,
-        e0=energy_0,
-        pre1=pre1,
-        pre2=pre2,
-    )
-
-    energy_min = input_values["variables"]["energy_min"]
-    energy_max = input_values["variables"]["energy_max"]
-    xas_data = calibrate_energy(
-        xas_data,
-        energy_0,
-        energy_min,
-        energy_max,
-        energy_format=energy_format,
-    )
-
-    if input_values["rebin"]:
-        print(xas_data.energy, xas_data.mu)
-        rebin_xafs(energy=xas_data.energy, mu=xas_data.mu, group=xas_data)
+    if do_rebin:
+        print("Re-binning data")
+        rebin_xafs(
+            energy=xas_data.energy,
+            mu=xas_data.mu,
+            group=xas_data,
+            **pre_edge_settings,
+        )
         xas_data = xas_data.rebinned
-        pre_edge(energy=xas_data.energy, mu=xas_data.mu, group=xas_data)
+        # After re-bin, will need to redo pre-edge
+        do_pre_edge = True
 
-    try:
-        autobk(xas_data)
-    except ValueError as e:
-        raise ValueError(
-            f"autobk failed with energy={xas_data.energy}, mu={xas_data.mu}.\n"
-            "This may occur if the edge is not included in the above ranges."
-        ) from e
-    xftf(xas_data, **xftf_params)
+    if do_pre_edge:
+        pre_edge_with_defaults(xas_data, pre_edge_settings)
 
-    if input_values["plot_graph"]:
+    if do_xftf:
+        xftf_with_defaults(xas_data, xftf_settings)
+
+    if plot_graph:
         plot_edge_fits(f"edge/{path_key}.png", xas_data)
         plot_flattened(f"flat/{path_key}.png", xas_data)
         plot_derivative(f"derivative/{path_key}.png", xas_data)
 
     xas_project = create_athena(f"prj/{path_key}.prj")
     xas_project.add_group(xas_data)
-    if input_values["annotation"]:
+    if annotation:
         group = next(iter(xas_project.groups.values()))
-        group.args["annotation"] = input_values["annotation"]
+        group.args["annotation"] = annotation
     xas_project.save()
 
     # Ensure that we do not run out of memory when running on large zips
     gc.collect()
-
-
-def validate_pre(pre, energy_0, energy_format):
-    if pre is not None and energy_format == "absolute":
-        if energy_0 is None:
-            raise ValueError(
-                "Edge energy must be set manually or be present in the "
-                "existing Athena project if using absolute format."
-            )
-        pre -= energy_0
-
-    return pre
 
 
 def plot_derivative(plot_path: str, xafs_group: Group):
@@ -363,9 +335,8 @@ if __name__ == "__main__":
         )
     else:
         is_zipped = False
-    xftf_params = input_values["variables"]["xftf"]
-    extract_group = None
 
+    extract_group = None
     if "extract_group" in input_values["merge_inputs"]["format"]:
         extract_group = input_values["merge_inputs"]["format"]["extract_group"]
 
@@ -379,7 +350,6 @@ if __name__ == "__main__":
     reader = Reader(
         energy_column=energy_column,
         mu_column=mu_column,
-        xftf_params=xftf_params,
         data_format=data_format,
         extract_group=extract_group,
     )
@@ -388,9 +358,35 @@ if __name__ == "__main__":
         merge_inputs=merge_inputs,
         is_zipped=is_zipped,
     )
+
+    calibrate_items = input_values["processing"]["calibrate"].items()
+    calibrate_settings = {k: v for k, v in calibrate_items if v is not None}
+    do_calibrate = calibrate_settings.pop("calibrate") == "true"
+
+    do_rebin = input_values["processing"].pop("rebin")
+
+    pre_edge_items = input_values["processing"]["pre_edge"].items()
+    pre_edge_settings = {k: v for k, v in pre_edge_items if v is not None}
+    do_pre_edge = pre_edge_settings.pop("pre_edge") == "true"
+
+    xftf_items = input_values["processing"]["xftf"].items()
+    xftf_settings = {k: v for k, v in xftf_items if v is not None}
+    do_xftf = xftf_settings.pop("xftf") == "true"
+
+    plot_graph = input_values["plot_graph"]
+    annotation = input_values["annotation"]
+
     for key, group in keyed_data.items():
         main(
             group,
-            input_values=input_values,
+            do_calibrate=do_calibrate,
+            calibrate_settings=calibrate_settings,
+            do_rebin=do_rebin,
+            do_pre_edge=do_pre_edge,
+            pre_edge_settings=pre_edge_settings,
+            do_xftf=do_xftf,
+            xftf_settings=xftf_settings,
+            plot_graph=plot_graph,
+            annotation=annotation,
             path_key=key,
         )
