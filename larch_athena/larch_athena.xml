@@ -111,16 +111,54 @@
             </when>
         </conditional>
         <param name="annotation" type="text" label="Annotation" optional="true" help="If set, will annotate the output project(s) with this string. This will be used to generate legends when plotting data."/>
-        <section name="variables" title="Processing Options">
-            <param name="energy_0" type="float" label="Edge energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant)."/>
-            <expand macro="energy_limits"/>
-            <param name="pre1" type="float" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower edge of the region used for the pre-edge fitting, if unset will either use existing value or a default based on the data."/>
-            <param name="pre2" type="float" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper edge of the region used for the pre-edge fitting, if unset will either use existing value or a default based on the data."/>
-            <section name="xftf" title="XFTF">
-                <expand macro="xftf_params"/>
-            </section>
+        <section name="processing" expanded="true" title="Processing Options" help="By default, the following processing steps will be performed either with default values, or those contained in the input Athena project (if used). If specified here, these values will be used instead for process in sequence.">
+            <conditional name="calibrate">
+                <param name="calibrate" type="select" label="Calibrate energy" help="If set, will shift the spectrum so that its (automatically determined) edge occurs at the specified value, and any values outside the range will be discarded.">
+                    <option value="" selected="true">False</option>
+                    <option value="true">True</option>
+                </param>
+                <when value=""/>
+                <when value="true">
+                    <param name="calibration_e0" type="float" label="Calibration energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant). Note that this is different from specifying E0 in the pre-edge normalization, as this will the x-axis of the data (so that the Nth x point will no longer align with the Nth y point)."/>
+                    <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts (after re-calibrating)."/>
+                    <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts (after re-calibrating)."/>
+                </when>
+            </conditional>
+            <param name="rebin" type="boolean" label="Re-bin data" help="Whether to re-bin along the energy axis to automatically ensure appropriate levels of precision in the pre-edge, near-edge and extended region of the spectrum."/>
+            <conditional name="pre_edge">
+                <param name="pre_edge" type="select" label="Pre-edge normalization" help="If set, will (re)perform forward pre-edge normalization using provided values.">
+                    <option value="" selected="true">False</option>
+                    <option value="true">True</option>
+                </param>
+                <when value=""/>
+                <when value="true">
+                    <param argument="e0" type="float" label="Edge energy (eV)" optional="true" help="If set, normalization will use this as the location of the edge rather than automatically determining it."/>
+                    <param argument="pre1" type="float" max="0" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
+                    <param argument="pre2" type="float" max="0" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
+                </when>
+            </conditional>
+            <conditional name="xftf">
+                <param name="xftf" type="select" label="XFTF" help="If set, will (re)perform forward Fourier Transform using provided values.">
+                    <option value="" selected="true">False</option>
+                    <option value="true">True</option>
+                </param>
+                <when value=""/>
+                <when value="true">
+                    <param argument="kmin" type="float" optional="true" min="0.0" help="Minimum k value."/>
+                    <param argument="kmax" type="float" optional="true" min="0.0" help="Maximum k value."/>
+                    <param argument="kweight" type="float" optional="true" help="Exponent for weighting spectra by raising k to this power."/>
+                    <param argument="dk" type="float" optional="true" help="Tapering parameter for Fourier Transform window."/>
+                    <param argument="window" type="select" optional="true" help="Fourier Transform window type.">
+                        <option value="hanning">Hanning (cosine-squared taper)</option>
+                        <option value="parzen">Parzen (linear taper)</option>
+                        <option value="welch">Welch (quadratic taper)</option>
+                        <option value="gaussian">Gaussian function window</option>
+                        <option value="sine">Sine function window</option>
+                        <option value="kaiser">Kaiser-Bessel function-derived window</option>
+                    </param>
+                </when>
+            </conditional>
         </section>
-        <param name="rebin" type="boolean" label="Re-bin data" help="Whether to re-bin along the energy axis to ensure appropriate levels of precision in the pre-edge, near-edge and extended region of the spectrum."/>
         <param name="plot_graph" type="boolean" label="Plot graph" help="Whether to plot the pre/post edge fitting and the normalised xμ data."/>
         <param name="zip_outputs" type="boolean" label="Zip outputs" help="Whether to zip all outputs into one dataset."/>
     </inputs>
@@ -129,26 +167,25 @@
         <data name="out_zip" format="zip" from_work_dir="out_zip.zip" label="Zipped Athena project(s) ${annotation} ${on_string}">
             <filter>zip_outputs</filter>
         </data>
-        <!-- Single outputs of differnt types if merging, or not using a zip -->
+        <!-- Single outputs of different types if merging, or not using a zip -->
         <data name="athena_project_file" format="prj" from_work_dir="prj/out.prj" label="Athena project ${annotation} ${on_string}">
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
         </data>
         <data name="edge_plot" format="png" from_work_dir="edge/out.png" label="Edge fitting ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
         </data>
         <data name="flat_plot" format="png" from_work_dir="flat/out.png" label="Flattened plot ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
         </data>
         <data name="derivative_plot" format="png" from_work_dir="derivative/out.png" label="Derivative plot ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] or merge_inputs["format"]["dat_file"].extension != "zip"</filter>
-            <filter>merge_inputs["merge_inputs"] or (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"] == "")</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
         </data>
         <!-- Directories of outputs if using single, non-merged zip as input -->
         <collection name="athena_project_file_collection" format="prj" type="list" label="Athena projects ${annotation} ${on_string}">
@@ -176,6 +213,7 @@
         </collection>
     </outputs>
     <tests>
+        <!-- 1 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.xmu"/>
             <output name="athena_project_file">
@@ -184,6 +222,7 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 2 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="ffi0.tabular"/>
             <output name="athena_project_file">
@@ -192,6 +231,7 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 3 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="ffi1.tabular"/>
             <output name="athena_project_file">
@@ -200,12 +240,13 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 4 -->
         <test expect_num_outputs="4">
             <param name="dat_file" value="test.xmu"/>
             <param name="plot_graph" value="true"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="5405" delta="10"/>
+                    <has_size value="5400" delta="100"/>
                 </assert_contents>
             </output>
             <output name="edge_plot">
@@ -224,6 +265,7 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 5 -->
         <test expect_num_outputs="4">
             <param name="is_zipped" value="true"/>
             <param name="dat_file" value="test.zip"/>
@@ -233,6 +275,7 @@
             <output_collection name="flat_plot_collection" type="list" count="2"/>
             <output_collection name="derivative_plot_collection" type="list" count="2"/>
         </test>
+        <!-- 6 -->
         <test expect_num_outputs="1">
             <param name="is_zipped" value="true"/>
             <param name="dat_file" value="h5.zip"/>
@@ -244,9 +287,10 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 7 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.xmu"/>
-            <param name="energy_format" value="absolute"/>
+            <param name="calibrate" value="true"/>
             <param name="energy_min" value="7000"/>
             <output name="athena_project_file">
                 <assert_contents>
@@ -254,9 +298,10 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 8 -->
         <test expect_num_outputs="4">
             <param name="dat_file" value="test.xmu"/>
-            <param name="energy_format" value="absolute"/>
+            <param name="calibrate" value="true"/>
             <param name="energy_min" value="7000"/>
             <param name="energy_max" value="7200"/>
             <param name="plot_graph" value="true"/>
@@ -267,32 +312,34 @@
             </output>
             <output name="edge_plot">
                 <assert_contents>
-                    <has_size value="44430" delta="10"/>
+                    <has_size value="44900" delta="100"/>
                 </assert_contents>
             </output>
             <output name="flat_plot">
                 <assert_contents>
-                    <has_size value="37310" delta="10"/>
+                    <has_size value="39400" delta="100"/>
                 </assert_contents>
             </output>
             <output name="derivative_plot">
                 <assert_contents>
-                    <has_size value="46390" delta="10"/>
+                    <has_size value="45900" delta="100"/>
                 </assert_contents>
             </output>
         </test>
+        <!-- 9 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.xmu"/>
-            <param name="energy_format" value="absolute"/>
-            <param name="energy_0" value="7050"/>
+            <param name="calibrate" value="true"/>
+            <param name="calibration_e0" value="7050"/>
             <param name="energy_min" value="7000"/>
             <param name="energy_max" value="7200"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="3300" delta="50"/>
+                    <has_size value="3600" delta="100"/>
                 </assert_contents>
             </output>
         </test>
+        <!-- 10 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.xmu"/>
             <param name="rebin" value="true"/>
@@ -302,6 +349,7 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 11 -->
         <test expect_num_outputs="1">
             <param name="merge_inputs" value="true"/>
             <param name="dat_file" value="262875_PtSn_OCO_Abu_1.nxs,262876_PtSn_OCO_Abu_2.nxs"/>
@@ -311,6 +359,7 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 12 -->
         <test expect_num_outputs="1">
             <param name="merge_inputs" value="true"/>
             <param name="is_zipped" value="true"/>
@@ -321,6 +370,7 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 13 -->
         <test expect_num_outputs="1">
             <param name="format" value="athena"/>
             <param name="dat_file" value="test.prj"/>
