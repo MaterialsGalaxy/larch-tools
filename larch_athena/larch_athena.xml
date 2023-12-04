@@ -33,7 +33,7 @@
             </conditional>
         </xml>
         <xml name="columns">
-            <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify columns ending with 'energy' or labelled 'col1'."/>
+            <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify the first column ending with 'energy' or labelled 'col1' 'Ef'."/>
             <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it', 'FFI0' or 'FF/I1'."/>
         </xml>
         <xml name="is_zipped">

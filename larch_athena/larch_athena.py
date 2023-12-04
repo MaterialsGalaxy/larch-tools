@@ -176,7 +176,7 @@ class Reader:
                 raise ValueError(f"{self.energy_column} not found in {labels}")
         else:
             for i, label in enumerate(labels):
-                if label == "col1" or label.endswith("energy"):
+                if label in ("col1", "ef") or label.endswith("energy"):
                     labels[i] = "energy"
                     break
 
