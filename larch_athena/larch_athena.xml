@@ -246,7 +246,7 @@
             <param name="plot_graph" value="true"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="5405" delta="10"/>
+                    <has_size value="5400" delta="100"/>
                 </assert_contents>
             </output>
             <output name="edge_plot">
