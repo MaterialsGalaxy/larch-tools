@@ -4,7 +4,7 @@
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">0.9.71</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">0</token>
+        <token name="@WRAPPER_VERSION@">1</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -19,7 +19,7 @@
         </xml>
         <xml name="columns">
             <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify columns ending with 'energy' or labelled 'col1'."/>
-            <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it' or 'FFI0'."/>
+            <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it', 'FFI0' or 'FF/I1'."/>
         </xml>
         <xml name="is_zipped">
             <param name="is_zipped" type="select" display="radio" label="Inputs Zipped" help="Whether plaintext input files are zipped together into one directory, or not.">
@@ -189,6 +189,14 @@
             <output name="athena_project_file">
                 <assert_contents>
                     <has_size value="34400" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="ffi1.tabular"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="4400" delta="100"/>
                 </assert_contents>
             </output>
         </test>
