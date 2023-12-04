@@ -19,7 +19,7 @@
         </xml>
         <xml name="columns">
             <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify columns ending with 'energy' or labelled 'col1'."/>
-            <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it' or 'FFI0'."/>
+            <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it', 'FFI0' or 'FF/I1'."/>
         </xml>
         <xml name="is_zipped">
             <param name="is_zipped" type="select" display="radio" label="Inputs Zipped" help="Whether plaintext input files are zipped together into one directory, or not.">
@@ -232,6 +232,15 @@
             </output>
         </test>
         <!-- 3 -->
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="ffi1.tabular"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="4400" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 4 -->
         <test expect_num_outputs="4">
             <param name="dat_file" value="test.xmu"/>
             <param name="plot_graph" value="true"/>
@@ -256,7 +265,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 4 -->
+        <!-- 5 -->
         <test expect_num_outputs="4">
             <param name="is_zipped" value="true"/>
             <param name="dat_file" value="test.zip"/>
@@ -266,7 +275,7 @@
             <output_collection name="flat_plot_collection" type="list" count="2"/>
             <output_collection name="derivative_plot_collection" type="list" count="2"/>
         </test>
-        <!-- 5 -->
+        <!-- 6 -->
         <test expect_num_outputs="1">
             <param name="is_zipped" value="true"/>
             <param name="dat_file" value="h5.zip"/>
@@ -278,7 +287,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 6 -->
+        <!-- 7 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.xmu"/>
             <param name="calibrate" value="true"/>
@@ -289,7 +298,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 7 -->
+        <!-- 8 -->
         <test expect_num_outputs="4">
             <param name="dat_file" value="test.xmu"/>
             <param name="calibrate" value="true"/>
@@ -317,7 +326,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 8 -->
+        <!-- 9 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.xmu"/>
             <param name="calibrate" value="true"/>
@@ -330,7 +339,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 9 -->
+        <!-- 10 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.xmu"/>
             <param name="rebin" value="true"/>
@@ -340,7 +349,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 10 -->
+        <!-- 11 -->
         <test expect_num_outputs="1">
             <param name="merge_inputs" value="true"/>
             <param name="dat_file" value="262875_PtSn_OCO_Abu_1.nxs,262876_PtSn_OCO_Abu_2.nxs"/>
@@ -350,7 +359,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 11 -->
+        <!-- 12 -->
         <test expect_num_outputs="1">
             <param name="merge_inputs" value="true"/>
             <param name="is_zipped" value="true"/>
@@ -361,7 +370,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- 12 -->
+        <!-- 13 -->
         <test expect_num_outputs="1">
             <param name="format" value="athena"/>
             <param name="dat_file" value="test.prj"/>
