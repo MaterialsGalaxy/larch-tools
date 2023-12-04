@@ -5,20 +5,16 @@ import json
 import os
 import sys
 
-from common import get_group
+from common import read_group
 
 from larch.fitting import guess, param, param_group
-from larch.io import read_athena
 from larch.symboltable import Group
 from larch.xafs import (
     FeffPathGroup,
     FeffitDataSet,
     TransformGroup,
-    autobk,
     feffit,
     feffit_report,
-    pre_edge,
-    xftf,
 )
 
 import matplotlib
@@ -37,14 +33,6 @@ def read_csv_data(input_file, id_field="id"):
     except FileNotFoundError:
         print("The specified file does not exist")
     return csv_data
-
-
-def calc_with_defaults(xafs_group: Group) -> Group:
-    """Calculate pre_edge and background with default arguments"""
-    pre_edge(xafs_group)
-    autobk(xafs_group)
-    xftf(xafs_group)
-    return xafs_group
 
 
 def dict_to_gds(data_dict):
@@ -209,12 +197,10 @@ def main(
     rmr_path = f"rmr/rmr{series_id}.png"
     chikr_path = f"chikr/chikr{series_id}.png"
 
-    athena_project = read_athena(prj_file)
-    athena_group = get_group(athena_project)
     # calc_with_defaults will hang indefinitely (>6 hours recorded) if the
     # data contains any NaNs - consider adding an early error here if this is
     # not fixed in Larch?
-    data_group = calc_with_defaults(athena_group)
+    data_group = read_group(prj_file)
 
     print(f"Fitting project from file {data_group.filename}")
 

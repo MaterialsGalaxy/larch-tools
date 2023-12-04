@@ -4,7 +4,7 @@
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">0.9.71</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">0</token>
+        <token name="@WRAPPER_VERSION@">1</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -19,6 +19,7 @@
     </requirements>
     <required_files>
         <include type="literal" path="larch_lcf.py"/>
+        <include type="literal" path="common.py"/>
     </required_files>
     <command detect_errors="exit_code"><![CDATA[
         python '${__tool_directory__}/larch_lcf.py' '$prj_file' '$inputs'
@@ -33,23 +34,33 @@
             <param name="label" type="text" optional="true" label="Component label" help="The label to use for this component. If unset, the label will be taken from the Athena project metadata."/>
             <param name="component_file" type="data" format="prj" label="Athena project to fit" help="Reference X-ray Absorption Fine Structure (XAFS) data, in Athena project format, to be used as components in the fit."/>
         </repeat>
-        <expand macro="energy_limits"/>
+        <!-- Energy range for LCF -->
+        <param name="energy_min" type="float" label="Minimum fit energy (eV)" optional="true" help="If set, only data above this value will be used for the LCF."/>
+        <param name="energy_max" type="float" label="Maximum fit energy (eV)" optional="true" help="If set, only data below this value will be used for the LCF."/>
+        <!-- Plot limits -->
+        <expand macro="plot_limits_energy"/>
     </inputs>
     <outputs>
-        <data name="plot" format="png" from_work_dir="plot.png" label="Larch LCF ${label} ${on_string}"/>
+        <data name="plot" format="png" from_work_dir="plot.png"/>
     </outputs>
     <tests>
+        <!-- 1 -->
         <test expect_num_outputs="1">
-            <param name="prj_file" value="PtSn_OCO_Abu_1.prj"/>
-            <param name="component_file" value="Sn_foil_extracted.prj"/>
-            <param name="component_file" value="SnO2_extracted.prj"/>
-            <param name="energy_format" value="relative"/>
-            <param name="energy_max" value="10"/>
+            <param name="prj_file" value="PtSn_OCO_Abu_1_29204.5.prj"/>
+            <param name="component_file" value="Sn_foil_29200.prj"/>
+            <param name="component_file" value="SnO2_29206.prj"/>
+            <param name="energy_min" value="29190"/>
+            <param name="energy_max" value="29230"/>
+            <param name="x_limit_min" value="29190"/>
+            <param name="x_limit_max" value="29230"/>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="55100" delta="100"/>
+                    <has_size value="59500" delta="100"/>
                 </assert_contents>
             </output>
+            <assert_stdout>
+                <has_text text="Goodness of fit (rfactor): 0.532130%"/>
+            </assert_stdout>
         </test>
     </tests>
     <help><![CDATA[
