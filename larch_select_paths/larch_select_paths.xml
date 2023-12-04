@@ -4,7 +4,7 @@
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">0.9.71</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">0</token>
+        <token name="@WRAPPER_VERSION@">1</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -17,18 +17,27 @@
         <xml name="vary">
             <param name="vary" type="boolean" checked="true" label="Vary" help="If True, the initial 'Guess' will be optimised in the fitting. If False, the value will be 'Set' instead and not optimised."/>
         </xml>
+        <xml name="max_number">
+            <param name="max_number" type="integer" min="1" optional="true" label="Maximum number of paths" help="Will select (up to) this many paths, ordered by ascending path length, subject to criteria below. If unset, will select all that meet the criteria."/>
+        </xml>
+        <xml name="max_path_length">
+            <param name="max_path_length" type="float" min="0" optional="true" label="Maximum path length" help="Exclude paths with lengths greater than this (expressed in Angstrom). If unset, will not restrict based on path length."/>
+        </xml>
+        <xml name="min_amplitude_ratio">
+            <param name="min_amplitude_ratio" type="float" min="0" max="100" optional="true" label="Minimum amplitude ratio (%)" help="Exclude paths with a ratio below this ratio (expressed as a percentage). If unset, will not restrict based on amplitude ratio."/>
+        </xml>
+        <xml name="max_degeneracy">
+            <param name="max_degeneracy" type="integer" min="1" optional="true" label="Maximum degeneracy" help="Exclude paths with degeneracy above this value. If unset, will not restrict based on degeneracy."/>
+        </xml>
     </macros>
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
-    <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <requirement type="package" version="3.5.2">matplotlib</requirement>
-    </requirements>
     <required_files>
         <include type="literal" path="larch_select_paths.py"/>
     </required_files>
     <command detect_errors="exit_code"><![CDATA[
+        mkdir sp &&
         python '${__tool_directory__}/larch_select_paths.py' '$inputs'
     ]]></command>
     <configfiles>
@@ -64,8 +73,8 @@
             <conditional name="selection">
                 <param name="selection" type="select" label="Selection method">
                     <option value="all" selected="true">All paths</option>
-                    <!-- <option value="number">Fixed number</option>
-                    <option value="combinations">Combinations</option> -->
+                    <option value="criteria">Criteria</option>
+                    <option value="combinations">Combinations</option>
                     <option value="manual">Manual</option>
                 </param>
                 <when value="all">
@@ -97,10 +106,20 @@
                         </section>
                     </repeat>
                 </when>
-                <!-- <when value="number">
+                <when value="criteria">
+                    <expand macro="max_number"/>
+                    <expand macro="max_path_length"/>
+                    <expand macro="min_amplitude_ratio"/>
+                    <expand macro="max_degeneracy"/>
                 </when>
                 <when value="combinations">
-                </when> -->
+                    <param name="min_combination_size" type="integer" value="1" min="1" label="Minimum combination size" help="Each combination will have at least this many paths. If less then this many paths match the below criteria, a single combination with all paths will be generated."/>
+                    <param name="max_combination_size" type="integer" optional="true" label="Maximum combination size" help="Each combination will have at most this many paths. Note this is distinct from the number of paths to consider, below. One might want to consider combinations of the 5 shortest paths (set using 'Maximum number of paths'), but have no more than 3 paths in each combination (set using this)."/>
+                    <expand macro="max_number"/>
+                    <expand macro="max_path_length"/>
+                    <expand macro="min_amplitude_ratio"/>
+                    <expand macro="max_degeneracy"/>
+                </when>
                 <when value="manual">
                     <repeat name="paths" title="Select paths" help="Identify paths to use in the fitting by their id, and optionally define their variables. This will overwrite and defaults set above.">
                         <param name="id" type="integer" value="1" min="1" label="Path ID" help="Numerical id of a path to select, this appears at the end of the label and filename in the path summary CSV."/>
@@ -138,7 +157,13 @@
             <filter>len(feff_outputs) > 1</filter>
         </data>
         <data name="gds_csv" format="gds" from_work_dir="gds.csv" label="GDS values for ${on_string}"/>
-        <data name="sp_csv" format="sp" from_work_dir="sp.csv" label="Selected paths for ${on_string}"/>
+        <data name="sp_csv" format="sp" from_work_dir="sp.csv" label="Selected paths for ${on_string}">
+            <filter>not any([f["selection"]["selection"] == "combinations" for f in feff_outputs])</filter>
+        </data>
+        <collection name="sp_collection" format="sp" type="list" label="Selected path combinations for ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="sp"/>
+            <filter>any([f["selection"]["selection"] == "combinations" for f in feff_outputs])</filter>
+        </collection>
     </outputs>
     <tests>
         <!-- Test defaults for CSV with select_all -->
@@ -271,6 +296,51 @@
             </output>
             <output name="gds_csv" file="gds_merge_custom.csv"/>
             <output name="sp_csv" file="sp_merge_custom.csv"/>
+        </test>
+        <!-- Test for criteria based selection -->
+        <test expect_num_outputs="2">
+            <repeat name="feff_outputs">
+                <param name="paths_zip" value="FEFF_paths.zip"/>
+                <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
+                <conditional name="selection">
+                    <param name="selection" value="criteria"/>
+                    <param name="min_amplitude_ratio" value="20"/>
+                    <param name="max_degeneracy" value="4"/>
+                </conditional>
+            </repeat>
+            <output name="gds_csv" file="gds_default.csv"/>
+            <output name="sp_csv" file="sp_criteria.csv"/>
+        </test>
+        <!-- Test for combinations based selection -->
+        <test expect_num_outputs="3">
+            <!-- Should result in 4 + 6 + 4 + 1 = 15 combinations -->
+            <repeat name="feff_outputs">
+                <param name="paths_zip" value="FEFF_paths.zip"/>
+                <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
+                <conditional name="selection">
+                    <param name="selection" value="combinations"/>
+                    <param name="min_amplitude_ratio" value="20"/>
+                </conditional>
+            </repeat>
+            <!-- Should result in 3 combinations -->
+            <repeat name="feff_outputs">
+                <param name="paths_zip" value="FEFF_paths.zip"/>
+                <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
+                <conditional name="selection">
+                    <param name="selection" value="combinations"/>
+                    <param name="min_combination_size" value="2"/>
+                    <param name="max_combination_size" value="2"/>
+                    <param name="max_number" value="3"/>
+                </conditional>
+            </repeat>
+            <output name="merged_directories">
+                <assert_contents>
+                    <has_size value="206000" delta="1000"/>
+                </assert_contents>
+            </output>
+            <output name="gds_csv" file="gds_default.csv"/>
+            <!-- Should get 15 * 3 = 45 combinations in total -->
+            <output_collection name="sp_collection" type="list" count="45"/>
         </test>
     </tests>
     <help><![CDATA[
