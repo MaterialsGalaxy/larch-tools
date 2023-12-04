@@ -19,6 +19,24 @@ def get_group(athena_group: AthenaGroup, key: str = None) -> Group:
         raise KeyError(f"{key} not in {group_keys}") from e
 
 
+def read_all_groups(dat_file: str, key: str = None) -> "dict[str, Group]":
+    # Cannot rely on do_ABC as _larch is None
+    athena_group = read_athena(
+        dat_file,
+        do_preedge=False,
+        do_bkg=False,
+        do_fft=False,
+    )
+    all_groups = {}
+    for key in athena_group._athena_groups.keys():
+        group = get_group(athena_group, key)
+        pre_edge_with_defaults(group=group)
+        xftf_with_defaults(group=group)
+        all_groups[key] = group
+
+    return all_groups
+
+
 def read_group(dat_file: str, key: str = None):
     # Cannot rely on do_ABC as _larch is None
     athena_group = read_athena(

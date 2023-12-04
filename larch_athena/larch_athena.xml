@@ -15,7 +15,22 @@
             </param> 
         </xml>
         <xml name="extract_group">
-            <param name="extract_group" type="text" optional="true" label="Extract group" help="Which group to extract and process from the Athena project (will use first group in file if unset)"/>
+            <conditional name="extract_group">
+                <param name="extract_group" type="select" label="Group extraction" help="Method of handling group extraction. Extracting all or multiple named groups will result in multiple outputs, unless merging groups is also true.">
+                    <option value="single" selected="true">Extract single</option>
+                    <option value="multiple">Extract multiple</option>
+                    <option value="all">Extract all</option>
+                </param>
+                <when value="single">
+                    <param name="group_name" type="text" optional="true" label="Group label" help="Which group to extract and process from the Athena project (will use first group in file if unset)"/>
+                </when>
+                <when value="multiple">
+                    <repeat name="multiple" min="1" default="1" title="Groups">
+                        <param name="group_name" type="text" label="Group label" help="Which group to extract and process from the Athena project (will use first group in file if unset)"/>
+                    </repeat>
+                </when>
+                <when value="all"/>
+            </conditional>
         </xml>
         <xml name="columns">
             <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify columns ending with 'energy' or labelled 'col1'."/>
@@ -171,46 +186,46 @@
         <!-- Single outputs of different types if merging, or not using a zip -->
         <data name="athena_project_file" format="prj" from_work_dir="prj/out.prj" label="Athena project ${annotation} ${on_string}">
             <filter>not zip_outputs</filter>
-            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
         </data>
         <data name="edge_plot" format="png" from_work_dir="edge/out.png" label="Edge fitting ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
         </data>
         <data name="flat_plot" format="png" from_work_dir="flat/out.png" label="Flattened plot ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
         </data>
         <data name="derivative_plot" format="png" from_work_dir="derivative/out.png" label="Derivative plot ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>not (merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"])</filter>
+            <filter>not (merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
         </data>
-        <!-- Directories of outputs if using single, non-merged zip as input -->
+        <!-- Directories of outputs if using single, non-merged zip as input or extracting multiple/all Athena groups -->
         <collection name="athena_project_file_collection" format="prj" type="list" label="Athena projects ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="prj"/>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")</filter>
         </collection>
         <collection name="edge_plot_collection" format="png" type="list" label="Edge fittings ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="edge"/>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")</filter>
         </collection>
         <collection name="flat_plot_collection" format="png" type="list" label="Flattened plots ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="flat"/>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")</filter>
         </collection>
         <collection name="derivative_plot_collection" format="png" type="list" label="Derivative plots ${annotation} ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="derivative"/>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]</filter>
+            <filter>merge_inputs["merge_inputs"] == "" and (merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")</filter>
         </collection>
     </outputs>
     <tests>
@@ -380,6 +395,22 @@
                     <has_size value="5400" delta="200"/>
                 </assert_contents>
             </output>
+        </test>
+        <!-- 14: Extract multiple groups from Athena .prj -->
+        <test expect_num_outputs="1">
+            <param name="format" value="athena"/>
+            <param name="extract_group" value="multiple"/>
+            <param name="group_name" value="merge"/>
+            <param name="group_name" value="d__Ref_PtSn_OC_MERGE_CALIBRATE"/>
+            <param name="dat_file" value="multiple.prj"/>
+            <output_collection name="athena_project_file_collection" type="list" count="2"/>
+        </test>
+        <!-- 15: Extract all groups from Athena .prj -->
+        <test expect_num_outputs="1">
+            <param name="format" value="athena"/>
+            <param name="extract_group" value="all"/>
+            <param name="dat_file" value="multiple.prj"/>
+            <output_collection name="athena_project_file_collection" type="list" count="9"/>
         </test>
     </tests>
     <help><![CDATA[
