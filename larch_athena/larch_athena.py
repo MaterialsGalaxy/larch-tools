@@ -4,7 +4,9 @@ import os
 import re
 import sys
 
-from common import pre_edge_with_defaults, read_group, xftf_with_defaults
+from common import (
+    pre_edge_with_defaults, read_all_groups, read_group, xftf_with_defaults
+)
 
 from larch.io import (
     create_athena,
@@ -28,7 +30,7 @@ class Reader:
         energy_column: str,
         mu_column: str,
         data_format: str,
-        extract_group: str = None,
+        extract_group: "dict[str, str]" = None,
     ):
         self.energy_column = energy_column
         self.mu_column = mu_column
@@ -76,7 +78,18 @@ class Reader:
 
         print(f"Attempting to read from {filepath}")
         if self.data_format == "athena":
-            group = read_group(filepath, self.extract_group)
+            if self.extract_group["extract_group"] == "single":
+                group = read_group(filepath, self.extract_group["group_name"])
+                return {"out": group}
+            elif self.extract_group["extract_group"] == "multiple":
+                groups = {}
+                for repeat in self.extract_group["multiple"]:
+                    name = repeat["group_name"]
+                    groups[name] = read_group(filepath, name)
+                return groups
+            else:
+                return read_all_groups(filepath)
+
         else:
             # Try ascii anyway
             try:
@@ -90,8 +103,7 @@ class Reader:
                 group = self.load_h5(filepath)
             pre_edge_with_defaults(group)
             xftf_with_defaults(group)
-
-        return {"out": group}
+            return {"out": group}
 
     def load_ascii(self, dat_file):
         with open(dat_file) as f:
