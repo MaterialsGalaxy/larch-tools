@@ -38,10 +38,10 @@
                     <option value="chir_mag">Magnitude of χ(r)</option>
                 </param>
                 <when value="norm">
-                    <expand macro="energy_limits"/>
+                    <expand macro="plot_limits_energy"/>
                 </when>
                 <when value="dmude">
-                    <expand macro="energy_limits"/>
+                    <expand macro="plot_limits_energy"/>
                 </when>
                 <when value="chir_mag">
                     <param name="energy_min" type="float" label="Minimum r (ang)" optional="true" help="If set, data will be cropped below this value in angstroms."/>
@@ -59,11 +59,9 @@
         <test expect_num_outputs="1">
             <param name="dat_files" value="test.prj"/>
             <param name="variable" value="norm"/>
-            <param name="energy_format" value="absolute"/>
-            <param name="energy_min" value="7000"/>
+            <param name="x_limit_min" value="7000"/>
             <param name="variable" value="dmude"/>
-            <param name="energy_format" value="relative"/>
-            <param name="energy_max" value="10"/>
+            <param name="x_limit_max" value="7200"/>
             <output_collection name="plot_collection" type="list" count="2"/>
         </test>
     </tests>

@@ -1,26 +1,6 @@
 <macros>
-    <xml name="energy_limits">
-        <param name="energy_format" type="select" display="radio" label="Energy limits" help="Whether to limit the energy relative to the absorption edge or with absolute values.">
-            <option value="relative" selected="true">Relative</option>
-            <option value="absolute">Absolute</option>
-        </param>
-        <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts."/>
-        <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts."/>
-    </xml>
-    <xml name="xftf_params">
-        <param argument="kmin" type="float" value="0" min="0.0" help="Minimum k value."/>
-        <param argument="kmax" type="float" value="20" min="0.0" help="Maximum k value."/>
-        <param argument="kweight" type="float" value="2" help="Exponent for weighting spectra by raising k to this power."/>
-        <param argument="dk" type="float" value="4" help="Tapering parameter for Fourier Transform window."/>
-        <param argument="window" type="select" help="Fourier Transform window type.">
-            <option value="hanning">Hanning (cosine-squared taper)</option>
-            <option value="parzen">Parzen (linear taper)</option>
-            <option value="welch">Welch (quadratic taper)</option>
-            <option value="gaussian">Gaussian function window</option>
-            <option value="sine">Sine function window</option>
-            <option value="kaiser" selected="true">Kaiser-Bessel function-derived window</option>
-        </param>
-        <param argument="rmin" type="float" value="0.0" min="0.0" help="Minimum radial distance."/>
-        <param argument="rmax" type="float" value="10.0" min="0.0" help="Maximum radial distance."/>
+    <xml name="plot_limits_energy">
+        <param name="x_limit_min" type="float" label="Minimum plot energy (eV)" optional="true" help="If set, data will be limited to this value on the plot. Has no affect on the fit itself."/>
+        <param name="x_limit_max" type="float" label="Maximum plot energy (eV)" optional="true" help="If set, data will be limited to this value on the plot. Has no affect on the fit itself"/>
     </xml>
 </macros>
