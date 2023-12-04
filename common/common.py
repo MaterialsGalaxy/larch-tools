@@ -76,7 +76,14 @@ def pre_edge_with_defaults(group: Group, settings: dict = None):
             merged_settings[k] = v
 
     print(f"Pre-edge normalization with {merged_settings}")
-    pre_edge(group, **merged_settings)
+    try:
+        pre_edge(group, **merged_settings)
+    except Warning as e:
+        raise Warning(
+            "Unable to perform pre-edge fitting with:\n\n"
+            f"energy:\n{group.energy}\n\nmu:{group.mu}\n\n"
+            "Consider checking the correct columns have been extracted"
+        ) from e
     autobk(group, pre_edge_kws=merged_settings)
 
 
