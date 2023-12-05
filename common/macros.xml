@@ -1,6 +1,6 @@
 <macros>
     <xml name="plot_limits_energy">
-        <param name="x_limit_min" type="float" label="Minimum plot energy (eV)" optional="true" help="If set, data will be limited to this value on the plot. Has no affect on the fit itself."/>
-        <param name="x_limit_max" type="float" label="Maximum plot energy (eV)" optional="true" help="If set, data will be limited to this value on the plot. Has no affect on the fit itself"/>
+        <param name="x_limit_min" type="float" label="Minimum plot energy (eV)" optional="true" help="If set, plot will be limited to this value on the x axis."/>
+        <param name="x_limit_max" type="float" label="Maximum plot energy (eV)" optional="true" help="If set, plot will be limited to this value on the x axis."/>
     </xml>
 </macros>

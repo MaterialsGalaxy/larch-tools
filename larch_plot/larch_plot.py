@@ -27,11 +27,14 @@ def main(dat_files: "list[str]", plot_settings: "list[dict]"):
         y_variable = settings["variable"]["variable"]
         x_min = settings["variable"]["x_limit_min"]
         x_max = settings["variable"]["x_limit_max"]
+        y_min = settings["variable"]["y_limit_min"]
+        y_max = settings["variable"]["y_limit_max"]
         plot_path = f"plots/{i}_{y_variable}.png"
         plt.figure()
 
         for group in groups:
-            label = group.athena_params.annotation or group.athena_params.id
+            params = group.athena_params
+            label = params.annotation or params.file or params.id
             if y_variable == "chir_mag":
                 x_variable = "distance"
                 x = group.r
@@ -60,6 +63,7 @@ def main(dat_files: "list[str]", plot_settings: "list[dict]"):
                 )
 
         plt.xlim(x_min, x_max)
+        plt.ylim(y_min, y_max)
 
         save_plot(x_variable, y_variable, plot_path)
 
