@@ -39,13 +39,19 @@
                 </param>
                 <when value="norm">
                     <expand macro="plot_limits_energy"/>
+                    <param name="y_limit_min" type="float" label="Minimum xμ(E)" optional="true" help="If set, plot will be limited to this value on the y axis."/>
+                    <param name="y_limit_max" type="float" label="Maximum xμ(E)" optional="true" help="If set, plot will be limited to this value on the y axis."/>
                 </when>
                 <when value="dmude">
                     <expand macro="plot_limits_energy"/>
+                    <param name="y_limit_min" type="float" label="Minimum d(xμ(E))/dE" optional="true" help="If set, plot will be limited to this value on the y axis."/>
+                    <param name="y_limit_max" type="float" label="Maximum d(xμ(E))/dE" optional="true" help="If set, plot will be limited to this value on the y axis."/>
                 </when>
                 <when value="chir_mag">
-                    <param name="energy_min" type="float" label="Minimum r (ang)" optional="true" help="If set, data will be cropped below this value in angstroms."/>
-                    <param name="energy_max" type="float" label="Maximum r (ang)" optional="true" help="If set, data will be cropped above this value in angstroms."/>
+                    <param name="x_limit_min" type="float" label="Minimum r (ang)" optional="true" help="If set, plot will be limited to this value on the x axis."/>
+                    <param name="x_limit_max" type="float" label="Maximum r (ang)" optional="true" help="If set, plot will be limited to this value on the x axis."/>
+                    <param name="y_limit_min" type="float" label="Minimum |χ(r)|" optional="true" help="If set, plot will be limited to this value on the y axis."/>
+                    <param name="y_limit_max" type="float" label="Maximum |χ(r)|" optional="true" help="If set, plot will be limited to this value on the y axis."/>
                 </when>
             </conditional>
         </repeat>
@@ -56,13 +62,23 @@
         </collection>
     </outputs>
     <tests>
+        <!-- 1: plot types -->
+        <test expect_num_outputs="1">
+            <param name="dat_files" value="test.prj"/>
+            <param name="variable" value="norm"/>
+            <param name="variable" value="dmude"/>
+            <param name="variable" value="chir_mag"/>
+            <output_collection name="plot_collection" type="list" count="3"/>
+        </test>
+        <!-- 2: plot limits -->
         <test expect_num_outputs="1">
             <param name="dat_files" value="test.prj"/>
             <param name="variable" value="norm"/>
             <param name="x_limit_min" value="7000"/>
-            <param name="variable" value="dmude"/>
             <param name="x_limit_max" value="7200"/>
-            <output_collection name="plot_collection" type="list" count="2"/>
+            <param name="y_limit_min" value="0"/>
+            <param name="y_limit_max" value="1"/>
+            <output_collection name="plot_collection" type="list" count="1"/>
         </test>
     </tests>
     <help><![CDATA[
