@@ -60,19 +60,30 @@ def pre_edge_with_defaults(group: Group, settings: dict = None):
         bkg_parameters = None
 
     keys = (
-        ("e0", "e0"),
-        ("pre1", "pre1"),
-        ("pre1", "pre1"),
-        ("norm1", "nor1"),
-        ("norm2", "nor2"),
-        ("nnorm", "nnorm"),
-        ("make_flat", "flatten"),
+        ("e0", "e0", None),
+        ("pre1", "pre1", None),
+        ("pre2", "pre2", None),
+        ("norm1", "nor1", None),
+        ("norm2", "nor2", None),
+        ("nnorm", "nnorm", None),
+        ("make_flat", "flatten", None),
+        ("step", "step", None),
+        # This cannot be read from file as it is not stored by Larch (0.9.71)
+        # ("nvict", "nvict", None),
     )
-    for key, parameters_key in keys:
-        extract_attribute(merged_settings, key, bkg_parameters, parameters_key)
+    for key, parameters_key, default in keys:
+        extract_attribute(
+            merged_settings, key, bkg_parameters, parameters_key, default
+        )
 
     if settings:
         for k, v in settings.items():
+            if k == "nvict":
+                print(
+                    "WARNING: `nvict` can be used for pre-edge but is not "
+                    "saved to file, so value used will not be accessible in "
+                    "future operations using this Athena .prj"
+                )
             merged_settings[k] = v
 
     print(f"Pre-edge normalization with {merged_settings}")

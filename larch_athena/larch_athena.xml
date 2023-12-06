@@ -151,6 +151,7 @@
                     <param argument="e0" type="float" label="Edge energy (eV)" optional="true" help="If set, normalization will use this as the location of the edge rather than automatically determining it."/>
                     <param argument="pre1" type="float" max="0" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
                     <param argument="pre2" type="float" max="0" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
+                    <param argument="nvict" type="integer" label="Energy exponent" optional="true" help="Edge fitting will be performed against μ*E**n where n is defined here. This is 0 by default."/>
                 </when>
             </conditional>
             <conditional name="xftf">
