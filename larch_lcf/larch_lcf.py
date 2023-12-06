@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 def plot(
     group_to_fit: Group,
     fit_group: Group,
-    energy_min: float,
-    energy_max: float,
+    x_limit_min: float,
+    x_limit_max: float,
 ):
     formatted_label = ""
     for label, weight in fit_group.weights.items():
@@ -37,7 +37,7 @@ def plot(
         linestyle="--",
     )
     plt.grid(color="black", linestyle=":", linewidth=1)  # show and format grid
-    plt.xlim(energy_min, energy_max)
+    plt.xlim(x_limit_min, x_limit_max)
     plt.xlabel("Energy (eV)")
     plt.ylabel("normalised x$\mu$(E)")  # noqa: W605
     plt.legend()
@@ -67,16 +67,16 @@ if __name__ == "__main__":
         set_label(component_group, component["label"])
         component_groups.append(component_group)
 
-    fit_group = lincombo_fit(group_to_fit, component_groups)
-    print(f"Goodness of fit (rfactor): {fit_group.rfactor:.6%}")
-
     energy_min = input_values["energy_min"]
     energy_max = input_values["energy_max"]
-    if input_values["energy_format"] == "relative":
-        e0 = group_to_fit.e0
-        if energy_min is not None:
-            energy_min += e0
-        if energy_max is not None:
-            energy_max += e0
+    fit_group = lincombo_fit(
+        group=group_to_fit,
+        components=component_groups,
+        xmin=energy_min,
+        xmax=energy_max,
+    )
+    print(f"Goodness of fit (rfactor): {fit_group.rfactor:.6%}")
 
-    plot(group_to_fit, fit_group, energy_min, energy_max)
+    x_limit_min = input_values["x_limit_min"]
+    x_limit_max = input_values["x_limit_max"]
+    plot(group_to_fit, fit_group, x_limit_min, x_limit_max)
