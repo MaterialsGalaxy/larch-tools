@@ -29,6 +29,7 @@ def read_all_groups(dat_file: str, key: str = None) -> "dict[str, Group]":
     )
     all_groups = {}
     for key in athena_group._athena_groups.keys():
+        print(f"\nExtracting group {key}")
         group = get_group(athena_group, key)
         pre_edge_with_defaults(group=group)
         xftf_with_defaults(group=group)
