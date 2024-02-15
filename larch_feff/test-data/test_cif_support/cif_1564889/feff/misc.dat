@@ -1,0 +1,8 @@
+ Formula:    FeS2                                       Feff 6L.02  potph 4.12
+ SpaceGroup: Pnnm
+ # sites:    6
+ Abs   Z=26 Rmt= 1.102 Rnm= 1.359 K shell
+ Pot 1 Z=16 Rmt= 1.082 Rnm= 1.412
+ Pot 2 Z=26 Rmt= 1.195 Rnm= 1.592
+ Gam_ch=1.325E+00 H-L exch
+ Mu=-4.191E+00 kf=1.900E+00 Vint=-1.794E+01 Rs_int= 1.909

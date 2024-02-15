@@ -1,0 +1,69 @@
+
+======== running Feff module /home/tom/miniconda3/envs/larchtools/lib/python3.12/site-packages/larch/bin/linux64/feff6l ========
+ Feff 6L.02
+ Formula:    LaMnO3
+ SpaceGroup: Pm-3m
+ # sites:    5
+ Calculating potentials and phases...
+     free atom potential and density for atom type    0
+     free atom potential and density for atom type    1
+     free atom potential and density for atom type    2
+     free atom potential and density for atom type    3
+     overlapped potential and density for unique potential    0
+     overlapped potential and density for unique potential    1
+     overlapped potential and density for unique potential    2
+     overlapped potential and density for unique potential    3
+     muffin tin radii and interstitial parameters
+     phase shifts for unique potential    0
+     phase shifts for unique potential    1
+     phase shifts for unique potential    2
+     phase shifts for unique potential    3
+ Preparing plane wave scattering amplitudes...
+   nncrit in prcrit       9
+ Searching for paths...
+    WARNING in PATHS Module:
+       rmax > distance to most distant atom.
+       Some paths may be missing.
+   rmax, ratx      5.00000     4.33853
+     Rmax  5.0000  keep and heap limits   0.0000000   0.0000000
+    Preparing neighbor table
+     nfound  nheap  nheapx  nsc    r
+     Paths found      416   (nheapx, nbx      81   4)
+ Eliminating path degeneracies...
+     Plane wave chi amplitude filter   2.50%
+     Unique paths     29,  total paths     344
+ Calculating EXAFS parameters...
+     Curved wave chi amplitude ratio   4.00%
+     Discard feff.dat for paths with cw ratio <   2.67%
+     path  cw ratio     deg    nleg  reff
+       1   100.000     6.000     2   1.9398
+       2    18.050    24.000     3   3.3113
+       3    58.072     8.000     2   3.3596
+       4    13.482     4.000     2   3.8795
+       5     6.737     2.000     2   3.8805
+       6    16.691     6.000     3   3.8795
+       7    37.767     8.000     3   3.8795
+       8    18.868     4.000     3   3.8805
+       9    16.817     6.000     4   3.8795
+      10     5.806     6.000     4   3.8795
+      11    26.483     4.000     4   3.8795
+      12    13.227     2.000     4   3.8805
+      13     1.474    24.000     4   3.8795 neglected
+      14    19.067    44.000     3   4.0214
+      15    18.592     8.000     2   4.3371
+      16    27.876    12.000     2   4.3379
+      17     9.288     4.000     2   4.3385
+      18     9.216     8.000     3   4.5105
+      19    18.433    16.000     3   4.5100
+      20    18.424    16.000     3   4.5107
+      21     9.212     8.000     3   4.5113
+      22     4.622    16.000     4   4.6834
+      23    11.750    20.000     4   4.6837
+      24     4.617    12.000     4   4.6838
+      25     7.027     8.000     4   4.6832
+      26    10.542    12.000     4   4.6837
+      27     2.037    48.000     4   4.6835 neglected
+      28     2.350     4.000     4   4.6840 neglected
+      29     3.514     4.000     4   4.6840
+    26 paths kept,   29 examined.
+ Feff done.  Have a nice day.

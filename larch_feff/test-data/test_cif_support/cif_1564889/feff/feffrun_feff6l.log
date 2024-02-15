@@ -1,0 +1,47 @@
+
+======== running Feff module /home/tom/miniconda3/envs/larchtools/lib/python3.12/site-packages/larch/bin/linux64/feff6l ========
+ Feff 6L.02
+ Formula:    FeS2
+ SpaceGroup: Pnnm
+ # sites:    6
+ Calculating potentials and phases...
+     free atom potential and density for atom type    0
+     free atom potential and density for atom type    1
+     free atom potential and density for atom type    2
+     overlapped potential and density for unique potential    0
+     overlapped potential and density for unique potential    1
+     overlapped potential and density for unique potential    2
+     muffin tin radii and interstitial parameters
+     phase shifts for unique potential    0
+     phase shifts for unique potential    1
+     phase shifts for unique potential    2
+ Preparing plane wave scattering amplitudes...
+   nncrit in prcrit       9
+ Searching for paths...
+    WARNING in PATHS Module:
+       rmax > distance to most distant atom.
+       Some paths may be missing.
+   rmax, ratx      4.00000     3.89582
+     Rmax  4.0000  keep and heap limits   0.0000000   0.0000000
+    Preparing neighbor table
+     nfound  nheap  nheapx  nsc    r
+     Paths found       58   (nheapx, nbx      18   3)
+ Eliminating path degeneracies...
+     Plane wave chi amplitude filter   2.50%
+     Unique paths     10,  total paths      50
+ Calculating EXAFS parameters...
+     Curved wave chi amplitude ratio   4.00%
+     Discard feff.dat for paths with cw ratio <   2.67%
+     path  cw ratio     deg    nleg  reff
+       1   100.000     2.000     2   2.2366
+       2   100.000     4.000     2   2.2549
+       3    17.561     2.000     2   3.3852
+       4    16.957     2.000     2   3.4915
+       5    31.274     4.000     2   3.6045
+       6     7.145     8.000     3   3.8064
+       7     7.214     8.000     3   3.8606
+       8    50.180     8.000     2   3.8958
+       9     7.793     8.000     3   3.9475
+      10     8.508     4.000     3   3.9725
+    10 paths kept,   10 examined.
+ Feff done.  Have a nice day.

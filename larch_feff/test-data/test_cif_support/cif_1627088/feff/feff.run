@@ -1,0 +1,37 @@
+ Feff 6L.02
+ Formula:    Pd
+ SpaceGroup: Fm-3m
+ # sites:    1
+ Calculating potentials and phases...
+     free atom potential and density for atom type    0
+     free atom potential and density for atom type    1
+     overlapped potential and density for unique potential    0
+     overlapped potential and density for unique potential    1
+     muffin tin radii and interstitial parameters
+     phase shifts for unique potential    0
+     phase shifts for unique potential    1
+ Preparing plane wave scattering amplitudes...
+   nncrit in prcrit       9
+ Searching for paths...
+    WARNING in PATHS Module:
+       rmax > distance to most distant atom.
+       Some paths may be missing.
+   rmax, ratx      5.00000     4.83774
+     Rmax  5.0000  keep and heap limits   0.0000000   0.0000000
+    Preparing neighbor table
+     nfound  nheap  nheapx  nsc    r
+     Paths found      162   (nheapx, nbx      39   3)
+ Eliminating path degeneracies...
+     Plane wave chi amplitude filter   2.50%
+     Unique paths      5,  total paths     138
+ Calculating EXAFS parameters...
+     Curved wave chi amplitude ratio   4.00%
+     Discard feff.dat for paths with cw ratio <   2.67%
+     path  cw ratio     deg    nleg  reff
+       1   100.000    12.000     2   2.7931
+       2    18.733     6.000     2   3.9500
+       3     8.554    48.000     3   4.1896
+       4     5.107    48.000     3   4.7681
+       5    39.601    24.000     2   4.8377
+     5 paths kept,    5 examined.
+ Feff done.  Have a nice day.
