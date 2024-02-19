@@ -7,6 +7,7 @@ from pathlib import Path
 from larch.xafs.feffrunner import feff6l
 from larch.xrd import cif2feff
 
+from pymatgen.core import Species
 from pymatgen.io.cif import CifParser
 
 
@@ -54,8 +55,8 @@ def main(structure_file: str, file_format: dict):
     if file_format["format"] == "cif":
         print(f"Parsing {crystal_f.name} and saving to {path}")
 
-        # Parse the cif file here... but only so that we can extract the chemical symbols
-        # present in the crystal
+        # Parse the cif file here... but only so that we can extract the
+        # chemical symbols present in the crystal
         cif_parser = CifParser(crystal_f)
         structures = cif_parser.get_structures()
         length = len(structures)
@@ -64,28 +65,38 @@ def main(structure_file: str, file_format: dict):
                 f"Expected single structure in cif file but found {length}"
             )
 
-        # cif2feffinp below will take the absorber to be a chemical symbol, while this tool
-        # should support integer site index or chemical symbol of site (string). Hence convert
-        # any integer input to the relevant chemical symbol string.
-        # NOTE: The integer case for elements labeled with oxidation state 0 in the cif
-        # file, e.g. Pd0+.
+        # cif2feffinp below will take the absorber to be a chemical symbol,
+        # while this tool should support integer site index or chemical symbol
+        # of site (string). Hence convert any integer input to the relevant
+        # chemical symbol string.
         try:
-            absorbing_atom = int(file_format["absorbing_atom"])
-            absorbing_atom = str(structures[0][absorbing_atom].specie)
+            absorbing_atom_int = int(file_format["absorbing_atom"])
+            specie = structures[0][absorbing_atom_int].specie
+            if isinstance(specie, Species):
+                absorbing_atom = str(specie.element)
+            else:
+                absorbing_atom = str(specie)
         except ValueError:
             absorbing_atom = file_format["absorbing_atom"]
-        
-        # NOTE: Here the first site listed in the cif file with the species 'absorbing_atom'
-        # is selected as the absorbing atom.
+
+        # NOTE: Here the first site listed in the cif file with the species
+        # 'absorbing_atom' is selected as the absorbing atom.
         # NOTE: This generates output for FEFF6 via the 'version8' flag
-        inp_data = cif2feff.cif2feffinp(crystal_f, absorber=absorbing_atom, edge=None, 
-                                        cluster_size=file_format["radius"], absorber_site=1,
-                                        site_index=None, extra_titles=None, 
-                                        with_h=False, version8=False)
-        with open(path, 'w' ) as feff_inp_file:
-            feff_inp_file.write(inp_data+"\n")
-            print(inp_data+"\n")
-        
+        inp_data = cif2feff.cif2feffinp(
+            crystal_f,
+            absorber=absorbing_atom,
+            edge=None,
+            cluster_size=file_format["radius"],
+            absorber_site=1,
+            site_index=None,
+            extra_titles=None,
+            with_h=False,
+            version8=False,
+        )
+        with open(path, "w") as feff_inp_file:
+            feff_inp_file.write(inp_data + "\n")
+            print(inp_data + "\n")
+
     else:
         print(f"Copying {crystal_f.name} to {path}")
         shutil.copy(crystal_f, path)

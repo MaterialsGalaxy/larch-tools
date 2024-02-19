@@ -1,6 +1,0 @@
-    file     ,   sig2 ,  amp ratio,    deg  ,  nlegs,  r effective, label                         , select
- feff0001.dat, 0.00000,   100.000 ,   12.000,     2 ,  2.7931     , Pd.Pd.1                       ,      0
- feff0002.dat, 0.00000,    18.733 ,    6.000,     2 ,  3.9500     , Pd.Pd.2                       ,      0
- feff0003.dat, 0.00000,     8.554 ,   48.000,     3 ,  4.1896     , Pd.Pd.Pd.3                    ,      0
- feff0004.dat, 0.00000,     5.107 ,   48.000,     3 ,  4.7681     , Pd.Pd.Pd.4                    ,      0
- feff0005.dat, 0.00000,    39.601 ,   24.000,     2 ,  4.8377     , Pd.Pd.5                       ,      0

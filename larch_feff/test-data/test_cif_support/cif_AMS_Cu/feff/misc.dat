@@ -1,7 +1,0 @@
- Formula:    Cu                                         Feff 6L.02  potph 4.12
- SpaceGroup: Fm-3m
- # sites:    1
- Abs   Z=29 Rmt= 1.283 Rnm= 1.430 K shell
- Pot 1 Z=29 Rmt= 1.278 Rnm= 1.418
- Gam_ch=1.761E+00 H-L exch
- Mu=-5.360E+00 kf=1.758E+00 Vint=-1.714E+01 Rs_int= 2.062

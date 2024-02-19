@@ -1,9 +1,0 @@
- Formula:    LaMnO3                                     Feff 6L.02  potph 4.12
- SpaceGroup: Pm-3m
- # sites:    5
- Abs   Z=25 Rmt= 1.048 Rnm= 1.309 K shell
- Pot 1 Z= 8 Rmt= 0.936 Rnm= 1.114
- Pot 2 Z=57 Rmt= 1.739 Rnm= 1.928
- Pot 3 Z=25 Rmt= 1.068 Rnm= 1.365
- Gam_ch=1.205E+00 H-L exch
- Mu=-5.281E+00 kf=1.997E+00 Vint=-2.047E+01 Rs_int= 1.816
