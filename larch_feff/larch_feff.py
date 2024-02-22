@@ -5,9 +5,10 @@ import sys
 from pathlib import Path
 
 from larch.xafs.feffrunner import feff6l
+from larch.xrd import cif2feff
 
+from pymatgen.core import Species
 from pymatgen.io.cif import CifParser
-from pymatgen.io.feff import Atoms, Header, Potential
 
 
 def get_path_labels(paths_file):
@@ -48,54 +49,54 @@ def main(structure_file: str, file_format: dict):
     crystal_f = Path(structure_file)
     feff_dir = "feff"
     feff_inp = "feff.inp"
-    header_inp = "header"
-    atoms_inp = "atoms"
-    potential_inp = "potential"
     path = Path(feff_dir, feff_inp)
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if file_format["format"] == "cif":
         print(f"Parsing {crystal_f.name} and saving to {path}")
+
+        # Parse the cif file here... but only so that we can extract the
+        # chemical symbols present in the crystal
         cif_parser = CifParser(crystal_f)
         structures = cif_parser.get_structures()
         length = len(structures)
         if length != 1:
             raise ValueError(
-                f"Execpted single structure in cif file but found {length}"
+                f"Expected single structure in cif file but found {length}"
             )
+
+        # cif2feffinp below will take the absorber to be a chemical symbol,
+        # while this tool should support integer site index or chemical symbol
+        # of site (string). Hence convert any integer input to the relevant
+        # chemical symbol string.
         try:
-            aborsbing_atom = int(file_format["absorbing_atom"])
+            absorbing_atom_int = int(file_format["absorbing_atom"])
+            specie = structures[0][absorbing_atom_int].specie
+            if isinstance(specie, Species):
+                absorbing_atom = str(specie.element)
+            else:
+                absorbing_atom = str(specie)
         except ValueError:
-            # aborsbing_atom can be int or chemical symbol
-            aborsbing_atom = file_format["absorbing_atom"]
+            absorbing_atom = file_format["absorbing_atom"]
 
-        feff_header = Header(structures[0])
-        potential = Potential(structures[0], aborsbing_atom)
-        atoms = Atoms(structures[0], aborsbing_atom, file_format["radius"])
-        # if len(atoms.struct.sites) < len(potential.):
-
-        # print(atoms.as_dict())
-        feff_header.write_file(header_inp)
-        potential.write_file(potential_inp)
-        atoms.write_file(atoms_inp)
+        # NOTE: Here the first site listed in the cif file with the species
+        # 'absorbing_atom' is selected as the absorbing atom.
+        # NOTE: This generates output for FEFF6 via the 'version8' flag
+        inp_data = cif2feff.cif2feffinp(
+            crystal_f,
+            absorber=absorbing_atom,
+            edge=None,
+            cluster_size=file_format["radius"],
+            absorber_site=1,
+            site_index=None,
+            extra_titles=None,
+            with_h=False,
+            version8=False,
+        )
         with open(path, "w") as feff_inp_file:
-            with open(header_inp) as f:
-                header_text = f.read()
-                print(header_text)
-                feff_inp_file.write(header_text + "\n")
-            with open(potential_inp) as f:
-                potential_text = f.readlines()
-                print(*potential_text)
-                feff_inp_file.writelines(potential_text + ["\n"])
-            with open(atoms_inp) as f:
-                atoms_text = f.readlines()
-                print(*atoms_text)
-                feff_inp_file.writelines(atoms_text + ["\n"])
-        if len(atoms_text) <= len(potential_text):
-            print(
-                "WARNING: Every potential in the structure must be represented"
-                " by at least one atom, consider increasing the radius"
-            )
+            feff_inp_file.write(inp_data + "\n")
+            print(inp_data + "\n")
+
     else:
         print(f"Copying {crystal_f.name} to {path}")
         shutil.copy(crystal_f, path)
