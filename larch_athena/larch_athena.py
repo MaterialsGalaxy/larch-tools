@@ -63,16 +63,18 @@ class Reader:
         else:
             all_groups = []
             for filepath in dat_files.split(","):
-                group = self.load_single_file(filepath)["out"]
-                all_groups.append(group)
+                for group in self.load_single_file(filepath).values():
+                    all_groups.append(group)
 
-        return merge_groups(all_groups, xarray="energy", yarray="mu")
+        merged_group = merge_groups(all_groups, xarray="energy", yarray="mu")
+        pre_edge_with_defaults(merged_group)
+        return merged_group
 
     def load_single_file(
         self,
         filepath: str,
         is_zipped: bool = False,
-    ) -> "tuple[dict, bool]":
+    ) -> dict:
         if is_zipped:
             return self.load_zipped_files()
 
@@ -85,6 +87,7 @@ class Reader:
                 groups = {}
                 for repeat in self.extract_group["multiple"]:
                     name = repeat["group_name"]
+                    print(f"\nExtracting group {name}")
                     groups[name] = read_group(filepath, name)
                 return groups
             else:
@@ -141,8 +144,6 @@ class Reader:
         all_paths.sort(key=lambda x: x[0])
         file_total = sum([len(f) for _, _, f in all_paths])
         print(f"{file_total} files found")
-        key_length = len(str(file_total))
-        i = 0
         keyed_data = {}
         for dirpath, _, filenames in all_paths:
             try:
@@ -155,11 +156,13 @@ class Reader:
                 filenames.sort()
 
             for filename in filenames:
-                key = str(i).zfill(key_length)
+                if len(all_paths) > 1:
+                    key = f"{dirpath}_{filename}"
+                else:
+                    key = filename
                 filepath = os.path.join(dirpath, filename)
                 xas_data = self.load_single_file(filepath)
                 keyed_data[key] = xas_data["out"]
-                i += 1
 
         return keyed_data
 

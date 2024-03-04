@@ -34,7 +34,10 @@ def main(dat_files: "list[str]", plot_settings: "list[dict]"):
 
         for group in groups:
             params = group.athena_params
-            label = params.annotation or params.file or params.id
+            annotation = getattr(params, "annotation", None)
+            file = getattr(params, "file", None)
+            params_id = getattr(params, "id", None)
+            label = annotation or file or params_id
             if y_variable == "chir_mag":
                 x_variable = "distance"
                 x = group.r
