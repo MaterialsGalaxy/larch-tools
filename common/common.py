@@ -69,8 +69,7 @@ def pre_edge_with_defaults(group: Group, settings: dict = None):
         ("nnorm", "nnorm", None),
         ("make_flat", "flatten", None),
         ("step", "step", None),
-        # This cannot be read from file as it is not stored by Larch (0.9.71)
-        # ("nvict", "nvict", None),
+        ("nvict", "nvict", None),
     )
     for key, parameters_key, default in keys:
         extract_attribute(
