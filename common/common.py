@@ -29,6 +29,7 @@ def read_all_groups(dat_file: str, key: str = None) -> "dict[str, Group]":
     )
     all_groups = {}
     for key in athena_group._athena_groups.keys():
+        print(f"\nExtracting group {key}")
         group = get_group(athena_group, key)
         pre_edge_with_defaults(group=group)
         xftf_with_defaults(group=group)
@@ -68,8 +69,7 @@ def pre_edge_with_defaults(group: Group, settings: dict = None):
         ("nnorm", "nnorm", None),
         ("make_flat", "flatten", None),
         ("step", "step", None),
-        # This cannot be read from file as it is not stored by Larch (0.9.71)
-        # ("nvict", "nvict", None),
+        ("nvict", "nvict", None),
     )
     for key, parameters_key, default in keys:
         extract_attribute(

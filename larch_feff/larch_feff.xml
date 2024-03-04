@@ -2,7 +2,7 @@
     <description>generate FEFF paths from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.71</token>
+        <token name="@TOOL_VERSION@">0.9.74</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -51,7 +51,7 @@
         </data>
     </outputs>
     <tests>
-        <!-- Test FEFF input -->
+        <!-- 1: Test FEFF input -->
         <test expect_num_outputs="2">
             <conditional name="format">
                 <param name="format" value="feff"/>
@@ -64,7 +64,7 @@
                 </assert_contents>
             </output>
         </test>
-        <!-- Test CIF input -->
+        <!-- 2: Test CIF input FeS2 -->
         <test expect_num_outputs="3">
             <conditional name="format">
                 <param name="format" value="cif"/>
@@ -74,11 +74,151 @@
             <output name="out_csv" file="[CSV_summary_of_1564889.cif].csv"/>
             <output name="out_dir">
                 <assert_contents>
-                    <has_size value="85700" delta="100"/>
+                    <has_size value="88900" delta="100"/>
                 </assert_contents>
             </output>
         </test>
-        <!-- Test CIF input failure with low radius -->
+        <!-- 3: Test CIF input FeS2 string species -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1564889.cif"/>
+                <param name="absorbing_atom" value="Fe"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1564889.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1564889.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="88900" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 4: Test CIF input Pd -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1627088.cif"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1627088.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1627088.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="62500" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 5: Test CIF input Pd string species -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1627088.cif"/>
+                <param name="absorbing_atom" value="Pd"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1627088.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1627088.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="62500" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 6: Test CIF input Pd modified -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1627088_modified.cif"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1627088_modified.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1627088.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="62500" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 7: Test CIF input Pd modified string species -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1627088_modified.cif"/>
+                <param name="absorbing_atom" value="Pd"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1627088_modified.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1627088.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="62500" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 8: Test CIF input LaMnO3 -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1667441.cif"/>
+                <param name="absorbing_atom" value="1"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1667441.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1667441.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="142700" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 9: Test CIF input LaMnO3 string species -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="1667441.cif"/>
+                <param name="absorbing_atom" value="Mn"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_1667441.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_1667441.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="142700" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 10: Test CIF input Cu -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="AMS_Cu.cif"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_AMS_Cu.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_AMS_Cu.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="64300" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 11: Test CIF input Cu string species -->
+        <test expect_num_outputs="3">
+            <conditional name="format">
+                <param name="format" value="cif"/>
+                <param name="structure_file" value="AMS_Cu.cif"/>
+                <param name="absorbing_atom" value="Cu"/>
+                <param name="radius" value="5.0"/>
+            </conditional>
+            <output name="feff_inp" file="[FEFF_input_of_AMS_Cu.cif].txt"/>
+            <output name="out_csv" file="[CSV_summary_of_AMS_Cu.cif].csv"/>
+            <output name="out_dir">
+                <assert_contents>
+                    <has_size value="64300" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 12: Test CIF input failure with low radius -->
         <test expect_failure="true">
             <conditional name="format">
                 <param name="format" value="cif"/>
