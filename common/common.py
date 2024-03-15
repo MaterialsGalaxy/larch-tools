@@ -73,7 +73,11 @@ def pre_edge_with_defaults(group: Group, settings: dict = None):
     )
     for key, parameters_key, default in keys:
         extract_attribute(
-            merged_settings, key, bkg_parameters, parameters_key, default
+            merged_settings=merged_settings,
+            key=key,
+            parameters_group=bkg_parameters,
+            parameters_key=parameters_key,
+            default=default,
         )
 
     if settings:
@@ -116,7 +120,11 @@ def xftf_with_defaults(group: Group, settings: dict = None):
     )
     for key, parameters_key, default in keys:
         extract_attribute(
-            merged_settings, key, fft_parameters, parameters_key, default
+            merged_settings=merged_settings,
+            key=key,
+            parameters_group=fft_parameters,
+            parameters_key=parameters_key,
+            default=default,
         )
 
     if settings:
