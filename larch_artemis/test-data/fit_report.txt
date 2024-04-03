@@ -1,49 +1,52 @@
 =================== FEFFIT RESULTS ====================
 \[\[Statistics\]\]
-   nvarys, npts       =  6, 104
-   n_independent      =  12\.205
-   chi_square         =  [\d\.]{9}
-   reduced chi_square =  [\d\.]{9}
-   r-factor           =  [\d\.]{9}
-   Akaike info crit   =  [\d\.]{9}
-   Bayesian info crit =  [\d\.]{9}
-
-\[\[Data\]\]
-   fit space          = 'r'
-   r-range            = 1\.400, 3\.000
-   k-range            = 3\.000, 14\.000
-   k window, dk       = 'hanning', 1\.000
-   paths used in fit  = \['feff/feff0001\.dat', 'feff/feff0002\.dat', 'feff/feff0003\.dat', 'feff/feff0004\.dat'\]
-   k-weight           = 2
-   epsilon_k          = Array\(mean=5\.1913e-4, std=4\.5676e-4\)
-   epsilon_r          = [\d\.]{9}
-   n_independent      = 12\.205
+  n_function_calls     = 4\d\d
+  n_variables          = 6
+  n_data_points        = 104
+  n_independent        = 12\.2045080
+  chi_square           = [\d\.]{10}
+  reduced chi_square   = [\d\.]{10}
+  r-factor             = [\d\.]{10}
+  Akaike info crit     = [\d\.]{10}
+  Bayesian info crit   = [\d\.]{10}
 
 \[\[Variables\]\]
-   alpha          = [-\s][\d\.]{9} \+/- [\d\.]{9}   \(init=  1\.0000e-7\)
-   amp            = [-\s][\d\.]{9} \+/- [\d\.]{9}   \(init=  1\.0000000\)
-   enot           = [-\s][\d\.]{9} \+/- [\d\.]{9}   \(init=  1\.0000e-7\)
-   ss             = [-\s][\d\.]{9} \+/- [\d\.]{9}   \(init=  0\.0030000\)
-   ss2            = [-\s][\d\.]{9} \+/- [\d\.]{9}   \(init=  0\.0030000\)
-   ss3            = [-\s][\d\.]{9} \+/- [\d\.]{9}  = 'ss2'
-   ssfe           = [-\s][\d\.]{9} \+/- [\d\.]{9}   \(init=  0\.0030000\)
+  alpha                = [-\s][\d\.]{9} \+/- [\d\.]{9}  \(init= 1\.0000e-7\)
+  amp                  = [-\s][\d\.]{9} \+/- [\d\.]{9}  \(init= 1\.0000000\)
+  enot                 = [-\s][\d\.]{9} \+/- [\d\.]{9}  \(init= 1\.0000e-7\)
+  ss                   = [-\s][\d\.]{9} \+/- [\d\.]{9}  \(init= 0\.0030000\)
+  ss2                  = [-\s][\d\.]{9} \+/- [\d\.]{9}  \(init= 0\.0030000\)
+  ss3                  = [-\s][\d\.]{9} \+/- [\d\.]{9}  = 'ss2'
+  ssfe                 = [-\s][\d\.]{9} \+/- [\d\.]{9}  \(init= 0\.0030000\)
 
-\[\[Correlations\]\]    \(unreported correlations are <  0\.100\)
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
-   \w+, \w+\s+= [\s\-]0\.\d{3}
+\[\[Correlations\]\] \(unreported correlations are <  0\.100\)
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
+  \w+, \w+\s+= [\s\-]0\.\d{3}
 
+
+\[\[Dataset\]\]
+  unique_id            = 'dm7xe57x'
+  fit space            = 'r'
+  r-range              = 1\.400, 3\.000
+  k-range              = 3\.000, 14\.000
+  k window, dk         = 'hanning', 1\.000
+  paths used in fit    = \['feff/feff0001\.dat', 'feff/feff0002\.dat', 'feff/feff0003\.dat', 'feff/feff0004\.dat'\]
+  k-weight             = 2
+  epsilon_k            = Array\(mean=5\.1913e-4, std=4\.5676e-4\)
+  epsilon_r            = [\d\.]{9}
+  n_independent        = 12\.205
 
 \[\[Paths\]\]
  = Path 'S1' = Rh K Edge
