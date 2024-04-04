@@ -2,7 +2,7 @@
     <description>generate Athena projects from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.74</token>
+        <token name="@TOOL_VERSION@">0.9.75</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -58,7 +58,7 @@
         <include type="literal" path="common.py"/>
     </required_files>
     <command detect_errors="exit_code"><![CDATA[
-        mkdir prj edge flat derivative
+        mkdir prj plot
         #if $merge_inputs.format.format=="plaintext":
             #if $merge_inputs.format.is_zipped.is_zipped=="true":
                 && echo Unzipping '$merge_inputs.format.is_zipped.dat_file.name'
@@ -90,7 +90,7 @@
                         <conditional name="is_zipped" >
                             <expand macro="is_zipped"/>
                             <when value="">
-                                <param name="dat_file" type="data" format="h5,txt" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format."/>
+                                <param name="dat_file" type="data" format="h5,tabular" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format."/>
                             </when>
                             <when value="true">
                                 <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format."/>
@@ -180,7 +180,11 @@
                 </when>
             </conditional>
         </section>
-        <param name="plot_graph" type="boolean" label="Plot graph" help="Whether to plot the pre/post edge fitting and the normalised xμ data."/>
+        <param name="plot_graph" type="select" multiple="true" display="checkboxes" label="Plot graphs">
+            <option value="edge">Pre/post edge fitting</option>
+            <option value="flat">Flattened xμ</option>
+            <option value="dmude">Derivative of xμ</option>
+        </param>
         <param name="zip_outputs" type="boolean" label="Zip outputs" help="Whether to zip all outputs into one dataset."/>
     </inputs>
     <outputs>
@@ -193,17 +197,7 @@
             <filter>not zip_outputs</filter>
             <filter>not (merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")))</filter>
         </data>
-        <data name="edge_plot" format="png" from_work_dir="edge/out.png" label="Edge fitting ${annotation} ${on_string}">
-            <filter>plot_graph</filter>
-            <filter>not zip_outputs</filter>
-            <filter>not (merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")))</filter>
-        </data>
-        <data name="flat_plot" format="png" from_work_dir="flat/out.png" label="Flattened plot ${annotation} ${on_string}">
-            <filter>plot_graph</filter>
-            <filter>not zip_outputs</filter>
-            <filter>not (merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")))</filter>
-        </data>
-        <data name="derivative_plot" format="png" from_work_dir="derivative/out.png" label="Derivative plot ${annotation} ${on_string}">
+        <data name="plot" format="png" from_work_dir="plot/out.png" label="Plot of ${annotation} ${on_string}">
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
             <filter>not (merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single")))</filter>
@@ -214,20 +208,8 @@
             <filter>not zip_outputs</filter>
             <filter>merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
         </collection>
-        <collection name="edge_plot_collection" format="png" type="list" label="Edge fittings ${annotation} ${on_string}">
-            <discover_datasets pattern="__name_and_ext__" directory="edge"/>
-            <filter>plot_graph</filter>
-            <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
-        </collection>
-        <collection name="flat_plot_collection" format="png" type="list" label="Flattened plots ${annotation} ${on_string}">
-            <discover_datasets pattern="__name_and_ext__" directory="flat"/>
-            <filter>plot_graph</filter>
-            <filter>not zip_outputs</filter>
-            <filter>merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
-        </collection>
-        <collection name="derivative_plot_collection" format="png" type="list" label="Derivative plots ${annotation} ${on_string}">
-            <discover_datasets pattern="__name_and_ext__" directory="derivative"/>
+        <collection name="plot_collection" format="png" type="list" label="Plots of ${annotation} ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="plot"/>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
             <filter>merge_inputs["merge_inputs"] == "" and ((merge_inputs["format"]["format"] == "plaintext" and merge_inputs["format"]["is_zipped"]["is_zipped"]) or (merge_inputs["format"]["format"] == "athena" and merge_inputs["format"]["extract_group"]["extract_group"] != "single"))</filter>
@@ -262,49 +244,37 @@
             </output>
         </test>
         <!-- 4 -->
-        <test expect_num_outputs="4">
+        <test expect_num_outputs="2">
             <param name="dat_file" value="test.xmu"/>
-            <param name="plot_graph" value="true"/>
+            <param name="plot_graph" value="edge,flat,dmude"/>
             <output name="athena_project_file">
                 <assert_contents>
                     <has_size value="5400" delta="100"/>
                 </assert_contents>
             </output>
-            <output name="edge_plot">
+            <output name="plot">
                 <assert_contents>
-                    <has_size value="54036" delta="20"/>
-                </assert_contents>
-            </output>
-            <output name="flat_plot">
-                <assert_contents>
-                    <has_size value="39266" delta="20"/>
-                </assert_contents>
-            </output>
-            <output name="derivative_plot">
-                <assert_contents>
-                    <has_size value="42435" delta="20"/>
+                    <has_size value="134972" delta="20"/>
                 </assert_contents>
             </output>
         </test>
         <!-- 5 -->
-        <test expect_num_outputs="4">
+        <test expect_num_outputs="2">
             <param name="is_zipped" value="true"/>
             <param name="dat_file" value="test.zip"/>
-            <param name="plot_graph" value="true"/>
+            <param name="plot_graph" value="edge,flat,dmude"/>
             <output_collection name="athena_project_file_collection" type="list" count="2"/>
-            <output_collection name="edge_plot_collection" type="list" count="2"/>
-            <output_collection name="flat_plot_collection" type="list" count="2"/>
-            <output_collection name="derivative_plot_collection" type="list" count="2"/>
+            <output_collection name="plot_collection" type="list" count="2"/>
         </test>
         <!-- 6 -->
         <test expect_num_outputs="1">
             <param name="is_zipped" value="true"/>
             <param name="dat_file" value="h5.zip"/>
-            <param name="plot_graph" value="true"/>
+            <param name="plot_graph" value="edge,flat,dmude"/>
             <param name="zip_outputs" value="true"/>
             <output name="out_zip">
                 <assert_contents>
-                    <has_size value="312000" delta="500"/>
+                    <has_size value="75500" delta="500"/>
                 </assert_contents>
             </output>
         </test>
@@ -320,30 +290,20 @@
             </output>
         </test>
         <!-- 8 -->
-        <test expect_num_outputs="4">
+        <test expect_num_outputs="2">
             <param name="dat_file" value="test.xmu"/>
             <param name="calibrate" value="true"/>
             <param name="energy_min" value="7000"/>
             <param name="energy_max" value="7200"/>
-            <param name="plot_graph" value="true"/>
+            <param name="plot_graph" value="edge,flat,dmude"/>
             <output name="athena_project_file">
                 <assert_contents>
                     <has_size value="3300" delta="50"/>
                 </assert_contents>
             </output>
-            <output name="edge_plot">
+            <output name="plot">
                 <assert_contents>
-                    <has_size value="44900" delta="100"/>
-                </assert_contents>
-            </output>
-            <output name="flat_plot">
-                <assert_contents>
-                    <has_size value="39400" delta="100"/>
-                </assert_contents>
-            </output>
-            <output name="derivative_plot">
-                <assert_contents>
-                    <has_size value="45900" delta="100"/>
+                    <has_size value="134700" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -392,29 +352,19 @@
             </output>
         </test>
         <!-- 13: Test merging and plotting multiple prj inputs -->
-        <test expect_num_outputs="4">
+        <test expect_num_outputs="2">
             <param name="merge_inputs" value="true"/>
             <param name="format" value="athena"/>
             <param name="dat_file" value="test.prj,test.prj"/>
-            <param name="plot_graph" value="true"/>
+            <param name="plot_graph" value="edge,flat,dmude"/>
             <output name="athena_project_file">
                 <assert_contents>
                     <has_size value="4500" delta="100"/>
                 </assert_contents>
             </output>
-            <output name="edge_plot">
+            <output name="plot">
                 <assert_contents>
-                    <has_size value="54200" delta="100"/>
-                </assert_contents>
-            </output>
-            <output name="flat_plot">
-                <assert_contents>
-                    <has_size value="39400" delta="100"/>
-                </assert_contents>
-            </output>
-            <output name="derivative_plot">
-                <assert_contents>
-                    <has_size value="41800" delta="100"/>
+                    <has_size value="135000" delta="100"/>
                 </assert_contents>
             </output>
         </test>

@@ -10,7 +10,7 @@ import numpy as np
 
 
 AXIS_LABELS = {
-    "norm": r"x$\mu$(E), normalised",
+    "flat": r"x$\mu$(E), flattened",
     "dmude": r"d(x$\mu$(E))/dE, normalised",
     "chir_mag": r"|$\chi$(r)|",
     "energy": "Energy (eV)",
