@@ -9,8 +9,8 @@
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
         <xml name="format">
-            <param name="format" type="select" display="radio" label="Input format" help="Whether data is in plaintext or already saved as an Athena project">
-                <option value="plaintext" selected="true">Plaintext</option>
+            <param name="format" type="select" display="radio" label="Input format" help="Whether data is in tabular or NeXus (h5) format, or has already saved as an Athena project">
+                <option value="plaintext" selected="true">NeXus/tabular</option>
                 <option value="athena">Athena project</option>
             </param> 
         </xml>
@@ -37,7 +37,7 @@
             <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it', 'FFI0' or 'FF/I1'."/>
         </xml>
         <xml name="is_zipped">
-            <param name="is_zipped" type="select" display="radio" label="Inputs Zipped" help="Whether plaintext input files are zipped together into one directory, or not.">
+            <param name="is_zipped" type="select" display="radio" label="Inputs Zipped" help="Whether input files are zipped together into one directory, or not.">
                 <option value="" selected="true">No</option>
                 <option value="true">Yes</option>
             </param>
@@ -90,10 +90,10 @@
                         <conditional name="is_zipped" >
                             <expand macro="is_zipped"/>
                             <when value="">
-                                <param name="dat_file" type="data" format="h5,tabular" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext."/>
+                                <param name="dat_file" type="data" format="h5,tabular" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format."/>
                             </when>
                             <when value="true">
-                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext."/>
+                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format."/>
                             </when>
                         </conditional>
                         <expand macro="columns"/>
@@ -111,10 +111,10 @@
                         <conditional name="is_zipped" >
                             <expand macro="is_zipped"/>
                             <when value="">
-                                <param name="dat_file" type="data" format="h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext, which will be merged. Accepts individual files or a zip."/>
+                                <param name="dat_file" type="data" format="h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format, which will be merged. Accepts individual files or a zip."/>
                             </when>
                             <when value="true">
-                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext. All files in the zip will be merged."/>
+                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format. All files in the zip will be merged."/>
                             </when>
                         </conditional>
                         <expand macro="columns"/>
@@ -410,8 +410,8 @@
     <help><![CDATA[
         Using Larch, create an Athena project file from the input X-ray Absorption Fine Structure (XAFS) data file.
         
-        Accepts both plaintext and HDF5 formatted data or a zip file containing these formats.
-        If column names are not present in plaintext data, then the first column is treated as `energy` and the second as `mu`.
+        Accepts both tabular and NeXus/HDF5 formatted data or a zip file containing these formats.
+        If column names are not present in tabular data, then the first column is treated as `energy` and the second as `mu`.
         Note that in order to ensure a consistent output, once unzipped all files will sorted first by their parent directories (alphabetically).
         Within a given directory, if all filenames contain digits then the last block of digits will be used to sort the files numerically.
         In the output, all files (regardless of initial filepath) are output in a flat hierarchy, with the number in which it was processed as the file name (zero-padded).
