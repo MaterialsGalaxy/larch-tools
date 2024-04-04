@@ -322,6 +322,14 @@ def plot_graphs(
         plt.plot(xas_data.energy, xas_data.pre_edge, "g", label="pre-edge")
         plt.plot(xas_data.energy, xas_data.post_edge, "r", label="post-edge")
         plt.plot(xas_data.energy, xas_data.mu, "b", label="fit data")
+        if hasattr(xas_data, "mu_std"):
+            plt.fill_between(
+                x=xas_data.energy,
+                y1=xas_data.mu - xas_data.mu_std,
+                y2=xas_data.mu + xas_data.mu_std,
+                alpha=0.2,
+                label="standard deviation",
+            )
         plt.grid(color="r", linestyle=":", linewidth=1)
         plt.xlabel("Energy (eV)")
         plt.ylabel("x$\mu$(E)")  # noqa: W605
@@ -331,7 +339,17 @@ def plot_graphs(
 
     if "flat" in plot_keys:
         plt.subplot(nrows, 1, index)
-        plt.plot(xas_data.energy, xas_data.flat)
+        plt.plot(xas_data.energy, xas_data.flat, label="flattened signal")
+        if hasattr(xas_data, "mu_std"):
+            mu_std_normalised = xas_data.mu_std / xas_data.edge_step
+            plt.fill_between(
+                x=xas_data.energy,
+                y1=xas_data.flat - mu_std_normalised,
+                y2=xas_data.flat + mu_std_normalised,
+                alpha=0.2,
+                label="standard deviation",
+            )
+            plt.legend()
         plt.grid(color="r", linestyle=":", linewidth=1)
         plt.xlabel("Energy (eV)")
         plt.ylabel("Flattened x$\mu$(E)")  # noqa: W605
