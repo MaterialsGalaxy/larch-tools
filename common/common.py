@@ -52,13 +52,22 @@ def read_group(dat_file: str, key: str = None):
     return group
 
 
-def pre_edge_with_defaults(group: Group, settings: dict = None):
+def pre_edge_with_defaults(
+    group: Group, settings: dict = None, ref_channel: str = None
+):
     merged_settings = {}
-    try:
-        bkg_parameters = group.athena_params.bkg
-    except AttributeError as e:
-        print(f"Cannot load group.athena_params.bkg from group:\n{e}")
-        bkg_parameters = None
+    if ref_channel is not None:
+        print(f"Performing pre-edge with reference channel {ref_channel}")
+        ref = getattr(group, ref_channel.lower())
+        group.e0 = None
+        pre_edge(energy=group.energy, mu=ref, group=group)
+        bkg_parameters = group.pre_edge_details
+    else:
+        try:
+            bkg_parameters = group.athena_params.bkg
+        except AttributeError as e:
+            print(f"Cannot load group.athena_params.bkg from group:\n{e}")
+            bkg_parameters = None
 
     keys = (
         ("e0", "e0", None),
