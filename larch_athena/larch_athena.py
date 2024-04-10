@@ -261,6 +261,7 @@ def main(
     do_rebin: bool,
     do_pre_edge: bool,
     pre_edge_settings: dict,
+    ref_channel: str,
     do_xftf: bool,
     xftf_settings: dict,
     plot_graph: list,
@@ -286,7 +287,7 @@ def main(
         do_pre_edge = True
 
     if do_pre_edge:
-        pre_edge_with_defaults(xas_data, pre_edge_settings)
+        pre_edge_with_defaults(xas_data, pre_edge_settings, ref_channel)
 
     if do_xftf:
         xftf_with_defaults(xas_data, xftf_settings)
@@ -330,6 +331,8 @@ def plot_graphs(
                 alpha=0.2,
                 label="standard deviation",
             )
+        e0 = xas_data.e0
+        plt.axvline(e0, color="m", label=f"edge energy = {e0}")
         plt.grid(color="r", linestyle=":", linewidth=1)
         plt.xlabel("Energy (eV)")
         plt.ylabel("x$\mu$(E)")  # noqa: W605
@@ -375,29 +378,39 @@ if __name__ == "__main__":
     dat_file = sys.argv[1]
     input_values = json.load(open(sys.argv[2], "r", encoding="utf-8"))
     merge_inputs = input_values["merge_inputs"]["merge_inputs"]
-    data_format = input_values["merge_inputs"]["format"]["format"]
-    if "is_zipped" in input_values["merge_inputs"]["format"]:
-        is_zipped = bool(
-            input_values["merge_inputs"]["format"]["is_zipped"]["is_zipped"]
-        )
+    format_inputs = input_values["merge_inputs"]["format"]
+    if "is_zipped" in format_inputs:
+        is_zipped = bool(format_inputs["is_zipped"]["is_zipped"])
     else:
         is_zipped = False
 
     extract_group = None
-    if "extract_group" in input_values["merge_inputs"]["format"]:
-        extract_group = input_values["merge_inputs"]["format"]["extract_group"]
+    if "extract_group" in format_inputs:
+        extract_group = format_inputs["extract_group"]
 
-    energy_column = None
-    mu_column = None
-    if "energy_column" in input_values["merge_inputs"]["format"]:
-        energy_column = input_values["merge_inputs"]["format"]["energy_column"]
-    if "mu_column" in input_values["merge_inputs"]["format"]:
-        mu_column = input_values["merge_inputs"]["format"]["mu_column"]
+    if "energy_column" not in format_inputs:
+        energy_column = None
+    else:
+        energy_column = format_inputs["energy_column"]["energy_column"]
+        if energy_column == "auto":
+            energy_column = None
+        elif energy_column == "other":
+            energy_column_input = format_inputs["energy_column"]
+            energy_column = energy_column_input["energy_column_text"]
+
+    if "mu_column" not in format_inputs:
+        mu_column = None
+    else:
+        mu_column = format_inputs["mu_column"]["mu_column"]
+        if mu_column == "auto":
+            mu_column = None
+        elif mu_column == "other":
+            mu_column = format_inputs["mu_column"]["mu_column_text"]
 
     reader = Reader(
         energy_column=energy_column,
         mu_column=mu_column,
-        data_format=data_format,
+        data_format=format_inputs["format"],
         extract_group=extract_group,
     )
     keyed_data = reader.load_data(
@@ -414,7 +427,11 @@ if __name__ == "__main__":
 
     pre_edge_items = input_values["processing"]["pre_edge"].items()
     pre_edge_settings = {k: v for k, v in pre_edge_items if v is not None}
-    do_pre_edge = pre_edge_settings.pop("pre_edge") == "true"
+    do_pre_edge = bool(pre_edge_settings.pop("pre_edge"))
+
+    ref_channel = None
+    if "ref_channel" in pre_edge_settings:
+        ref_channel = pre_edge_settings.pop("ref_channel")
 
     xftf_items = input_values["processing"]["xftf"].items()
     xftf_settings = {k: v for k, v in xftf_items if v is not None}
@@ -431,6 +448,7 @@ if __name__ == "__main__":
             do_rebin=do_rebin,
             do_pre_edge=do_pre_edge,
             pre_edge_settings=pre_edge_settings,
+            ref_channel=ref_channel,
             do_xftf=do_xftf,
             xftf_settings=xftf_settings,
             plot_graph=plot_graph,
