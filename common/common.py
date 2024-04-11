@@ -7,14 +7,14 @@ from larch.xafs import autobk, pre_edge, xftf
 
 
 def get_group(athena_group: AthenaGroup, key: str = None) -> Group:
-    group_keys = list(athena_group._athena_groups.keys())
+    group_keys = list(athena_group.keys())
     if key is None:
         key = group_keys[0]
     else:
         key = key.replace("-", "_")
 
     try:
-        return extract_athenagroup(athena_group._athena_groups[key])
+        return extract_athenagroup(athena_group.groups[key])
     except KeyError as e:
         raise KeyError(f"{key} not in {group_keys}") from e
 
@@ -28,7 +28,7 @@ def read_all_groups(dat_file: str, key: str = None) -> "dict[str, Group]":
         do_fft=False,
     )
     all_groups = {}
-    for key in athena_group._athena_groups.keys():
+    for key in athena_group.keys():
         print(f"\nExtracting group {key}")
         group = get_group(athena_group, key)
         pre_edge_with_defaults(group=group)
@@ -52,13 +52,22 @@ def read_group(dat_file: str, key: str = None):
     return group
 
 
-def pre_edge_with_defaults(group: Group, settings: dict = None):
+def pre_edge_with_defaults(
+    group: Group, settings: dict = None, ref_channel: str = None
+):
     merged_settings = {}
-    try:
-        bkg_parameters = group.athena_params.bkg
-    except AttributeError as e:
-        print(f"Cannot load group.athena_params.bkg from group:\n{e}")
-        bkg_parameters = None
+    if ref_channel is not None:
+        print(f"Performing pre-edge with reference channel {ref_channel}")
+        ref = getattr(group, ref_channel.lower())
+        group.e0 = None
+        pre_edge(energy=group.energy, mu=ref, group=group)
+        bkg_parameters = group.pre_edge_details
+    else:
+        try:
+            bkg_parameters = group.athena_params.bkg
+        except AttributeError as e:
+            print(f"Cannot load group.athena_params.bkg from group:\n{e}")
+            bkg_parameters = None
 
     keys = (
         ("e0", "e0", None),

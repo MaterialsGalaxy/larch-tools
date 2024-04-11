@@ -2,15 +2,15 @@
     <description>generate Athena projects from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.74</token>
+        <token name="@TOOL_VERSION@">0.9.75</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">1</token>
+        <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
         <xml name="format">
-            <param name="format" type="select" display="radio" label="Input format" help="Whether data is in plaintext or already saved as an Athena project">
-                <option value="plaintext" selected="true">Plaintext</option>
+            <param name="format" type="select" display="radio" label="Input format" help="Whether data is in tabular or NeXus (h5) format, or has already saved as an Athena project">
+                <option value="plaintext" selected="true">NeXus/tabular</option>
                 <option value="athena">Athena project</option>
             </param> 
         </xml>
@@ -33,11 +33,39 @@
             </conditional>
         </xml>
         <xml name="columns">
-            <param name="energy_column" type="text" optional="true" label="Energy column" help="If set, this column we be used as 'energy'. Otherwise, will identify the first column ending with 'energy' or labelled 'col1' 'Ef'."/>
-            <param name="mu_column" type="text" optional="true" label="μ column" help="If set, this column we be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it', 'FFI0' or 'FF/I1'."/>
+            <conditional name="energy_column">
+                <param name="energy_column" type="select" label="Energy column" help="If set, this column will be used as 'energy'. Otherwise, will identify the first column ending with 'energy' or labelled 'col1' 'Ef'.">
+                    <option value="auto" selected="true">Automatic</option>
+                    <option value="qexafs_energy" selected="true">qexafs_energy</option>
+                    <option value="Ef" selected="true">Ef</option>
+                    <option value="other" selected="true">Other</option>
+                </param>
+                <when value="auto"/>
+                <when value="qexafs_energy"/>
+                <when value="Ef"/>
+                <when value="other">
+                    <param name="energy_column_text" type="text" label="Energy column" help="The column to be used as 'energy'."/>
+                </when>
+            </conditional>
+            <conditional name="mu_column">
+                <param name="mu_column" type="select" label="μ column" help="If set, this column will be used as 'mu'. Otherwise, will identify the first column labelled as either 'col2', 'xmu', 'lni0it', 'FFI0' or 'FF/I1'.">
+                    <option value="auto" selected="true">Automatic</option>
+                    <option value="lnI0It" selected="true">lnI0It</option>
+                    <option value="FFI0" selected="true">FFI0</option>
+                    <option value="FF/I1" selected="true">FF/I1</option>
+                    <option value="other" selected="true">Other</option>
+                </param>
+                <when value="auto"/>
+                <when value="lnI0It"/>
+                <when value="FFI0"/>
+                <when value="FF/I1"/>
+                <when value="other">
+                    <param name="mu_column_text" type="text" optional="true" label="μ column" help="The column to be used as 'mu'."/>
+                </when>
+            </conditional>
         </xml>
         <xml name="is_zipped">
-            <param name="is_zipped" type="select" display="radio" label="Inputs Zipped" help="Whether plaintext input files are zipped together into one directory, or not.">
+            <param name="is_zipped" type="select" display="radio" label="Inputs Zipped" help="Whether input files are zipped together into one directory, or not.">
                 <option value="" selected="true">No</option>
                 <option value="true">Yes</option>
             </param>
@@ -90,10 +118,10 @@
                         <conditional name="is_zipped" >
                             <expand macro="is_zipped"/>
                             <when value="">
-                                <param name="dat_file" type="data" format="h5,tabular" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext."/>
+                                <param name="dat_file" type="data" format="h5,tabular" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format."/>
                             </when>
                             <when value="true">
-                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext."/>
+                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format."/>
                             </when>
                         </conditional>
                         <expand macro="columns"/>
@@ -111,10 +139,10 @@
                         <conditional name="is_zipped" >
                             <expand macro="is_zipped"/>
                             <when value="">
-                                <param name="dat_file" type="data" format="h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext, which will be merged. Accepts individual files or a zip."/>
+                                <param name="dat_file" type="data" format="h5,txt" multiple="true" label="XAFS data file" help="X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format, which will be merged. Accepts individual files or a zip."/>
                             </when>
                             <when value="true">
-                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in h5 or plaintext. All files in the zip will be merged."/>
+                                <param name="dat_file" type="data" format="zip" label="Zipped XAFS data files" help="Zipped X-ray Absorption Fine Structure (XAFS) data, either in NeXus (h5) or tabular format. All files in the zip will be merged."/>
                             </when>
                         </conditional>
                         <expand macro="columns"/>
@@ -129,7 +157,7 @@
         <param name="annotation" type="text" label="Annotation" optional="true" help="If set, will annotate the output project(s) with this string. This will be used to generate legends when plotting data."/>
         <section name="processing" expanded="true" title="Processing Options" help="By default, the following processing steps will be performed either with default values, or those contained in the input Athena project (if used). If specified here, these values will be used instead for process in sequence.">
             <conditional name="calibrate">
-                <param name="calibrate" type="select" label="Calibrate energy" help="If set, will shift the spectrum so that its (automatically determined) edge occurs at the specified value, and any values outside the range will be discarded.">
+                <param name="calibrate" type="select" display="radio" label="Calibrate energy" help="If set, will shift the spectrum so that its (automatically determined) edge occurs at the specified value, and any values outside the range will be discarded.">
                     <option value="" selected="true">False</option>
                     <option value="true">True</option>
                 </param>
@@ -142,12 +170,16 @@
             </conditional>
             <param name="rebin" type="boolean" label="Re-bin data" help="Whether to re-bin along the energy axis to automatically ensure appropriate levels of precision in the pre-edge, near-edge and extended region of the spectrum."/>
             <conditional name="pre_edge">
-                <param name="pre_edge" type="select" label="Pre-edge normalization" help="If set, will (re)perform forward pre-edge normalization using provided values.">
-                    <option value="" selected="true">False</option>
-                    <option value="true">True</option>
+                <param name="pre_edge" type="select" display="radio" label="Pre-edge normalization" help="If set, will (re)perform forward pre-edge normalization using provided values.">
+                    <option value="" selected="true">Use default values</option>
+                    <option value="ref">Use reference channel</option>
+                    <option value="manual">Use manual values</option>
                 </param>
                 <when value=""/>
-                <when value="true">
+                <when value="ref">
+                    <param name="ref_channel" type="text" label="Reference channel" help="The channel to be used as a refernce to determine the pre-edge settings which are then used for the main signal. This can help when the main signal is affected by signal noise."/>
+                </when>
+                <when value="manual">
                     <param argument="e0" type="float" label="Edge energy (eV)" optional="true" help="If set, normalization will use this as the location of the edge rather than automatically determining it."/>
                     <param argument="pre1" type="float" max="0" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
                     <param argument="pre2" type="float" max="0" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
@@ -159,7 +191,7 @@
                 </when>
             </conditional>
             <conditional name="xftf">
-                <param name="xftf" type="select" label="XFTF" help="If set, will (re)perform forward Fourier Transform using provided values.">
+                <param name="xftf" type="select" display="radio" label="XFTF" help="If set, will (re)perform forward Fourier Transform using provided values.">
                     <option value="" selected="true">False</option>
                     <option value="true">True</option>
                 </param>
@@ -254,7 +286,7 @@
             </output>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="134972" delta="20"/>
+                    <has_size value="138100" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -303,7 +335,7 @@
             </output>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="134700" delta="100"/>
+                    <has_size value="137700" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -364,7 +396,7 @@
             </output>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="135000" delta="100"/>
+                    <has_size value="145700" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -406,12 +438,23 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 18: Use ref channel -->
+        <test expect_num_outputs="1">
+            <param name="dat_file" value="ffi0.tabular"/>
+            <param name="pre_edge" value="ref"/>
+            <param name="ref_channel" value="lnitiref"/>
+            <output name="athena_project_file">
+                <assert_contents>
+                    <has_size value="34400" delta="100"/>
+                </assert_contents>
+            </output>
+        </test>
     </tests>
     <help><![CDATA[
         Using Larch, create an Athena project file from the input X-ray Absorption Fine Structure (XAFS) data file.
         
-        Accepts both plaintext and HDF5 formatted data or a zip file containing these formats.
-        If column names are not present in plaintext data, then the first column is treated as `energy` and the second as `mu`.
+        Accepts both tabular and NeXus/HDF5 formatted data or a zip file containing these formats.
+        If column names are not present in tabular data, then the first column is treated as `energy` and the second as `mu`.
         Note that in order to ensure a consistent output, once unzipped all files will sorted first by their parent directories (alphabetically).
         Within a given directory, if all filenames contain digits then the last block of digits will be used to sort the files numerically.
         In the output, all files (regardless of initial filepath) are output in a flat hierarchy, with the number in which it was processed as the file name (zero-padded).

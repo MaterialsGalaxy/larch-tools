@@ -2,9 +2,9 @@
     <description>plot Athena projects</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.74</token>
+        <token name="@TOOL_VERSION@">0.9.75</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">1</token>
+        <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -36,6 +36,7 @@
                     <option value="flat" selected="true">Flattened xμ</option>
                     <option value="dmude">Derivative of xμ</option>
                     <option value="chir_mag">Magnitude of χ(r)</option>
+                    <option value="e0">E0</option>
                 </param>
                 <when value="flat">
                     <expand macro="plot_limits_energy"/>
@@ -53,6 +54,8 @@
                     <param name="y_limit_min" type="float" label="Minimum |χ(r)|" optional="true" help="If set, plot will be limited to this value on the y axis."/>
                     <param name="y_limit_max" type="float" label="Maximum |χ(r)|" optional="true" help="If set, plot will be limited to this value on the y axis."/>
                 </when>
+                <when value="e0">
+                </when>
             </conditional>
         </repeat>
     </inputs>
@@ -68,7 +71,8 @@
             <param name="variable" value="flat"/>
             <param name="variable" value="dmude"/>
             <param name="variable" value="chir_mag"/>
-            <output_collection name="plot_collection" type="list" count="3"/>
+            <param name="variable" value="e0"/>
+            <output_collection name="plot_collection" type="list" count="4"/>
         </test>
         <!-- 2: plot limits -->
         <test expect_num_outputs="1">
