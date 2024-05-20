@@ -162,7 +162,7 @@ class Reader:
 
             for filename in filenames:
                 if len(all_paths) > 1:
-                    key = f"{dirpath}_{filename}"
+                    key = f"{dirpath.replace('/', '_')}_{filename}"
                 else:
                     key = filename
                 filepath = os.path.join(dirpath, filename)

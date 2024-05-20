@@ -4,7 +4,7 @@
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">0.9.75</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">0</token>
+        <token name="@WRAPPER_VERSION@">1</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -448,6 +448,14 @@
                     <has_size value="34400" delta="100"/>
                 </assert_contents>
             </output>
+        </test>
+        <!-- 19: Zip file with nested directories -->
+        <test expect_num_outputs="2">
+            <param name="is_zipped" value="true"/>
+            <param name="dat_file" value="nested.zip"/>
+            <param name="plot_graph" value="edge,flat,dmude"/>
+            <output_collection name="athena_project_file_collection" type="list" count="2"/>
+            <output_collection name="plot_collection" type="list" count="2"/>
         </test>
     </tests>
     <help><![CDATA[
