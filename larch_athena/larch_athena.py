@@ -1,7 +1,6 @@
 import gc
 import json
 import os
-import re
 import sys
 
 from common import (

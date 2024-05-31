@@ -315,6 +315,26 @@
                 </assert_contents>
             </output>
         </test>
+        <!-- 7: Zipped numerical sort -->
+        <test expect_num_outputs="2">
+            <param name="execution" value="zipped"/>
+            <param name="prj_file" value="numeric_sort.zip"/>
+            <param name="variable" value="rfactor"/>
+            <param name="action" value="log"/>
+            <param name="feff_paths" value="[FEFF_paths_of_test.inp].zip"/>
+            <param name="gds_file" value="gds.csv"/>
+            <param name="sp_file" value="sp.csv"/>
+            <param name="fitspace" value="r"/>
+            <param name="kmin" value="3"/>
+            <param name="kmax" value="14"/>
+            <param name="kweight" value="2"/>
+            <param name="dk" value="1"/>
+            <param name="window" value="hanning"/>
+            <param name="rmin" value="1.4"/>
+            <param name="rmax" value="3.0"/>
+            <output_collection name="fit_report_collection" type="list" count="3"/>
+            <output name="criteria_report" file="numeric_sort_criteria_report.csv" compare="re_match"/>
+        </test>
     </tests>
     <help><![CDATA[
         Using Larch, perform fitting on an Athena project file, originally from the input X-ray Absorption Fine Structure (XAFS) data file.
