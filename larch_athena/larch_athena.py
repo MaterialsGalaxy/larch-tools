@@ -8,6 +8,7 @@ from common import (
     pre_edge_with_defaults,
     read_all_groups,
     read_group,
+    sorting_key,
     xftf_with_defaults,
 )
 
@@ -142,15 +143,16 @@ class Reader:
         return xafs_group
 
     def load_zipped_files(self) -> "dict[str, Group]":
-        def sorting_key(filename: str) -> str:
-            return re.findall(r"\d+", filename)[-1]
-
         all_paths = list(os.walk("dat_files"))
         all_paths.sort(key=lambda x: x[0])
         file_total = sum([len(f) for _, _, f in all_paths])
         print(f"{file_total} files found")
         keyed_data = {}
         for dirpath, _, filenames in all_paths:
+            if dirpath.endswith("__MACOSX"):
+                print(f"Skipping {dirpath}")
+                continue
+
             try:
                 filenames.sort(key=sorting_key)
             except IndexError as e:

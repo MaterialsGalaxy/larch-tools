@@ -1,3 +1,4 @@
+import re
 from typing import Iterable
 
 from larch.io import extract_athenagroup, read_athena
@@ -168,3 +169,6 @@ def extract_attribute(
 def read_groups(dat_files: "list[str]", key: str = None) -> Iterable[Group]:
     for dat_file in dat_files:
         yield read_group(dat_file=dat_file, key=key)
+
+def sorting_key(filename: str) -> str:
+    return re.findall(r"\d+", filename)[-1]

@@ -5,7 +5,7 @@ import json
 import os
 import sys
 
-from common import read_group
+from common import read_group, sorting_key
 
 from larch.fitting import guess, param, param_group
 from larch.symboltable import Group
@@ -351,7 +351,7 @@ if __name__ == "__main__":
             filepaths = [
                 os.path.join(prj_file, p) for p in os.listdir(prj_file)
             ]
-            filepaths.sort()
+            filepaths.sort(key=sorting_key)
         else:
             # DO NOT sort if we have multiple Galaxy datasets - the filenames
             # are arbitrary but should be in order
