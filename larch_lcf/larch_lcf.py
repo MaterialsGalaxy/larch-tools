@@ -1,7 +1,8 @@
 import json
+import os
 import sys
 
-from common import read_group
+from common import read_group, sorting_key
 
 from larch.math.lincombo_fitting import get_label, lincombo_fit
 from larch.symboltable import Group
@@ -15,6 +16,7 @@ def plot(
     fit_group: Group,
     x_limit_min: float,
     x_limit_max: float,
+    prj_id: str,
 ):
     formatted_label = ""
     for label, weight in fit_group.weights.items():
@@ -41,7 +43,7 @@ def plot(
     plt.xlabel("Energy (eV)")
     plt.ylabel("normalised x$\mu$(E)")  # noqa: W605
     plt.legend()
-    plt.savefig("plot.png", format="png")
+    plt.savefig(f"plot/{prj_id}.png", format="png")
     plt.close("all")
 
 
@@ -52,12 +54,7 @@ def set_label(component_group, label):
         component_group.filename = get_label(component_group)
 
 
-if __name__ == "__main__":
-    # larch imports set this to an interactive backend, so need to change it
-    matplotlib.use("Agg")
-    prj_file = sys.argv[1]
-    input_values = json.load(open(sys.argv[2], "r", encoding="utf-8"))
-
+def main(prj_file: str, input_values: dict, prj_id: str = "plot"):
     group_to_fit = read_group(prj_file)
     set_label(group_to_fit, input_values["label"])
 
@@ -79,4 +76,29 @@ if __name__ == "__main__":
 
     x_limit_min = input_values["x_limit_min"]
     x_limit_max = input_values["x_limit_max"]
-    plot(group_to_fit, fit_group, x_limit_min, x_limit_max)
+    plot(group_to_fit, fit_group, x_limit_min, x_limit_max, prj_id)
+
+
+if __name__ == "__main__":
+    # larch imports set this to an interactive backend, so need to change it
+    matplotlib.use("Agg")
+    prj_file = sys.argv[1]
+    input_values = json.load(open(sys.argv[2], "r", encoding="utf-8"))
+
+    if input_values["execution"]["execution"] == "parallel":
+        main(prj_file, input_values)
+
+    else:
+        if os.path.isdir(prj_file):
+            # Sort the unzipped directory, all filenames should be zero-padded
+            paths = os.listdir(prj_file)
+            filepaths = [os.path.join(prj_file, p) for p in paths]
+            filepaths.sort(key=sorting_key)
+        else:
+            # DO NOT sort if we have multiple Galaxy datasets - the filenames
+            # are arbitrary but should be in order
+            filepaths = prj_file.split(",")
+        
+        id_length = len(str(len(filepaths)))
+        for i, prj_file in enumerate(filepaths):
+            main(prj_file, input_values, str(i).zfill(id_length))
