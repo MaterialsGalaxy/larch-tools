@@ -98,7 +98,7 @@ if __name__ == "__main__":
             # DO NOT sort if we have multiple Galaxy datasets - the filenames
             # are arbitrary but should be in order
             filepaths = prj_file.split(",")
-        
+
         id_length = len(str(len(filepaths)))
         for i, prj_file in enumerate(filepaths):
             main(prj_file, input_values, str(i).zfill(id_length))
