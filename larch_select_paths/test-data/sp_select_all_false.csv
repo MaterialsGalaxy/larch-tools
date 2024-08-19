@@ -1,3 +1,3 @@
-  id,                 filename,                    label, s02,   e0,                   sigma2,     deltar
-   1,        feff/feff0001.dat,                   S.Fe.1, s02,   e0,                   sigma2, alpha*reff
-   2,        feff/feff0002.dat,                   S.Fe.2, s02,   e0,                   sigma2, alpha*reff
+  id,                 filename,                    label, degen, s02,   e0,                   sigma2,     deltar
+   1,        feff/feff0001.dat,                   S.Fe.1, degen, s02,   e0,                   sigma2, alpha*reff
+   2,        feff/feff0002.dat,                   S.Fe.2, degen, s02,   e0,                   sigma2, alpha*reff

@@ -1,5 +1,6 @@
   id,                     name, value, expr, vary
-   1,                      s02,   0.1,     , False
-   2,                       e0,   0.1,     , True
-   3,                    alpha,  10.0,     , False
-   4,                   sigma2, 0.003,     , True
+   1,                    degen,      ,     , True
+   2,                      s02,   0.1,     , False
+   3,                       e0,   0.1,     , True
+   4,                    alpha,  10.0,     , False
+   5,                   sigma2, 0.003,     , True

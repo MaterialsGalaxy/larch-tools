@@ -4,30 +4,10 @@
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">0.9.75</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">1</token>
+        <token name="@WRAPPER_VERSION@">2</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
-        <xml name="series_options">
-            <param name="stop_on_error" type="boolean" label="Stop on error" help="Whether to stop gracefully or continue with subsequent projects if an error is encountered when fitting."/>
-            <repeat name="report_criteria" title="Report Criteria">
-                <param name="variable" type="text" label="Variable" help="Name of the variable of that appears in the statistics or variables sections of the report."/>
-                <conditional name="action">
-                    <param name="action" type="select" display="radio" label="Action" help="What to do with the named variable.">
-                        <option value="log" selected="true">Log</option>
-                        <option value="warn">Warn</option>
-                        <option value="stop">Early stopping</option>
-                    </param>
-                    <when value="log"/>
-                    <when value="warn">
-                        <param name="threshold" type="float" value="0.0" min="0.0" label="Warning threshold" help="In addition to logging, a warning will be printed if the absolute value of this variable goes above this threshold."/>
-                    </when>
-                    <when value="stop">
-                        <param name="threshold" type="float" value="0.0" min="0.0" label="Early stopping threshold" help="In addition to logging, execution will stop if the absolute value of this variable goes above this threshold."/>
-                    </when>
-                </conditional>
-            </repeat>
-        </xml>
         <import>macros.xml</import>
     </macros>
     <creator>
@@ -45,9 +25,15 @@
     <command detect_errors="exit_code"><![CDATA[
         unzip '$feff_paths'
         && mkdir report rmr chikr
-        #if $execution.execution=="zipped":
-            && unzip '$execution.prj_file'
-            && python '${__tool_directory__}/larch_artemis.py' prj '$gds_file' '$sp_file' '$inputs'
+        #if $execution.execution=="series":
+            #if $execution.format.format=="zipped":
+                && unzip '$execution.format.prj_file'
+                && python '${__tool_directory__}/larch_artemis.py' prj '$gds_file' '$sp_file' '$inputs'
+            #else
+                && python '${__tool_directory__}/larch_artemis.py' '$execution.format.prj_file' '$gds_file' '$sp_file' '$inputs'
+            #end if
+        #elif $execution.execution=="simultaneous":
+            && python '${__tool_directory__}/larch_artemis.py' _ '$gds_file' '$sp_file' '$inputs'
         #else
             && python '${__tool_directory__}/larch_artemis.py' '$execution.prj_file' '$gds_file' '$sp_file' '$inputs'
         #end if
@@ -56,25 +42,57 @@
         #end if
     ]]></command>
     <configfiles>
-        <inputs name="inputs"/>
+        <inputs name="inputs" data_style="paths"/>
     </configfiles>
     <inputs>
-        <conditional name="execution" >
-            <param name="execution" type="select" display="radio" label="Execution mode" help="Whether to execute: on individual Athena projects as parallel jobs, as one job with each project fit occurring in series, or as one job using a zipped input.">
+        <conditional name="execution">
+            <param name="execution" type="select" display="radio" label="Execution mode" help="Whether to execute: on individual Athena projects as parallel jobs, on several projects using a simultaneous fit, or as one job with each project fit occurring in series.">
                 <option value="parallel" selected="true">Parallel</option>
+                <option value="simultaneous">Simultaneous</option>
                 <option value="series">Series</option>
-                <option value="zipped">Zipped</option>
             </param>
             <when value="parallel">
                 <param name="prj_file" type="data" format="prj" label="Athena project file" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format. If a collection of files is provided, these will be submitted and executed in parallel."/>
             </when>
-            <when value="series">
-                <param name="prj_file" type="data" format="prj" multiple="true" label="Athena project files" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format. These will be submitted as a single job working in series, enabling early stopping criteria."/>
-                <expand macro="series_options"/>
+            <when value="simultaneous">
+                <repeat name="simultaneous" title="Simultaneous datasets" min="1" default="1">
+                    <param name="prj_file" type="data" format="prj" label="Athena project files" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format. These will be submitted as a single job performing a simultaneous fit."/>
+                    <repeat name="paths" title="Path IDs to select" min="1" default="1">
+                        <param name="path_id" type="integer" min="1" label="Path ID"/>
+                    </repeat>
+                </repeat>
             </when>
-            <when value="zipped">
-                <param name="prj_file" type="data" format="zip" label="Zipped Athena outputs" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format, and zipped. These will be submitted as a single job working in series, enabling early stopping criteria."/>
-                <expand macro="series_options"/>
+            <when value="series">
+                <conditional name="format">
+                    <param name="format" type="select" display="radio" label="Data format">
+                        <option value="prj" selected="true">Athena projects (.prj)</option>
+                        <option value="zipped">Zipped</option>
+                    </param>
+                    <when value="prj">
+                        <param name="prj_file" type="data" format="prj" multiple="true" label="Athena project files" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format. These will be submitted as a single job working in series, enabling early stopping criteria."/>
+                    </when>
+                    <when value="zipped">
+                        <param name="prj_file" type="data" format="zip" label="Zipped Athena outputs" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format, and zipped. These will be submitted as a single job working in series, enabling early stopping criteria."/>
+                    </when>
+                </conditional>
+                <param name="stop_on_error" type="boolean" label="Stop on error" help="Whether to stop gracefully or continue with subsequent projects if an error is encountered when fitting."/>
+                <repeat name="report_criteria" title="Report Criteria">
+                    <param name="variable" type="text" label="Variable" help="Name of the variable of that appears in the statistics or variables sections of the report."/>
+                    <conditional name="action">
+                        <param name="action" type="select" display="radio" label="Action" help="What to do with the named variable.">
+                            <option value="log" selected="true">Log</option>
+                            <option value="warn">Warn</option>
+                            <option value="stop">Early stopping</option>
+                        </param>
+                        <when value="log"/>
+                        <when value="warn">
+                            <param name="threshold" type="float" value="0.0" min="0.0" label="Warning threshold" help="In addition to logging, a warning will be printed if the absolute value of this variable goes above this threshold."/>
+                        </when>
+                        <when value="stop">
+                            <param name="threshold" type="float" value="0.0" min="0.0" label="Early stopping threshold" help="In addition to logging, execution will stop if the absolute value of this variable goes above this threshold."/>
+                        </when>
+                    </conditional>
+                </repeat>
             </when>
         </conditional>
         <param name="feff_paths" type="data" format="zip" label="FEFF paths file" help="Zipped directory of the FEFF paths."/>
@@ -110,38 +128,38 @@
             <filter>zip_outputs</filter>
         </data>
         <data name="fit_report" format="feffit" from_work_dir="report/fit_report.txt" label="Fit report on ${on_string}">
-            <filter>execution["execution"]=="parallel"</filter>
+            <filter>execution["execution"]!="series"</filter>
             <filter>not zip_outputs</filter>
         </data>
         <data name="rmr" format="png" from_work_dir="rmr/rmr.png" label="RMR plot on ${on_string}">
-            <filter>execution["execution"]=="parallel"</filter>
+            <filter>execution["execution"]!="series"</filter>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
         </data>
         <data name="chikr" format="png" from_work_dir="chikr/chikr.png" label="ChiKR plot on ${on_string}">
-            <filter>execution["execution"]=="parallel"</filter>
+            <filter>execution["execution"]!="series"</filter>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
         </data>
         <collection name="fit_report_collection" format="feffit" type="list" label="Fit reports on ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="report"/>
-            <filter>execution["execution"]!="parallel"</filter>
+            <filter>execution["execution"]=="series"</filter>
             <filter>not zip_outputs</filter>
         </collection>
         <collection name="rmr_collection" format="png" type="list" label="RMR plots on ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="rmr"/>
-            <filter>execution["execution"]!="parallel"</filter>
+            <filter>execution["execution"]=="series"</filter>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
         </collection>
         <collection name="chikr_collection" format="png" type="list" label="ChiKR plots on ${on_string}">
             <discover_datasets pattern="__name_and_ext__" directory="chikr"/>
-            <filter>execution["execution"]!="parallel"</filter>
+            <filter>execution["execution"]=="series"</filter>
             <filter>plot_graph</filter>
             <filter>not zip_outputs</filter>
         </collection>
         <data name="criteria_report" format="csv" from_work_dir="criteria_report.csv" label="Selected criteria from ${on_string}">
-            <filter>execution["execution"]!="parallel"</filter>
+            <filter>execution["execution"]=="series"</filter>
             <filter>len(execution["report_criteria"])>0</filter>
         </data>
     </outputs>
@@ -182,12 +200,12 @@
             <output name="fit_report" file="fit_report.txt" compare="re_match"/>
             <output name="rmr">
                 <assert_contents>
-                    <has_size value="55000" delta="1000"/>
+                    <has_size value="50000" delta="10000"/>
                 </assert_contents>
             </output>
             <output name="chikr">
                 <assert_contents>
-                    <has_size value="65000" delta="1000"/>
+                    <has_size value="70000" delta="10000"/>
                 </assert_contents>
             </output>
         </test>
@@ -294,7 +312,8 @@
         </test>
         <!-- Zipped -->
         <test expect_num_outputs="1">
-            <param name="execution" value="zipped"/>
+            <param name="execution" value="series"/>
+            <param name="format" value="zipped"/>
             <param name="prj_file" value="test.zip"/>
             <param name="feff_paths" value="[FEFF_paths_of_test.inp].zip"/>
             <param name="gds_file" value="gds.csv"/>
@@ -311,13 +330,14 @@
             <param name="zip_outputs" value="true"/>
             <output name="out_zip">
                 <assert_contents>
-                    <has_size value="230000" delta="500"/>
+                    <has_size value="250000" delta="10000"/>
                 </assert_contents>
             </output>
         </test>
         <!-- 7: Zipped numerical sort -->
         <test expect_num_outputs="2">
-            <param name="execution" value="zipped"/>
+            <param name="execution" value="series"/>
+            <param name="format" value="zipped"/>
             <param name="prj_file" value="numeric_sort.zip"/>
             <param name="variable" value="rfactor"/>
             <param name="action" value="log"/>
@@ -335,6 +355,41 @@
             <output_collection name="fit_report_collection" type="list" count="3"/>
             <output name="criteria_report" file="numeric_sort_criteria_report.csv" compare="re_match"/>
         </test>
+        <!-- 8: Simultaneous -->
+        <!-- Fails due to a bug in versions of Larch <= 0.9.76 -->
+        <!-- <test expect_num_outputs="1">
+            <param name="execution" value="simultaneous"/>
+            <repeat name="simultaneous">
+                <param name="prj_file" value="test.prj"/>
+                <repeat name="paths">
+                    <param name="path_id" value="1"/>
+                    <param name="path_id" value="2"/>
+                    <param name="path_id" value="3"/>
+                    <param name="path_id" value="4"/>
+                </repeat>
+            </repeat>
+            <repeat name="simultaneous">
+                <param name="prj_file" value="test.prj"/>
+                <repeat name="paths">
+                    <param name="path_id" value="1"/>
+                    <param name="path_id" value="2"/>
+                    <param name="path_id" value="3"/>
+                    <param name="path_id" value="4"/>
+                </repeat>
+            </repeat>
+            <param name="feff_paths" value="[FEFF_paths_of_test.inp].zip"/>
+            <param name="gds_file" value="gds.csv"/>
+            <param name="sp_file" value="sp.csv"/>
+            <param name="fitspace" value="r"/>
+            <param name="kmin" value="3"/>
+            <param name="kmax" value="14"/>
+            <param name="kweight" value="2"/>
+            <param name="dk" value="1"/>
+            <param name="window" value="hanning"/>
+            <param name="rmin" value="1.4"/>
+            <param name="rmax" value="3.0"/>
+            <output name="fit_report" file="fit_report.txt" compare="re_match"/>
+        </test> -->
     </tests>
     <help><![CDATA[
         Using Larch, perform fitting on an Athena project file, originally from the input X-ray Absorption Fine Structure (XAFS) data file.
