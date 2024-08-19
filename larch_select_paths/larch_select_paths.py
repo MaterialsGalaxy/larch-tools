@@ -61,7 +61,7 @@ class GDSWriter:
             "degen": {"name": "degen"},
             "s02": {"name": "s02"},
             "e0": {"name": "e0"},
-            "deltar": {"name": "alpha*reff"},
+            "deltar": {"name": "alpha"},
             "sigma2": {"name": "sigma2"},
         }
         self.rows = [
@@ -118,7 +118,7 @@ class GDSWriter:
             formatted_value = str(value)
         else:
             formatted_value = ""
-        
+
         self.rows.append(
             f"{len(self.rows):4d}, {formatted_name:>24s}, "
             f"{formatted_value:>5s}, {expr:>4s}, {str(vary):>4s}\n"
@@ -333,7 +333,7 @@ class PathsWriter:
         s02: str = "s02",
         e0: str = "e0",
         sigma2: str = "sigma2",
-        deltar: str = "alpha*reff",
+        deltar: str = "alpha",
     ) -> int:
         """Format and append row representing a selected FEFF path.
 
@@ -351,7 +351,7 @@ class PathsWriter:
             sigma2 (str, optional): Mean squared displacement variable name.
                 Defaults to "sigma2".
             deltar (str, optional): Change in path length variable.
-                Defaults to "alpha*reff".
+                Defaults to "alpha".
 
         Returns:
             int: The id of the added row.
@@ -366,7 +366,7 @@ class PathsWriter:
         row_id = len(self.rows)
         self.rows.append(
             f"{row_id:>4d}, {filename:>24s}, {label:>24s}, {degen:>5s}, "
-            f"{s02:>3s}, {e0:>4s}, {sigma2:>24s}, {deltar:>10s}\n"
+            f"{s02:>3s}, {e0:>4s}, {sigma2:>24s}, {deltar + '*reff':>10s}\n"
         )
 
         return row_id

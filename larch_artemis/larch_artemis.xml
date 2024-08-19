@@ -2,9 +2,9 @@
     <description>generate Artemis projects from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.75</token>
+        <token name="@TOOL_VERSION@">0.9.80</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">2</token>
+        <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -356,8 +356,7 @@
             <output name="criteria_report" file="numeric_sort_criteria_report.csv" compare="re_match"/>
         </test>
         <!-- 8: Simultaneous -->
-        <!-- Fails due to a bug in versions of Larch <= 0.9.76 -->
-        <!-- <test expect_num_outputs="1">
+        <test expect_num_outputs="1">
             <param name="execution" value="simultaneous"/>
             <repeat name="simultaneous">
                 <param name="prj_file" value="test.prj"/>
@@ -389,7 +388,7 @@
             <param name="rmin" value="1.4"/>
             <param name="rmax" value="3.0"/>
             <output name="fit_report" file="fit_report.txt" compare="re_match"/>
-        </test> -->
+        </test>
     </tests>
     <help><![CDATA[
         Using Larch, perform fitting on an Athena project file, originally from the input X-ray Absorption Fine Structure (XAFS) data file.
