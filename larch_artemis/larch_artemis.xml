@@ -4,7 +4,7 @@
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">0.9.80</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">0</token>
+        <token name="@WRAPPER_VERSION@">1</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -58,7 +58,7 @@
                 <repeat name="simultaneous" title="Simultaneous datasets" min="1" default="1">
                     <param name="prj_file" type="data" format="prj" label="Athena project files" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format. These will be submitted as a single job performing a simultaneous fit."/>
                     <repeat name="paths" title="Path IDs to select" min="1" default="1">
-                        <param name="path_id" type="integer" min="1" label="Path ID"/>
+                        <param name="path_id" type="integer" value="1" min="1" label="Path ID"/>
                     </repeat>
                 </repeat>
             </when>
