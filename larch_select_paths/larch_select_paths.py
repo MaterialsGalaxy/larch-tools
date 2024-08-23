@@ -58,9 +58,10 @@ class ManualSelector:
 class GDSWriter:
     def __init__(self, default_variables: "dict[str, dict]"):
         self.default_properties = {
+            "degen": {"name": "degen"},
             "s02": {"name": "s02"},
             "e0": {"name": "e0"},
-            "deltar": {"name": "alpha*reff"},
+            "deltar": {"name": "alpha"},
             "sigma2": {"name": "sigma2"},
         }
         self.rows = [
@@ -113,9 +114,14 @@ class GDSWriter:
             raise ValueError(f"{formatted_name} already used as variable name")
         self.names.add(formatted_name)
 
+        if value is not None:
+            formatted_value = str(value)
+        else:
+            formatted_value = ""
+
         self.rows.append(
-            f"{len(self.rows):4d}, {formatted_name:>24s}, {str(value):>5s}, "
-            f"{expr:>4s}, {str(vary):>4s}\n"
+            f"{len(self.rows):4d}, {formatted_name:>24s}, "
+            f"{formatted_value:>5s}, {expr:>4s}, {str(vary):>4s}\n"
         )
 
     def parse_gds(
@@ -179,8 +185,8 @@ class GDSWriter:
 class PathsWriter:
     def __init__(self, default_variables: "dict[str, dict]"):
         self.rows = [
-            f"{'id':>4s}, {'filename':>24s}, {'label':>24s}, {'s02':>3s}, "
-            f"{'e0':>4s}, {'sigma2':>24s}, {'deltar':>10s}\n"
+            f"{'id':>4s}, {'filename':>24s}, {'label':>24s}, {'degen':>5s}, "
+            f"{'s02':>3s}, {'e0':>4s}, {'sigma2':>24s}, {'deltar':>10s}\n"
         ]
         self.gds_writer = GDSWriter(default_variables=default_variables)
         self.all_combinations = [[0]]  # 0 corresponds to the header row
@@ -323,10 +329,11 @@ class PathsWriter:
         filename: str,
         path_label: str,
         directory_label: str = "",
+        degen: str = "degen",
         s02: str = "s02",
         e0: str = "e0",
         sigma2: str = "sigma2",
-        deltar: str = "alpha*reff",
+        deltar: str = "alpha",
     ) -> int:
         """Format and append row representing a selected FEFF path.
 
@@ -336,13 +343,15 @@ class PathsWriter:
             path_label (str): Label indicating the atoms involved in this path.
             directory_label (str, optional): Label to indicate paths from a
                 separate directory. Defaults to "".
+            degen (str, optional): Path degeneracy variable name.
+                Defaults to "degen".
             s02 (str, optional): Electron screening factor variable name.
                 Defaults to "s02".
             e0 (str, optional): Energy shift variable name. Defaults to "e0".
             sigma2 (str, optional): Mean squared displacement variable name.
                 Defaults to "sigma2".
             deltar (str, optional): Change in path length variable.
-                Defaults to "alpha*reff".
+                Defaults to "alpha".
 
         Returns:
             int: The id of the added row.
@@ -356,8 +365,8 @@ class PathsWriter:
 
         row_id = len(self.rows)
         self.rows.append(
-            f"{row_id:>4d}, {filename:>24s}, {label:>24s}, "
-            f"{s02:>3s}, {e0:>4s}, {sigma2:>24s}, {deltar:>10s}\n"
+            f"{row_id:>4d}, {filename:>24s}, {label:>24s}, {degen:>5s}, "
+            f"{s02:>3s}, {e0:>4s}, {sigma2:>24s}, {deltar + '*reff':>10s}\n"
         )
 
         return row_id

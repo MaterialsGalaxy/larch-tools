@@ -2,7 +2,7 @@
     <description>select FEFF paths for XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.75</token>
+        <token name="@TOOL_VERSION@">0.9.80</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -45,6 +45,11 @@
     </configfiles>
     <inputs>
         <section name="variables" expanded="false" title="GDS variable defaults" help="Define default values for variables in the EXAFS equation to use for the paths selected below.">
+            <section name="degen" expanded="false" title="N: path degeneracy">
+                <param name="is_common" type="boolean" checked="true" label="Use path default" help="If set, a single variable 'degen' will be used for all paths. Otherwise, each path has a distinct variable."/>
+                <param name="value" type="float" optional="true" min="0.0" label="Value" help="The initial value for 'degen'. This will depend on the structure and path in question. If unset, then the path default will be used."/>
+                <expand macro="vary"/>
+            </section>
             <section name="s02" expanded="false" title="S02: passive electron reduction factor">
                 <param name="is_common" type="boolean" checked="true" label="Common to all paths" help="If set, a single variable 's02' will be used for all paths. Otherwise, each path has a distinct variable."/>
                 <param name="value" type="float" value="1.0" min="0.0" max="1.0" label="Value" help="The initial value for 's02'. This is typically between 0.7 and 1.0."/>
@@ -80,6 +85,12 @@
                 <when value="all">
                     <repeat name="paths" title="Define path variables" help="Overwrite the default variables defined above for chosen paths.">
                         <param name="id" type="integer" value="1" min="1" label="Path ID" help="Numerical id of a path to select, this appears at the end of the label and filename in the path summary CSV."/>
+                        <section name="degen" expanded="false" title="N: path degeneracy">
+                            <expand macro="name"/>
+                            <param name="value" type="float" optional="true" min="0.0" label="Value" help="The initial value for 'degen'. This will depend on the structure and path in question."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
                         <section name="s02" expanded="false" title="S02: passive electron reduction factor">
                             <expand macro="name"/>
                             <param name="value" type="float" value="1.0" min="0.0" max="1.0" label="Value" help="The initial value for 's02'. This is typically between 0.7 and 1.0."/>
@@ -123,6 +134,12 @@
                 <when value="manual">
                     <repeat name="paths" title="Select paths" help="Identify paths to use in the fitting by their id, and optionally define their variables. This will overwrite and defaults set above.">
                         <param name="id" type="integer" value="1" min="1" label="Path ID" help="Numerical id of a path to select, this appears at the end of the label and filename in the path summary CSV."/>
+                        <section name="degen" expanded="false" title="N: path degeneracy">
+                            <expand macro="name"/>
+                            <param name="value" type="float" value="1.0" min="0.0" optional="true" label="Value" help="The initial value for 'degen'. This will depend on the structure and path in question. If unset, then the path default will be used."/>
+                            <expand macro="expr"/>
+                            <expand macro="vary"/>
+                        </section>
                         <section name="s02" expanded="false" title="S02: passive electron reduction factor">
                             <expand macro="name"/>
                             <param name="value" type="float" value="1.0" min="0.0" max="1.0" label="Value" help="The initial value for 's02'. This is typically between 0.7 and 1.0."/>

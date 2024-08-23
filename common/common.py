@@ -11,8 +11,6 @@ def get_group(athena_group: AthenaGroup, key: str = None) -> Group:
     group_keys = list(athena_group.keys())
     if key is None:
         key = group_keys[0]
-    else:
-        key = key.replace("-", "_")
 
     try:
         return extract_athenagroup(athena_group.groups[key])
@@ -20,7 +18,7 @@ def get_group(athena_group: AthenaGroup, key: str = None) -> Group:
         raise KeyError(f"{key} not in {group_keys}") from e
 
 
-def read_all_groups(dat_file: str, key: str = None) -> "dict[str, Group]":
+def read_all_groups(dat_file: str) -> "dict[str, Group]":
     # Cannot rely on do_ABC as _larch is None
     athena_group = read_athena(
         dat_file,
@@ -40,14 +38,20 @@ def read_all_groups(dat_file: str, key: str = None) -> "dict[str, Group]":
 
 
 def read_group(dat_file: str, key: str = None):
+    if key:
+        match_ = key.replace(" ", "_").replace("-", "_").replace(".", "_")
+    else:
+        match_ = None
+
     # Cannot rely on do_ABC as _larch is None
     athena_group = read_athena(
         dat_file,
+        match=match_,
         do_preedge=False,
         do_bkg=False,
         do_fft=False,
     )
-    group = get_group(athena_group, key)
+    group = get_group(athena_group, match_)
     pre_edge_with_defaults(group=group)
     xftf_with_defaults(group=group)
     return group

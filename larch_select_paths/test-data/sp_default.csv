@@ -1,9 +1,9 @@
-  id,                 filename,                    label, s02,   e0,                   sigma2,     deltar
-   1,        feff/feff0001.dat,                   S.Fe.1, s02,   e0,                   sigma2, alpha*reff
-   2,        feff/feff0002.dat,                   S.Fe.2, s02,   e0,                   sigma2, alpha*reff
-   3,        feff/feff0003.dat,                  Fe.Fe.3, s02,   e0,                   sigma2, alpha*reff
-   4,        feff/feff0004.dat,                   S.Fe.4, s02,   e0,                   sigma2, alpha*reff
-   5,        feff/feff0005.dat,                   S.Fe.5, s02,   e0,                   sigma2, alpha*reff
-   6,        feff/feff0006.dat,                 S.S.Fe.6, s02,   e0,                   sigma2, alpha*reff
-   7,        feff/feff0007.dat,                 S.S.Fe.7, s02,   e0,                   sigma2, alpha*reff
-   8,        feff/feff0008.dat,                  Fe.Fe.8, s02,   e0,                   sigma2, alpha*reff
+  id,                 filename,                    label, degen, s02,   e0,                   sigma2,     deltar
+   1,        feff/feff0001.dat,                   S.Fe.1, degen, s02,   e0,                   sigma2, alpha*reff
+   2,        feff/feff0002.dat,                   S.Fe.2, degen, s02,   e0,                   sigma2, alpha*reff
+   3,        feff/feff0003.dat,                  Fe.Fe.3, degen, s02,   e0,                   sigma2, alpha*reff
+   4,        feff/feff0004.dat,                   S.Fe.4, degen, s02,   e0,                   sigma2, alpha*reff
+   5,        feff/feff0005.dat,                   S.Fe.5, degen, s02,   e0,                   sigma2, alpha*reff
+   6,        feff/feff0006.dat,                 S.S.Fe.6, degen, s02,   e0,                   sigma2, alpha*reff
+   7,        feff/feff0007.dat,                 S.S.Fe.7, degen, s02,   e0,                   sigma2, alpha*reff
+   8,        feff/feff0008.dat,                  Fe.Fe.8, degen, s02,   e0,                   sigma2, alpha*reff

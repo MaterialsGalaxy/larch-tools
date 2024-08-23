@@ -1,7 +1,8 @@
   id,                     name, value, expr, vary
-   1,                      s02,   1.0,     , True
-   2,                       e0,   0.0,     , True
-   3,                    alpha,   0.0,     , True
-   4,                   sigma2, 0.003,     , True
-   5,            custom_name_1, 0.003,     , True
-   6,            custom_name_2, 0.003,     , True
+   1,                    degen,      ,     , True
+   2,                      s02,   1.0,     , True
+   3,                       e0,   0.0,     , True
+   4,                    alpha,   0.0,     , True
+   5,                   sigma2, 0.003,     , True
+   6,            custom_name_1, 0.003,     , True
+   7,            custom_name_2, 0.003,     , True
