@@ -2,7 +2,7 @@
     <description>generate FEFF paths from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.75</token>
+        <token name="@TOOL_VERSION@">0.9.80</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
