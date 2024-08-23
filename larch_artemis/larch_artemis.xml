@@ -8,7 +8,6 @@
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
-        <import>macros.xml</import>
     </macros>
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
@@ -362,8 +361,14 @@
                 <param name="prj_file" value="test.prj"/>
                 <repeat name="paths">
                     <param name="path_id" value="1"/>
+                </repeat>
+                <repeat name="paths">
                     <param name="path_id" value="2"/>
+                </repeat>
+                <repeat name="paths">
                     <param name="path_id" value="3"/>
+                </repeat>
+                <repeat name="paths">
                     <param name="path_id" value="4"/>
                 </repeat>
             </repeat>
@@ -371,8 +376,14 @@
                 <param name="prj_file" value="test.prj"/>
                 <repeat name="paths">
                     <param name="path_id" value="1"/>
+                </repeat>
+                <repeat name="paths">
                     <param name="path_id" value="2"/>
+                </repeat>
+                <repeat name="paths">
                     <param name="path_id" value="3"/>
+                </repeat>
+                <repeat name="paths">
                     <param name="path_id" value="4"/>
                 </repeat>
             </repeat>
@@ -387,7 +398,7 @@
             <param name="window" value="hanning"/>
             <param name="rmin" value="1.4"/>
             <param name="rmax" value="3.0"/>
-            <output name="fit_report" file="fit_report.txt" compare="re_match"/>
+            <output name="fit_report" file="fit_report_simultaneous.txt" compare="re_match"/>
         </test>
     </tests>
     <help><![CDATA[
