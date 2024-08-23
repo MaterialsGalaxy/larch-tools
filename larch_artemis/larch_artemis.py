@@ -127,6 +127,12 @@ def read_selected_paths_list(file_name):
     sp_list = []
     for path_dict in sp_dict.values():
         filename = path_dict["filename"]
+        if not os.path.isfile(filename):
+            raise FileNotFoundError(
+                f"{filename} not found, check paths in the Selected Paths "
+                "table match those in the zipped directory structure."
+            )
+
         print(f"Reading selected path for file {filename}")
         new_path = FeffPathGroup(
             filename=filename,
