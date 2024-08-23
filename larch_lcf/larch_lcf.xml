@@ -4,7 +4,7 @@
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">0.9.80</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">0</token>
+        <token name="@WRAPPER_VERSION@">1</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -22,14 +22,35 @@
         <include type="literal" path="common.py"/>
     </required_files>
     <command detect_errors="exit_code"><![CDATA[
-        python '${__tool_directory__}/larch_lcf.py' '$prj_file' '$inputs'
+        mkdir plot &&
+        #if $execution.execution=="zipped":
+            unzip '$execution.prj_file' &&
+            python '${__tool_directory__}/larch_lcf.py' prj '$inputs'
+        #else
+            python '${__tool_directory__}/larch_lcf.py' '$execution.prj_file' '$inputs'
+        #end if
     ]]></command>
     <configfiles>
         <inputs name="inputs" data_style="paths"/>
     </configfiles>
     <inputs>
         <param name="label" type="text" optional="true" label="Main data label" help="The label to use for the main data (target of the fit). If unset, the label will be taken from the Athena project metadata."/>
-        <param name="prj_file" type="data" format="prj" label="Athena project to fit" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format, to be fit."/>
+        <conditional name="execution" >
+            <param name="execution" type="select" display="radio" label="Execution mode" help="Whether to execute: on individual Athena projects as parallel jobs, as one job with each project fit occurring in series, or as one job using a zipped input.">
+                <option value="parallel" selected="true">Parallel</option>
+                <option value="series">Series</option>
+                <option value="zipped">Zipped</option>
+            </param>
+            <when value="parallel">
+                <param name="prj_file" type="data" format="prj" label="Athena project file" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format. If a collection of files is provided, these will be submitted and executed in parallel."/>
+            </when>
+            <when value="series">
+                <param name="prj_file" type="data" format="prj" multiple="true" label="Athena project files" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format. These will be submitted as a single job working in series, enabling transition search."/>
+            </when>
+            <when value="zipped">
+                <param name="prj_file" type="data" format="zip" label="Zipped Athena outputs" help="Normalised X-ray Absorption Fine Structure (XAFS) data, in Athena project format, and zipped. These will be submitted as a single job working in series, enabling transition search."/>
+            </when>
+        </conditional>
         <repeat name="components" title="Fit components">
             <param name="label" type="text" optional="true" label="Component label" help="The label to use for this component. If unset, the label will be taken from the Athena project metadata."/>
             <param name="component_file" type="data" format="prj" label="Athena project to fit" help="Reference X-ray Absorption Fine Structure (XAFS) data, in Athena project format, to be used as components in the fit."/>
@@ -41,7 +62,13 @@
         <expand macro="plot_limits_energy"/>
     </inputs>
     <outputs>
-        <data name="plot" format="png" from_work_dir="plot.png"/>
+        <data name="plot" format="png" from_work_dir="plot/plot.png">
+            <filter>execution["execution"]=="parallel"</filter>
+        </data>
+        <collection name="plot_collection" format="png" type="list" label="Larch LCF on series data ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="plot"/>
+            <filter>execution["execution"]!="parallel"</filter>
+        </collection>
     </outputs>
     <tests>
         <!-- 1 -->
@@ -58,6 +85,36 @@
                     <has_size value="59500" delta="100"/>
                 </assert_contents>
             </output>
+            <assert_stdout>
+                <has_text text="Goodness of fit (rfactor): 0.532130%"/>
+            </assert_stdout>
+        </test>
+        <!-- 2: series -->
+        <test expect_num_outputs="1">
+            <param name="execution" value="series"/>
+            <param name="prj_file" value="PtSn_OCO_Abu_1_29204.5.prj"/>
+            <param name="component_file" value="Sn_foil_29200.prj"/>
+            <param name="component_file" value="SnO2_29206.prj"/>
+            <param name="energy_min" value="29190"/>
+            <param name="energy_max" value="29230"/>
+            <param name="x_limit_min" value="29190"/>
+            <param name="x_limit_max" value="29230"/>
+            <output_collection name="plot_collection" type="list" count="1"/>
+            <assert_stdout>
+                <has_text text="Goodness of fit (rfactor): 0.532130%"/>
+            </assert_stdout>
+        </test>
+        <!-- 3: zipped -->
+        <test expect_num_outputs="1">
+            <param name="execution" value="zipped"/>
+            <param name="prj_file" value="lcf.zip"/>
+            <param name="component_file" value="Sn_foil_29200.prj"/>
+            <param name="component_file" value="SnO2_29206.prj"/>
+            <param name="energy_min" value="29190"/>
+            <param name="energy_max" value="29230"/>
+            <param name="x_limit_min" value="29190"/>
+            <param name="x_limit_max" value="29230"/>
+            <output_collection name="plot_collection" type="list" count="2"/>
             <assert_stdout>
                 <has_text text="Goodness of fit (rfactor): 0.532130%"/>
             </assert_stdout>
