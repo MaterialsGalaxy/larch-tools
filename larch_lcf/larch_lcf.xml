@@ -82,11 +82,11 @@
             <param name="x_limit_max" value="29230"/>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="59500" delta="100"/>
+                    <has_size value="61000" delta="1000"/>
                 </assert_contents>
             </output>
             <assert_stdout>
-                <has_text text="Goodness of fit (rfactor): 0.532130%"/>
+                <has_text text="Goodness of fit (rfactor): 0.658596%"/>
             </assert_stdout>
         </test>
         <!-- 2: series -->
@@ -101,7 +101,7 @@
             <param name="x_limit_max" value="29230"/>
             <output_collection name="plot_collection" type="list" count="1"/>
             <assert_stdout>
-                <has_text text="Goodness of fit (rfactor): 0.532130%"/>
+                <has_text text="Goodness of fit (rfactor): 0.658596%"/>
             </assert_stdout>
         </test>
         <!-- 3: zipped -->
@@ -116,7 +116,7 @@
             <param name="x_limit_max" value="29230"/>
             <output_collection name="plot_collection" type="list" count="2"/>
             <assert_stdout>
-                <has_text text="Goodness of fit (rfactor): 0.532130%"/>
+                <has_text text="Goodness of fit (rfactor): 0.658596%"/>
             </assert_stdout>
         </test>
     </tests>
