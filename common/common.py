@@ -171,7 +171,7 @@ def extract_attribute(
                 f"WARNING: values {values} for for keys {parameter_keys}, "
                 "using first entry"
             )
-        
+
         if len(values) > 0:
             merged_settings[key] = values[0]
             return
