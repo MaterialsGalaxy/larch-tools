@@ -75,22 +75,22 @@ def pre_edge_with_defaults(
             bkg_parameters = None
 
     keys = (
-        ("e0", "e0", None),
-        ("pre1", "pre1", None),
-        ("pre2", "pre2", None),
-        ("norm1", "nor1", None),
-        ("norm2", "nor2", None),
-        ("nnorm", "nnorm", None),
-        ("make_flat", "flatten", None),
-        ("step", "step", None),
-        ("nvict", "nvict", None),
+        ("e0", ("e0"), None),
+        ("pre1", ("pre1"), None),
+        ("pre2", ("pre2"), None),
+        ("norm1", ("nor1"), None),
+        ("norm2", ("nor2"), None),
+        ("nnorm", ("nnorm"), None),
+        ("make_flat", ("flatten"), None),
+        ("step", ("step"), None),
+        ("nvict", ("nvict"), None),
     )
-    for key, parameters_key, default in keys:
+    for key, parameter_keys, default in keys:
         extract_attribute(
             merged_settings=merged_settings,
             key=key,
             parameters_group=bkg_parameters,
-            parameters_key=parameters_key,
+            parameter_keys=parameter_keys,
             default=default,
         )
 
@@ -125,19 +125,18 @@ def xftf_with_defaults(group: Group, settings: dict = None):
         fft_parameters = None
 
     keys = (
-        ("kmin", "kmin", 0),
-        ("kmax", "kmax", 20),
-        ("dk", "dk", 1),
-        ("kweight", "kw", 2),
-        ("kweight", "kweight", 2),
-        ("window", "kwindow", "kaiser"),
+        ("kmin", ("kmin",), 0),
+        ("kmax", ("kmax",), 20),
+        ("dk", ("dk",), 1),
+        ("kweight", ("kw", "kweight"), 2),
+        ("window", ("kwindow",), "kaiser"),
     )
-    for key, parameters_key, default in keys:
+    for key, parameter_keys, default in keys:
         extract_attribute(
             merged_settings=merged_settings,
             key=key,
             parameters_group=fft_parameters,
-            parameters_key=parameters_key,
+            parameter_keys=parameter_keys,
             default=default,
         )
 
@@ -156,15 +155,26 @@ def extract_attribute(
     merged_settings: dict,
     key: str,
     parameters_group: Group,
-    parameters_key: str,
+    parameter_keys: "tuple[str]",
     default: "str|int" = None,
 ):
     if parameters_group is not None:
-        try:
-            merged_settings[key] = getattr(parameters_group, parameters_key)
+        values = []
+        for parameter_key in parameter_keys:
+            try:
+                values.append(getattr(parameters_group, parameter_key))
+            except AttributeError:
+                pass
+
+        if len(values) > 1:
+            print(
+                f"WARNING: values {values} for for keys {parameter_keys}, "
+                "using first entry"
+            )
+        
+        if len(values) > 0:
+            merged_settings[key] = values[0]
             return
-        except AttributeError:
-            pass
 
     if default is not None:
         merged_settings[key] = default
