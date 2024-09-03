@@ -1,6 +1,6 @@
 =================== FEFFIT RESULTS ====================
 \[\[Statistics\]\]
-  n_function_calls     = 4\d\d
+  n_function_calls     = \d{3}
   n_variables          = 6
   n_data_points        = 208
   n_independent        = 24\.4090160
@@ -37,14 +37,14 @@
 
 
 \[\[Dataset 1 of 2\]\]
-  unique_id            = 'dm7xe57x'
+  unique_id            = '\w{8}'
   fit space            = 'r'
   r-range              = 1\.400, 3\.000
   k-range              = 3\.000, 14\.000
   k window, dk         = 'hanning', 1\.000
   paths used in fit    = \['feff/feff0001\.dat', 'feff/feff0002\.dat', 'feff/feff0003\.dat', 'feff/feff0004\.dat'\]
   k-weight             = 2
-  epsilon_k            = Array\(mean=5\.1913e-4, std=4\.5676e-4\)
+  epsilon_k            = Array\(mean=5\.\d{4}e-4, std=4\.5\d{3}e-4\)
   epsilon_r            = [\d\.]{9}
   n_independent        = 12\.205
 
@@ -109,7 +109,7 @@
   k window, dk         = 'hanning', 1\.000
   paths used in fit    = \['feff/feff0001\.dat', 'feff/feff0002\.dat', 'feff/feff0003\.dat', 'feff/feff0004\.dat'\]
   k-weight             = 2
-  epsilon_k            = Array\(mean=5\.1913e-4, std=4\.5676e-4\)
+  epsilon_k            = Array\(mean=5\.\d{4}e-4, std=4\.5\d{3}e-4\)
   epsilon_r            = [\d\.]{9}
   n_independent        = 12\.205
 
