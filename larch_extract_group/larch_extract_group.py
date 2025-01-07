@@ -104,7 +104,9 @@ class Reader:
                     if self.annotation is not None:
                         group.args["annotation"] = self.annotation
                     elif self.extract_group["annotation"]:
-                        group.args["annotation"] = self.extract_group["annotation"]
+                        group.args["annotation"] = (
+                            self.extract_group["annotation"]
+                        )
                     xas_project.save()
                 return {"out": group}
 
@@ -159,7 +161,7 @@ class Reader:
             pre_edge_with_defaults(group)
             xftf_with_defaults(group)
             if save:
-                xas_project = create_athena(f"prj/out.prj")
+                xas_project = create_athena("prj/out.prj")
                 xas_project.add_group(group)
                 if self.annotation is not None:
                     group.args["annotation"] = self.annotation
