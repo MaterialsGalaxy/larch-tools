@@ -63,9 +63,9 @@ def pre_edge_with_defaults(
     merged_settings = {}
     if ref_channel is not None:
         print(f"Performing pre-edge with reference channel {ref_channel}")
-        ref = getattr(group, ref_channel.lower())
+        ref_group = read_group(ref_channel)
         group.e0 = None
-        pre_edge(energy=group.energy, mu=ref, group=group)
+        pre_edge(energy=group.energy, mu=ref_group, group=group)
         bkg_parameters = group.pre_edge_details
     else:
         try:
