@@ -1,6 +1,5 @@
 import gc
 import json
-import os
 import sys
 
 from common import (
@@ -103,12 +102,12 @@ def main(
 
     if plot_graph:
         plot_graphs(
-            plot_path=f"plot/out.png",
+            plot_path="plot/out.png",
             xas_data=xas_data,
             plot_keys=plot_graph,
         )
 
-    xas_project = create_athena(f"prj/out.prj")
+    xas_project = create_athena("prj/out.prj")
     xas_project.add_group(xas_data)
     xas_project.save()
 
