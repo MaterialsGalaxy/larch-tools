@@ -271,7 +271,9 @@
         <test expect_num_outputs="2">
             <section name="variables">
                 <section name="degen">
-                    <param name="degeneracy_origin" value="feff"/>
+                    <conditional name="degeneracy_origin">
+                        <param name="degeneracy_origin" value="feff"/>
+                    </conditional>
                     <param name="vary" value="true"/>
                 </section>
             </section>
@@ -285,8 +287,10 @@
         <test expect_num_outputs="2">
             <section name="variables">
                 <section name="degen">
-                    <param name="degeneracy_origin" value="manual"/>
-                    <param name="is_common" value="true"/>
+                    <conditional name="degeneracy_origin">
+                        <param name="degeneracy_origin" value="manual"/>
+                        <param name="is_common" value="true"/>
+                    </conditional>
                     <param name="vary" value="true"/>
                 </section>
             </section>
@@ -300,8 +304,10 @@
         <test expect_num_outputs="2">
             <section name="variables">
                 <section name="degen">
-                    <param name="degeneracy_origin" value="manual"/>
-                    <param name="is_common" value="false"/>
+                    <conditional name="degeneracy_origin">
+                        <param name="degeneracy_origin" value="manual"/>
+                        <param name="is_common" value="false"/>
+                    </conditional>
                     <param name="vary" value="true"/>
                 </section>
             </section>
@@ -309,7 +315,7 @@
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
             <param name="selection" value="manual"/>
             <output name="gds_csv" file="gds_degen_manual_unique.csv"/>
-            <output name="sp_csv" file="sp_select_all_degen_unique.csv"/>
+            <output name="sp_csv" file="sp_select_all_false_degen_unique.csv"/>
         </test>
         <!-- 10: Test merging defaults -->
         <test expect_num_outputs="3">
