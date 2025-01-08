@@ -61,6 +61,8 @@
     </creator>
     <requirements>
         <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
+        <!-- Need to pin numpy <2 to avoid removal of np.string_ when loading with h5py -->
+        <requirement type="package" version="1.26.4">numpy</requirement>
         <requirement type="package" version="6.0">unzip</requirement>
     </requirements>
     <required_files>
