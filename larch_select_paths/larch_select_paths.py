@@ -186,7 +186,7 @@ class GDSWriter:
         else:
             auto_name = self.default_properties[property_name]["name"]
             value = self.default_properties[property_name]["value"]
-            if auto_name == "degen_variable" and value == None:
+            if auto_name == "degen_variable" and value is None:
                 value = feff_degen_value
 
             if directory_label:
