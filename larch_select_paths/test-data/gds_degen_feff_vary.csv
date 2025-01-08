@@ -1,0 +1,7 @@
+  id,                     name, value, expr, vary
+   1,      degen_variable_sfe1,   2.0,     , True
+   2,      degen_variable_sfe2,   4.0,     , True
+   3,                      s02,   1.0,     , True
+   4,                       e0,   0.0,     , True
+   5,                    alpha,   0.0,     , True
+   6,                   sigma2, 0.003,     , True
