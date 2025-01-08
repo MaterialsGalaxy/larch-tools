@@ -2,7 +2,7 @@
     <description>extract Athena groups to Galaxy distinct datasets</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">2024.12.0</token>
+        <token name="@TOOL_VERSION@">0.9.81</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
