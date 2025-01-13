@@ -2,7 +2,7 @@
     <description>select FEFF paths for XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.80</token>
+        <token name="@TOOL_VERSION@">0.9.81</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -46,9 +46,18 @@
     <inputs>
         <section name="variables" expanded="false" title="GDS variable defaults" help="Define default values for variables in the EXAFS equation to use for the paths selected below.">
             <section name="degen" expanded="false" title="N: path degeneracy">
-                <param name="is_common" type="boolean" checked="true" label="Use path default" help="If set, a single variable 'degen' will be used for all paths. Otherwise, each path has a distinct variable."/>
-                <param name="value" type="float" optional="true" min="0.0" label="Value" help="The initial value for 'degen'. This will depend on the structure and path in question. If unset, then the path default will be used."/>
-                <expand macro="vary"/>
+                <conditional name="degeneracy_origin">
+                    <param name="degeneracy_origin" type="select" display="radio" label="Degeneracy origin" help="Whether to source (initial or unvarying) degeneracy from the FEFF calculation or a manual definition.">
+                        <option value="feff" selected="true">FEFF</option>
+                        <option value="manual">Manual</option>
+                    </param>
+                    <when value="feff"/>
+                    <when value="manual">
+                        <param name="is_common" type="boolean" checked="true" label="Common to all paths" help="If set, a single variable 'degeneracy' will be used for all paths. Otherwise, each path has a distinct variable."/>
+                        <param name="value" type="float" value="1" min="0.0" label="Value" help="The initial value for 'degeneracy' for all paths (unless overwritten in individual path selection)."/>
+                    </when>
+                </conditional>
+                <param name="vary" type="boolean" checked="false" label="Vary" help="If True, the initial 'Guess' will be optimised in the fitting. If False, the value will be 'Set' instead and not optimised."/>
             </section>
             <section name="s02" expanded="false" title="S02: passive electron reduction factor">
                 <param name="is_common" type="boolean" checked="true" label="Common to all paths" help="If set, a single variable 's02' will be used for all paths. Otherwise, each path has a distinct variable."/>
@@ -87,7 +96,7 @@
                         <param name="id" type="integer" value="1" min="1" label="Path ID" help="Numerical id of a path to select, this appears at the end of the label and filename in the path summary CSV."/>
                         <section name="degen" expanded="false" title="N: path degeneracy">
                             <expand macro="name"/>
-                            <param name="value" type="float" optional="true" min="0.0" label="Value" help="The initial value for 'degen'. This will depend on the structure and path in question."/>
+                            <param name="value" type="float" value="1" min="0.0" label="Value" help="The initial value for 'degeneracy'. This will overwrite any use of the FEFF generated degeneracy."/>
                             <expand macro="expr"/>
                             <expand macro="vary"/>
                         </section>
@@ -183,14 +192,14 @@
         </collection>
     </outputs>
     <tests>
-        <!-- Test defaults for CSV with select_all -->
+        <!--  1: Test defaults for CSV with select_all -->
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
             <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_default.csv"/>
         </test>
-        <!-- Test defaults for CSV with some selected rows -->
+        <!--  2: Test defaults for CSV with some selected rows -->
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
@@ -198,7 +207,7 @@
             <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_select_all_false.csv"/>
         </test>
-        <!-- Test selected paths without custom GDS -->
+        <!--  3: Test selected paths without custom GDS -->
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
@@ -207,7 +216,7 @@
             <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_include_path_3.csv"/>
         </test>
-        <!-- Test selected paths with custom name but no GDS entry -->
+        <!--  4: Test selected paths with custom name but no GDS entry -->
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
@@ -219,7 +228,7 @@
             <output name="gds_csv" file="gds_include_path_3_custom_name.csv"/>
             <output name="sp_csv" file="sp_include_path_3_custom_name.csv"/>
         </test>
-        <!-- Test selected paths with custom GDS -->
+        <!--  5: Test selected paths with custom GDS -->
         <test expect_num_outputs="2">
             <param name="paths_zip" value="FEFF_paths.zip"/>
             <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
@@ -236,7 +245,7 @@
             <output name="gds_csv" file="gds_include_path_3_custom_name_value.csv"/>
             <output name="sp_csv" file="sp_include_path_3_custom_name.csv"/>
         </test>
-        <!-- Test changing default GDS values -->
+        <!--  6: Test changing default GDS values -->
         <test expect_num_outputs="2">
             <section name="variables">
                 <section name="s02">
@@ -258,7 +267,57 @@
             <output name="gds_csv" file="gds_altered_defaults.csv"/>
             <output name="sp_csv" file="sp_select_all_false.csv"/>
         </test>
-        <!-- Test merging defaults -->
+        <!--  7: Initialise with FEFF degen, allow to vary -->
+        <test expect_num_outputs="2">
+            <section name="variables">
+                <section name="degen">
+                    <conditional name="degeneracy_origin">
+                        <param name="degeneracy_origin" value="feff"/>
+                    </conditional>
+                    <param name="vary" value="true"/>
+                </section>
+            </section>
+            <param name="paths_zip" value="FEFF_paths.zip"/>
+            <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
+            <param name="selection" value="manual"/>
+            <output name="gds_csv" file="gds_degen_feff_vary.csv"/>
+            <output name="sp_csv" file="sp_select_all_false_degen_unique.csv"/>
+        </test>
+        <!--  8: Manual degen, common to all paths -->
+        <test expect_num_outputs="2">
+            <section name="variables">
+                <section name="degen">
+                    <conditional name="degeneracy_origin">
+                        <param name="degeneracy_origin" value="manual"/>
+                        <param name="is_common" value="true"/>
+                    </conditional>
+                    <param name="vary" value="true"/>
+                </section>
+            </section>
+            <param name="paths_zip" value="FEFF_paths.zip"/>
+            <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
+            <param name="selection" value="manual"/>
+            <output name="gds_csv" file="gds_degen_manual_common.csv"/>
+            <output name="sp_csv" file="sp_select_all_false_degen_manual_common.csv"/>
+        </test>
+        <!--  9: Manual degen, unique to paths -->
+        <test expect_num_outputs="2">
+            <section name="variables">
+                <section name="degen">
+                    <conditional name="degeneracy_origin">
+                        <param name="degeneracy_origin" value="manual"/>
+                        <param name="is_common" value="false"/>
+                    </conditional>
+                    <param name="vary" value="true"/>
+                </section>
+            </section>
+            <param name="paths_zip" value="FEFF_paths.zip"/>
+            <param name="paths_file" value="[CSV_summary_of_1564889.cif].csv"/>
+            <param name="selection" value="manual"/>
+            <output name="gds_csv" file="gds_degen_manual_unique.csv"/>
+            <output name="sp_csv" file="sp_select_all_false_degen_unique.csv"/>
+        </test>
+        <!-- 10: Test merging defaults -->
         <test expect_num_outputs="3">
             <repeat name="feff_outputs">
                 <param name="paths_zip" value="FEFF_paths.zip"/>
@@ -276,7 +335,7 @@
             <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_merge_default.csv"/>
         </test>
-        <!-- Test merging custom arguments -->
+        <!-- 11: Test merging custom arguments -->
         <test expect_num_outputs="3">
             <repeat name="feff_outputs">
                 <param name="label" value="primary"/>
@@ -314,7 +373,7 @@
             <output name="gds_csv" file="gds_merge_custom.csv"/>
             <output name="sp_csv" file="sp_merge_custom.csv"/>
         </test>
-        <!-- Test for criteria based selection -->
+        <!-- 12: Test for criteria based selection -->
         <test expect_num_outputs="2">
             <repeat name="feff_outputs">
                 <param name="paths_zip" value="FEFF_paths.zip"/>
@@ -328,7 +387,7 @@
             <output name="gds_csv" file="gds_default.csv"/>
             <output name="sp_csv" file="sp_criteria.csv"/>
         </test>
-        <!-- Test for combinations based selection -->
+        <!-- 13: Test for combinations based selection -->
         <test expect_num_outputs="3">
             <!-- Should result in 4 + 6 + 4 + 1 = 15 combinations -->
             <repeat name="feff_outputs">

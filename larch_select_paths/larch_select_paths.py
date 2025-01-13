@@ -58,7 +58,7 @@ class ManualSelector:
 class GDSWriter:
     def __init__(self, default_variables: "dict[str, dict]"):
         self.default_properties = {
-            "degen": {"name": "degen"},
+            "degen": {"name": "degen_variable"},
             "s02": {"name": "s02"},
             "e0": {"name": "e0"},
             "deltar": {"name": "alpha"},
@@ -71,16 +71,34 @@ class GDSWriter:
         self.names = set()
 
         for property in self.default_properties:
-            name = self.default_properties[property]["name"]
-            value = default_variables[property]["value"]
-            vary = default_variables[property]["vary"]
-            is_common = default_variables[property]["is_common"]
+            default_variable = default_variables[property]
+            vary = default_variable["vary"]
+            if "degeneracy_origin" in default_variable:
+                degeneracy_dict = default_variable["degeneracy_origin"]
+                degeneracy_origin = degeneracy_dict["degeneracy_origin"]
+                if degeneracy_origin == "feff":
+                    value = None
+                    if default_variable["vary"]:
+                        is_common = False
+                    else:
+                        self.default_properties["degen"]["name"] = "degen"
+                        is_common = True
+
+                elif degeneracy_origin == "manual":
+                    value = degeneracy_dict["value"]
+                    is_common = degeneracy_dict["is_common"]
+
+            else:
+                value = default_variable["value"]
+                vary = default_variable["vary"]
+                is_common = default_variable["is_common"]
 
             self.default_properties[property]["value"] = value
             self.default_properties[property]["vary"] = vary
             self.default_properties[property]["is_common"] = is_common
 
             if is_common:
+                name = self.default_properties[property]["name"]
                 self.append_gds(name=name, value=value, vary=vary)
 
     def append_gds(
@@ -127,6 +145,7 @@ class GDSWriter:
     def parse_gds(
         self,
         property_name: str,
+        feff_degen_value: float,
         variable_name: str = None,
         path_variable: dict = None,
         directory_label: str = None,
@@ -138,6 +157,8 @@ class GDSWriter:
         Args:
             property_name (str): The property to which the variable
                 corresponds. Should be a key in `self.default_properties`.
+            feff_degen_value (float):
+                The degeneracy determined by FEFF for this path.
             variable_name (str, optional): Custom name for this variable.
                 Defaults to None.
             path_variable (dict, optional): Dictionary defining the GDS
@@ -164,6 +185,10 @@ class GDSWriter:
             return self.default_properties[property_name]["name"]
         else:
             auto_name = self.default_properties[property_name]["name"]
+            value = self.default_properties[property_name]["value"]
+            if auto_name == "degen_variable" and value is None:
+                value = feff_degen_value
+
             if directory_label:
                 auto_name += f"_{directory_label}"
             if path_label:
@@ -171,7 +196,7 @@ class GDSWriter:
 
             self.append_gds(
                 name=auto_name,
-                value=self.default_properties[property_name]["value"],
+                value=value,
                 vary=self.default_properties[property_name]["vary"],
             )
             return auto_name
@@ -271,9 +296,14 @@ class PathsWriter:
                     )
                     if selected:
                         filename = row[0].strip()
+                        feff_degen_value = float(row[3].strip())
                         path_label = row[-2].strip()
                         row_id = self.parse_row(
-                            directory_label, filename, path_label, path_value
+                            directory_label,
+                            filename,
+                            path_label,
+                            path_value,
+                            feff_degen_value,
                         )
                         row_ids.append(row_id)
 
@@ -285,6 +315,7 @@ class PathsWriter:
         filename: str,
         path_label: str,
         path_value: "None|dict",
+        feff_degen_value: float,
     ) -> int:
         """Parse row for GDS and path information.
 
@@ -295,6 +326,8 @@ class PathsWriter:
             path_label (str): Label for the FEFF path, extracted from row.
             path_value (None|dict): The values associated with the selected
                 FEFF path. May be None in which case defaults are used.
+            feff_degen_value (float):
+                The degeneracy determined by FEFF for this path.
 
         Returns:
             int: The id of the added row.
@@ -304,6 +337,7 @@ class PathsWriter:
             for property in self.gds_writer.default_properties:
                 variables[property] = self.gds_writer.parse_gds(
                     property_name=property,
+                    feff_degen_value=feff_degen_value,
                     variable_name=path_value[property]["name"],
                     path_variable=path_value[property],
                     directory_label=directory_label,
@@ -313,6 +347,7 @@ class PathsWriter:
             for property in self.gds_writer.default_properties:
                 variables[property] = self.gds_writer.parse_gds(
                     property_name=property,
+                    feff_degen_value=feff_degen_value,
                     directory_label=directory_label,
                     path_label=path_label,
                 )
