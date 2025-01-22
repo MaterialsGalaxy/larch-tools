@@ -81,8 +81,12 @@
         <!-- 1 -->
         <test expect_num_outputs="2">
             <param name="prj_file" value="PtSn_OCO_Abu_1_29204.5.prj"/>
-            <param name="component_file" value="Sn_foil_29200.prj"/>
-            <param name="component_file" value="SnO2_29206.prj"/>
+            <repeat name="components">
+                <param name="component_file" value="Sn_foil_29200.prj"/>
+            </repeat>
+            <repeat name="components">
+                <param name="component_file" value="SnO2_29206.prj"/>
+            </repeat>
             <param name="energy_min" value="29190"/>
             <param name="energy_max" value="29230"/>
             <param name="x_limit_min" value="29190"/>
