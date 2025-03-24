@@ -4,6 +4,7 @@ import sys
 
 from common import read_group, sorting_key
 
+from larch.fitting import fit_report
 from larch.math.lincombo_fitting import get_label, lincombo_fit
 from larch.symboltable import Group
 
@@ -54,7 +55,7 @@ def set_label(component_group, label):
         component_group.filename = get_label(component_group)
 
 
-def main(prj_file: str, input_values: dict, prj_id: str = "plot"):
+def main(prj_file: str, input_values: dict, prj_id: str = "out"):
     group_to_fit = read_group(prj_file)
     set_label(group_to_fit, input_values["label"])
 
@@ -73,6 +74,8 @@ def main(prj_file: str, input_values: dict, prj_id: str = "plot"):
         xmax=energy_max,
     )
     print(f"Goodness of fit (rfactor): {fit_group.rfactor:.6%}")
+    with open(f"report/{prj_id}.txt", "w") as f:
+        f.write(fit_report(fit_group.result))
 
     x_limit_min = input_values["x_limit_min"]
     x_limit_max = input_values["x_limit_max"]
