@@ -68,7 +68,12 @@ def parse_row(
             words = line.split()
             try:
                 variable = words[0]
-                value = words[2]
+                if variable.endswith(":"):
+                    # Variables in LCF reports have a : instead of =
+                    variable = variable[:-1]
+                    value = words[1]
+                else:
+                    value = words[2]
                 if variable in headers:
                     row[headers.index(variable)] = f"{value:>12s}"
                     data[variable].append(float(value))

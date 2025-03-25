@@ -1,10 +1,10 @@
 <tool id="larch_criteria_report" name="Larch Criteria Report" version="@TOOL_VERSION@+galaxy@WRAPPER_VERSION@" python_template_version="3.5" profile="22.05" license="MIT">
-    <description>generate reports on Artemis fitting from XAFS data</description>
+    <description>generate reports on LCF or FEFF fitting from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
         <token name="@TOOL_VERSION@">3.5.2</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">0</token>
+        <token name="@WRAPPER_VERSION@">1</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1109/MCSE.2007.55</token>
@@ -42,13 +42,13 @@
                 <param name="input_data" type="data" format="csv" label="Criteria report" help="Report summarising logged criteria from an execution of Larch Artemis."/>
             </when>
             <when value="collection">
-                <param name="input_data" type="data" format="feffit" multiple="true" label="Fit reports" help="Individual fit reports from independent executions of Larch Artemis."/>
+                <param name="input_data" type="data" format="feffit,txt" multiple="true" label="Fit reports" help="Individual fit reports from independent executions of Larch LCF/Artemis."/>
                 <repeat name="report_criteria" title="Report Criteria">
                     <param name="variable" type="text" label="Variable" help="Name of the variable of that appears in the statistics or variables sections of the report."/>
                 </repeat>
             </when>
             <when value="zipped">
-                <param name="input_data" type="data" format="zip" label="Zipped Artemis outputs" help="Zipped fit reports from series executions of Larch Artemis."/>
+                <param name="input_data" type="data" format="zip" label="Zipped Artemis outputs" help="Zipped fit reports from series executions of Larch LCF/Artemis."/>
                 <repeat name="report_criteria" title="Report Criteria">
                     <param name="variable" type="text" label="Variable" help="Name of the variable of that appears in the statistics or variables sections of the report."/>
                 </repeat>
@@ -85,9 +85,17 @@
             <output name="criteria_report" file="criteria_report_zipped.csv"/>
             <output_collection name="plots" type="list" count="1"/>
         </test>
+        <!-- 4: From LCF -->
+        <test expect_num_outputs="2">
+            <param name="format" value="collection"/>
+            <param name="input_data" value="lcf.txt"/>
+            <param name="variable" value="c0"/>
+            <output name="criteria_report" file="criteria_report_lcf.csv"/>
+            <output_collection name="plots" type="list" count="1"/>
+        </test>
     </tests>
     <help><![CDATA[
-        Plot criteria of interest from multiple Artemis fittings, for example where each dataset represents a sequential point in time.
+        Plot criteria of interest from multiple LCF/Artemis fittings, for example where each dataset represents a sequential point in time.
 
         Either accepts a CSV summary from series execution (with criteria already selected), a zipped directory, or multiple datasets/a collection of fit reports from parallel execution.
         In the latter cases, the criteria of interest need to be specified.
