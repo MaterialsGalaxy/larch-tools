@@ -2,7 +2,7 @@
     <description>perform linear combination fit on XAS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.81</token>
+        <token name="@TOOL_VERSION@">2026.1.2</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -14,20 +14,16 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <requirement type="package" version="3.5.2">matplotlib</requirement>
+        <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container>
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
-    <required_files>
-        <include type="literal" path="larch_lcf.py"/>
-        <include type="literal" path="common.py"/>
-    </required_files>
     <command detect_errors="exit_code"><![CDATA[
         mkdir plot report &&
         #if $execution.execution=="zipped":
             unzip '$execution.prj_file' &&
-            python '${__tool_directory__}/larch_lcf.py' prj '$inputs'
+            larch_lcf prj '$inputs'
         #else
-            python '${__tool_directory__}/larch_lcf.py' '$execution.prj_file' '$inputs'
+            larch_lcf '$execution.prj_file' '$inputs'
         #end if
     ]]></command>
     <configfiles>

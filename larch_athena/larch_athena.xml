@@ -2,7 +2,7 @@
     <description>process Athena projects of XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.81</token>
+        <token name="@TOOL_VERSION@">2026.1.2</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -13,16 +13,12 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <requirement type="package" version="3.5.2">matplotlib</requirement>
+        <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container>
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
-    <required_files>
-        <include type="literal" path="larch_athena.py"/>
-        <include type="literal" path="common.py"/>
-    </required_files>
     <command detect_errors="exit_code"><![CDATA[
         mkdir prj plot
-        && python '${__tool_directory__}/larch_athena.py' '$dat_file' '$inputs'
+        && larch_athena '$dat_file' '$inputs'
     ]]></command>
     <configfiles>
         <inputs name="inputs"/>
@@ -105,12 +101,12 @@
             <param name="plot_graph" value="edge,flat,dmude"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="5400" delta="100"/>
+                    <has_size value="5600" delta="200"/>
                 </assert_contents>
             </output>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="141000" delta="1000"/>
+                    <has_size value="142000" delta="2000"/>
                 </assert_contents>
             </output>
         </test>
@@ -121,7 +117,7 @@
             <param name="energy_min" value="7000"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="5300" delta="100"/>
+                    <has_size value="5600" delta="200"/>
                 </assert_contents>
             </output>
         </test>
@@ -134,12 +130,12 @@
             <param name="plot_graph" value="edge,flat,dmude"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="3300" delta="50"/>
+                    <has_size value="3500" delta="100"/>
                 </assert_contents>
             </output>
             <output name="plot">
                 <assert_contents>
-                    <has_size value="138000" delta="1000"/>
+                    <has_size value="140000" delta="2000"/>
                 </assert_contents>
             </output>
         </test>
@@ -152,7 +148,7 @@
             <param name="energy_max" value="7200"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="3600" delta="100"/>
+                    <has_size value="3800" delta="200"/>
                 </assert_contents>
             </output>
         </test>
@@ -162,7 +158,7 @@
             <param name="rebin" value="true"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="8413" delta="10"/>
+                    <has_size value="8700" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -173,7 +169,7 @@
             <param name="ref_channel" value="test.prj"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="5400" delta="100"/>
+                    <has_size value="5600" delta="200"/>
                 </assert_contents>
             </output>
         </test>

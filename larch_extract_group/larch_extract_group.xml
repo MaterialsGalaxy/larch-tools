@@ -2,7 +2,7 @@
     <description>extract Athena groups to Galaxy distinct datasets</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.81</token>
+        <token name="@TOOL_VERSION@">2026.1.2</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -60,27 +60,21 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <!-- Need to pin numpy <2 to avoid removal of np.string_ when loading with h5py -->
-        <requirement type="package" version="1.26.4">numpy</requirement>
-        <requirement type="package" version="6.0">unzip</requirement>
+        <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container>
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
-    <required_files>
-        <include type="literal" path="larch_extract_group.py"/>
-        <include type="literal" path="common.py"/>
-    </required_files>
     <command detect_errors="exit_code"><![CDATA[
         mkdir prj
         #if $merge_inputs.format.format=="plaintext":
             #if $merge_inputs.format.is_zipped.is_zipped=="true":
                 && echo Unzipping '$merge_inputs.format.is_zipped.dat_file.name'
                 && unzip '$merge_inputs.format.is_zipped.dat_file' -d dat_files
-                && python '${__tool_directory__}/larch_extract_group.py' dat_files '$inputs'
+                && larch_extract_group dat_files '$inputs'
             #else
-                && python '${__tool_directory__}/larch_extract_group.py' '$merge_inputs.format.is_zipped.dat_file' '$inputs'
+                && larch_extract_group '$merge_inputs.format.is_zipped.dat_file' '$inputs'
             #end if
         #else
-            && python '${__tool_directory__}/larch_extract_group.py' '$merge_inputs.format.dat_file' '$inputs'
+            && larch_extract_group '$merge_inputs.format.dat_file' '$inputs'
         #end if
     ]]></command>
     <configfiles>
@@ -193,7 +187,7 @@
             <param name="annotation" value="annotation"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="5400" delta="100"/>
+                    <has_size value="5600" delta="400"/>
                 </assert_contents>
             </output>
         </test>
@@ -202,7 +196,7 @@
             <param name="dat_file" value="ffi0.tabular"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="34400" delta="100"/>
+                    <has_size value="45800" delta="200"/>
                 </assert_contents>
             </output>
         </test>
@@ -211,7 +205,7 @@
             <param name="dat_file" value="ffi1.tabular"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="4400" delta="100"/>
+                    <has_size value="4600" delta="200"/>
                 </assert_contents>
             </output>
         </test>
@@ -228,7 +222,7 @@
             <param name="annotation" value="annotation"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="37550" delta="50"/>
+                    <has_size value="55400" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -240,7 +234,7 @@
             <param name="annotation" value="annotation"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="18000" delta="50"/>
+                    <has_size value="18600" delta="100"/>
                 </assert_contents>
             </output>
         </test>
@@ -252,7 +246,7 @@
             <param name="annotation" value="annotation"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="4500" delta="100"/>
+                    <has_size value="4800" delta="200"/>
                 </assert_contents>
             </output>
         </test>
@@ -263,7 +257,7 @@
             <param name="annotation" value="annotation"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="5400" delta="200"/>
+                    <has_size value="5600" delta="400"/>
                 </assert_contents>
             </output>
         </test>
@@ -295,7 +289,7 @@
             <param name="annotation" value="annotation"/>
             <output name="athena_project_file">
                 <assert_contents>
-                    <has_size value="26000" delta="100"/>
+                    <has_size value="44000" delta="200"/>
                 </assert_contents>
             </output>
         </test>

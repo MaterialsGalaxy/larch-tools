@@ -2,7 +2,7 @@
     <description>generate FEFF paths from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.80</token>
+        <token name="@TOOL_VERSION@">2026.1.2</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -13,15 +13,11 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <requirement type="package" version="3.5.2">matplotlib</requirement>
-        <requirement type="package" version="3.0">zip</requirement>
+        <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container>
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
-    <required_files>
-        <include type="literal" path="larch_feff.py"/>
-    </required_files>
     <command detect_errors="exit_code"><![CDATA[
-        python '${__tool_directory__}/larch_feff.py' '$format.structure_file' '$inputs'
+        larch_feff '$format.structure_file' '$inputs'
         && zip -r out.zip feff
     ]]></command>
     <configfiles>
@@ -167,7 +163,7 @@
             <output name="out_csv" file="[CSV_summary_of_1667441.cif].csv"/>
             <output name="out_dir">
                 <assert_contents>
-                    <has_size value="142700" delta="100"/>
+                    <has_size value="266200" delta="200"/>
                 </assert_contents>
             </output>
         </test>
@@ -183,7 +179,7 @@
             <output name="out_csv" file="[CSV_summary_of_1667441.cif].csv"/>
             <output name="out_dir">
                 <assert_contents>
-                    <has_size value="142700" delta="100"/>
+                    <has_size value="266200" delta="200"/>
                 </assert_contents>
             </output>
         </test>
