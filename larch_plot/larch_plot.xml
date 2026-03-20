@@ -14,7 +14,7 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container>
+        <!-- <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container> -->
         <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
