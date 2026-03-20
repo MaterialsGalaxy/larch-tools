@@ -24,7 +24,7 @@ jobs:
       chunk-list: ${{ steps.discover.outputs.chunk-list }}
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.12']
 
     steps:
     - name: Print github context properties
@@ -103,7 +103,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.12']
 
     steps:
     # checkout the repository
@@ -152,7 +152,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.12']
 
     steps:
     # checkout the repository to master
@@ -190,7 +190,7 @@ jobs:
       fail-fast: false
       matrix:
         chunk: ${{ fromJson(needs.setup.outputs.chunk-list) }}
-        python-version: ['3.13']
+        python-version: ['3.12']
     services:
       postgres:
         image: postgres:11
@@ -259,7 +259,7 @@ jobs:
     needs: [setup, test]
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.12']
     # This job runs on Linux
     runs-on: ubuntu-latest
     steps:
@@ -304,7 +304,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.12']
 
     steps:
     - uses: actions/checkout@v6
