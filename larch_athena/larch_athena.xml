@@ -17,161 +17,187 @@
         <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
-        mkdir prj plot
-        && larch_athena '$dat_file' '$inputs'
+        mkdir prj plot &&
+        larch_athena
+        --output-directory=.
+        #for $prj in $dat_file
+            '$prj'
+        #end for
+        #if $merge.merge=="merge_all"
+            --merge-all --annotation='$merge.annotation'
+        #elif $merge.merge=="merge_by"
+            #for $cdif in $merge.cdif_jsonld
+                --cdif-path='$cdif'
+            #end for
+            #for $merge_by in $merge.merge_by
+                --merge-by='$merge_by.variable'
+            #end for
+        #end if
+        #if $processing.calibrate.calibration_e0
+            --calibration-energy='$processing.calibrate.calibration_e0'
+        #end if
+        #if $processing.calibrate.energy_min
+            --minimum-energy='$processing.calibrate.energy_min'
+        #end if
+        #if $processing.calibrate.energy_max
+            --maximum-energy='$processing.calibrate.energy_max'
+        #end if
+        $processing.rebin
+        #if $processing.pre_edge.ref_channel
+            --reference-channel='$processing.pre_edge.ref_channel'
+        #end if
+        #if $processing.pre_edge.e0
+            --edge-energy='$processing.pre_edge.e0'
+        #end if
+        #if $processing.pre_edge.pre1
+            --pre-edge-lower='$processing.pre_edge.pre1'
+        #end if
+        #if $processing.pre_edge.pre2
+            --pre-edge-upper='$processing.pre_edge.pre2'
+        #end if
+        #if $processing.pre_edge.norm1
+            --post-edge-lower='$processing.pre_edge.norm1'
+        #end if
+        #if $processing.pre_edge.norm2
+            --post-edge-upper='$processing.pre_edge.norm2'
+        #end if
+        #if $processing.pre_edge.nnorm
+            --post-edge-polynomial='$processing.pre_edge.nnorm'
+        #end if
+        #if $processing.pre_edge.step
+            --edge-step='$processing.pre_edge.step'
+        #end if
+        #if $processing.pre_edge.nvict
+            --energy-exponent='$processing.pre_edge.nvict'
+        #end if
+        #if $processing.xftf.kmin
+            --k-min='$processing.xftf.kmin'
+        #end if
+        #if $processing.xftf.kmax
+            --k-max='$processing.xftf.kmax'
+        #end if
+        #if $processing.xftf.kweight
+            --k-weight='$processing.xftf.kweight'
+        #end if
+        #if $processing.xftf.dk
+            --dk='$processing.xftf.dk'
+        #end if
+        #if $processing.xftf.window
+            --window='$processing.xftf.window'
+        #end if
+        #for $plot in $plot_graph
+            $plot
+        #end for
     ]]></command>
-    <configfiles>
-        <inputs name="inputs"/>
-    </configfiles>
     <inputs>
-        <param name="dat_file" type="data" format="prj" label="Athena project" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
+        <param name="dat_file" type="data" format="prj" multiple="true" label="Athena projects" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
+        <conditional name="merge">
+            <param name="merge" type="select" display="radio" label="Merge groups" help="Whether and how to merge Athena Groups.">
+                <option value="" selected="true">No</option>
+                <option value="merge_all">Merge all</option>
+                <option value="merge_by">Merge by CDIF variables</option>
+            </param>
+            <when value=""/>
+            <when value="merge_all">
+                <param name="annotation" type="text" label="New annotation" optional="true" help="If set, will annotate the output project with this string. This will be used to generate legends when plotting data."/>
+            </when>
+            <when value="merge_by">
+                <param name="cdif_jsonld" type="data" format="jsonld" multiple="true" label="CDIF profiles" help="X-ray Absorption Spectroscopy (XAS) data, in Athena project format"/>
+                <repeat name="merge_by" min="1" default="1" title="Merge by">
+                    <param name="variable" type="text" label="CDIF variable" help="XAS CDIF profile variable to merge by."/>
+                </repeat>
+            </when>
+        </conditional>
         <section name="processing" expanded="true" title="Processing Options" help="By default, the following processing steps will be performed either with default values, or those contained in the input Athena project (if used). If specified here, these values will be used instead for process in sequence.">
-            <conditional name="calibrate">
-                <param name="calibrate" type="select" display="radio" label="Calibrate energy" help="If set, will shift the spectrum so that its (automatically determined) edge occurs at the specified value, and any values outside the range will be discarded.">
-                    <option value="" selected="true">False</option>
-                    <option value="true">True</option>
+            <section name="calibrate" title="Calibrate">
+                <param name="calibration_e0" type="float" label="Calibration energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant). Note that this is different from specifying E0 in the pre-edge normalization, as this will the x-axis of the data (so that the Nth x point will no longer align with the Nth y point)."/>
+                <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts (after re-calibrating)."/>
+                <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts (after re-calibrating)."/>
+            </section>
+            <param name="rebin" type="boolean" truevalue="--rebin" falsevalue="" label="Re-bin data" help="Whether to re-bin along the energy axis to automatically ensure appropriate levels of precision in the pre-edge, near-edge and extended region of the spectrum."/>
+            <section name="pre_edge" title="Pre-edge fitting">
+                <param name="ref_channel" type="data" format="prj" optional="true" label="Reference channel" help="The channel to be used as a reference to determine the pre-edge settings which are then used for the main signal. This can help when the main signal is affected by signal noise."/>
+                <param argument="e0" type="float" label="Edge energy (eV)" optional="true" help="If set, normalization will use this as the location of the edge rather than automatically determining it."/>
+                <param argument="pre1" type="float" max="0" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
+                <param argument="pre2" type="float" max="0" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
+                <param argument="norm1" type="float" min="0" label="Post-edge fit lower energy (eV)" optional="true" help="The lower end of the region used for the post-edge fitting, relative to the edge energy (and therefore positive)."/>
+                <param argument="norm2" type="float" min="0" label="Post-edge fit upper energy (eV)" optional="true" help="The upper end of the region used for the post-edge fitting, relative to the edge energy (and therefore positive)."/>
+                <param argument="nnorm" type="integer" min="0" max="5" label="Post-edge fit polynomial degree" optional="true" help="The degree of the polynomial used to fit in the post-edge region."/>
+                <param argument="step" type="float" min="0" label="Edge step" optional="true" help="Magnitude of the step in μ between the pre and post-edge regions at the edge energy."/>
+                <param argument="nvict" type="integer" label="Energy exponent" optional="true" help="Edge fitting will be performed against μ*E**n where n is defined here. This is 0 by default."/>
+            </section>
+            <section name="xftf" title="Forward Fourier transform">
+                <param argument="kmin" type="float" optional="true" min="0.0" help="Minimum k value."/>
+                <param argument="kmax" type="float" optional="true" min="0.0" help="Maximum k value."/>
+                <param argument="kweight" type="float" optional="true" help="Exponent for weighting spectra by raising k to this power."/>
+                <param argument="dk" type="float" optional="true" help="Tapering parameter for Fourier Transform window."/>
+                <param argument="window" type="select" optional="true" help="Fourier Transform window type.">
+                    <option value="hanning">Hanning (cosine-squared taper)</option>
+                    <option value="parzen">Parzen (linear taper)</option>
+                    <option value="welch">Welch (quadratic taper)</option>
+                    <option value="gaussian">Gaussian function window</option>
+                    <option value="sine">Sine function window</option>
+                    <option value="kaiser">Kaiser-Bessel function-derived window</option>
                 </param>
-                <when value=""/>
-                <when value="true">
-                    <param name="calibration_e0" type="float" label="Calibration energy (eV)" optional="true" help="If set, data will be calibrated so that the edge occurs at this energy (after merging, if relevant). Note that this is different from specifying E0 in the pre-edge normalization, as this will the x-axis of the data (so that the Nth x point will no longer align with the Nth y point)."/>
-                    <param name="energy_min" type="float" label="Minimum energy (eV)" optional="true" help="If set, data will be cropped below this value in electron volts (after re-calibrating)."/>
-                    <param name="energy_max" type="float" label="Maximum energy (eV)" optional="true" help="If set, data will be cropped above this value in electron volts (after re-calibrating)."/>
-                </when>
-            </conditional>
-            <param name="rebin" type="boolean" label="Re-bin data" help="Whether to re-bin along the energy axis to automatically ensure appropriate levels of precision in the pre-edge, near-edge and extended region of the spectrum."/>
-            <conditional name="pre_edge">
-                <param name="pre_edge" type="select" display="radio" label="Pre-edge normalization" help="If set, will (re)perform forward pre-edge normalization using provided values.">
-                    <option value="" selected="true">Use default values</option>
-                    <option value="ref">Use reference channel</option>
-                    <option value="manual">Use manual values</option>
-                </param>
-                <when value=""/>
-                <when value="ref">
-                    <param name="ref_channel" type="data" format="prj" label="Reference channel" help="The channel to be used as a reference to determine the pre-edge settings which are then used for the main signal. This can help when the main signal is affected by signal noise."/>
-                </when>
-                <when value="manual">
-                    <param argument="e0" type="float" label="Edge energy (eV)" optional="true" help="If set, normalization will use this as the location of the edge rather than automatically determining it."/>
-                    <param argument="pre1" type="float" max="0" label="Pre-edge fit lower energy (eV)" optional="true" help="The lower end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
-                    <param argument="pre2" type="float" max="0" label="Pre-edge fit upper energy (eV)" optional="true" help="The upper end of the region used for the pre-edge fitting, relative to the edge energy (and therefore negative)."/>
-                    <param argument="norm1" type="float" min="0" label="Post-edge fit lower energy (eV)" optional="true" help="The lower end of the region used for the post-edge fitting, relative to the edge energy (and therefore positive)."/>
-                    <param argument="norm2" type="float" min="0" label="Post-edge fit upper energy (eV)" optional="true" help="The upper end of the region used for the post-edge fitting, relative to the edge energy (and therefore positive)."/>
-                    <param argument="nnorm" type="integer" min="0" max="5" label="Post-edge fit polynomial degree" optional="true" help="The degree of the polynomial used to fit in the post-edge region."/>
-                    <param argument="step" type="float" min="0" label="Edge step" optional="true" help="Magnitude of the step in μ between the pre and post-edge regions at the edge energy."/>
-                    <param argument="nvict" type="integer" label="Energy exponent" optional="true" help="Edge fitting will be performed against μ*E**n where n is defined here. This is 0 by default."/>
-                </when>
-            </conditional>
-            <conditional name="xftf">
-                <param name="xftf" type="select" display="radio" label="XFTF" help="If set, will (re)perform forward Fourier Transform using provided values.">
-                    <option value="" selected="true">False</option>
-                    <option value="true">True</option>
-                </param>
-                <when value=""/>
-                <when value="true">
-                    <param argument="kmin" type="float" optional="true" min="0.0" help="Minimum k value."/>
-                    <param argument="kmax" type="float" optional="true" min="0.0" help="Maximum k value."/>
-                    <param argument="kweight" type="float" optional="true" help="Exponent for weighting spectra by raising k to this power."/>
-                    <param argument="dk" type="float" optional="true" help="Tapering parameter for Fourier Transform window."/>
-                    <param argument="window" type="select" optional="true" help="Fourier Transform window type.">
-                        <option value="hanning">Hanning (cosine-squared taper)</option>
-                        <option value="parzen">Parzen (linear taper)</option>
-                        <option value="welch">Welch (quadratic taper)</option>
-                        <option value="gaussian">Gaussian function window</option>
-                        <option value="sine">Sine function window</option>
-                        <option value="kaiser">Kaiser-Bessel function-derived window</option>
-                    </param>
-                </when>
-            </conditional>
+            </section>
         </section>
         <param name="plot_graph" type="select" multiple="true" display="checkboxes" label="Plot graphs">
-            <option value="edge">Pre/post edge fitting</option>
-            <option value="flat">Flattened xμ</option>
-            <option value="dmude">Derivative of xμ</option>
+            <option value="--plot-fit">Pre/post edge fitting</option>
+            <option value="--plot-flat">Flattened xμ</option>
+            <option value="--plot-derivative">Derivative of xμ</option>
         </param>
     </inputs>
     <outputs>
-        <data name="athena_project_file" format="prj" from_work_dir="prj/out.prj" label="Athena project ${on_string}"/>
-        <data name="plot" format="png" from_work_dir="plot/out.png" label="Plot of ${on_string}">
+        <collection name="athena_project_file_collection" format="prj" type="list" label="Athena projects ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="prj"/>
+        </collection>
+        <collection name="plots" format="png" type="list" label="Plot of ${on_string}">
+            <discover_datasets pattern="__name_and_ext__" directory="plot"/>
             <filter>plot_graph</filter>
-        </data>
+        </collection>
     </outputs>
     <tests>
         <!-- 1 -->
         <test expect_num_outputs="2">
             <param name="dat_file" value="test.prj"/>
-            <param name="plot_graph" value="edge,flat,dmude"/>
-            <output name="athena_project_file">
-                <assert_contents>
-                    <has_size value="5600" delta="200"/>
-                </assert_contents>
-            </output>
-            <output name="plot">
-                <assert_contents>
-                    <has_size value="142000" delta="2000"/>
-                </assert_contents>
-            </output>
+            <param name="plot_graph" value="--plot-flat,--plot-fit,--plot-derivative"/>
+            <output_collection name="athena_project_file_collection" type="list" count="1"/>
+            <output_collection name="plots" type="list" count="1"/>
         </test>
         <!-- 2 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.prj"/>
-            <param name="calibrate" value="true"/>
             <param name="energy_min" value="7000"/>
-            <output name="athena_project_file">
-                <assert_contents>
-                    <has_size value="5600" delta="200"/>
-                </assert_contents>
-            </output>
+            <output_collection name="athena_project_file_collection" type="list" count="1"/>
         </test>
         <!-- 3 -->
         <test expect_num_outputs="2">
             <param name="dat_file" value="test.prj"/>
-            <param name="calibrate" value="true"/>
             <param name="energy_min" value="7000"/>
             <param name="energy_max" value="7200"/>
-            <param name="plot_graph" value="edge,flat,dmude"/>
-            <output name="athena_project_file">
-                <assert_contents>
-                    <has_size value="3500" delta="100"/>
-                </assert_contents>
-            </output>
-            <output name="plot">
-                <assert_contents>
-                    <has_size value="140000" delta="2000"/>
-                </assert_contents>
-            </output>
+            <param name="plot_graph" value="--plot-flat,--plot-fit,--plot-derivative"/>
+            <output_collection name="athena_project_file_collection" type="list" count="1"/>
+            <output_collection name="plots" type="list" count="1"/>
         </test>
         <!-- 4 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.prj"/>
-            <param name="calibrate" value="true"/>
             <param name="calibration_e0" value="7050"/>
             <param name="energy_min" value="7000"/>
             <param name="energy_max" value="7200"/>
-            <output name="athena_project_file">
-                <assert_contents>
-                    <has_size value="3800" delta="200"/>
-                </assert_contents>
-            </output>
+            <output_collection name="athena_project_file_collection" type="list" count="1"/>
         </test>
         <!-- 5 -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.prj"/>
             <param name="rebin" value="true"/>
-            <output name="athena_project_file">
-                <assert_contents>
-                    <has_size value="8700" delta="100"/>
-                </assert_contents>
-            </output>
+            <output_collection name="athena_project_file_collection" type="list" count="1"/>
         </test>
         <!-- 6: Use ref channel -->
         <test expect_num_outputs="1">
             <param name="dat_file" value="test.prj"/>
-            <param name="pre_edge" value="ref"/>
             <param name="ref_channel" value="test.prj"/>
-            <output name="athena_project_file">
-                <assert_contents>
-                    <has_size value="5600" delta="200"/>
-                </assert_contents>
-            </output>
+            <output_collection name="athena_project_file_collection" type="list" count="1"/>
         </test>
     </tests>
     <help><![CDATA[

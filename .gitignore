@@ -1,3 +1,4 @@
 .vscode
+.venv*
 tool_test_output.*
 **/__pycache__/**
