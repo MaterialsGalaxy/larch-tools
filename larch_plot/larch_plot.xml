@@ -2,9 +2,9 @@
     <description>plot Athena projects</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.80</token>
+        <token name="@TOOL_VERSION@">2026.1.2</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">1</token>
+        <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -14,16 +14,12 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <requirement type="package" version="3.5.2">matplotlib</requirement>
+        <!-- <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container> -->
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
-    <required_files>
-        <include type="literal" path="larch_plot.py"/>
-        <include type="literal" path="common.py"/>
-    </required_files>
     <command detect_errors="exit_code"><![CDATA[
         mkdir plots
-        && python '${__tool_directory__}/larch_plot.py' '$dat_files' '$inputs'
+        && larch_plot '$dat_files' '$inputs'
     ]]></command>
     <configfiles>
         <inputs name="inputs"/>

@@ -2,7 +2,7 @@
     <description>select FEFF paths for XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.81</token>
+        <token name="@TOOL_VERSION@">2026.1.2</token>
         <!-- version of this tool wrapper (integer) -->
         <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
@@ -33,12 +33,13 @@
     <creator>
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
-    <required_files>
-        <include type="literal" path="larch_select_paths.py"/>
-    </required_files>
+    <requirements>
+        <!-- <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container> -->
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
+    </requirements>
     <command detect_errors="exit_code"><![CDATA[
         mkdir sp &&
-        python '${__tool_directory__}/larch_select_paths.py' '$inputs'
+       larch_select_paths '$inputs'
     ]]></command>
     <configfiles>
         <inputs name="inputs" data_style="paths"/>

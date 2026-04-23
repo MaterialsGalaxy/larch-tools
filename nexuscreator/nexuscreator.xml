@@ -1,0 +1,138 @@
+<tool id="nexuscreator" name="NeXusCreator" version="@TOOL_VERSION@+galaxy@WRAPPER_VERSION@" python_template_version="3.5" profile="22.05" license="MIT">
+    <description>convert data to NeXus/XDI formats</description>
+    <macros>
+        <!-- version of underlying tool (PEP 440) -->
+        <token name="@TOOL_VERSION@">0.1.0</token>
+        <!-- version of this tool wrapper (integer) -->
+        <token name="@WRAPPER_VERSION@">0</token>
+        <!-- citation should be updated with every underlying tool version -->
+        <!-- typical fields to update are version, month, year, and doi -->
+        <token name="@TOOL_CITATION@">10.5281/zenodo.19600002</token>
+    </macros>
+    <creator>
+        <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
+    </creator>
+    <requirements>
+        <!-- <container type="docker">localhost/nexuscreator_container:v@TOOL_VERSION@</container> -->
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/nexuscreator_container:v@TOOL_VERSION@</container>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+        #if $nexus_definition.nexus_definition == "dat":
+            cp '$input_data' input_data.dat && nexuscreator -n /app/resources/nxd/b18_dat.nxd -i input_data.dat -o '$output_nexus'
+        #else
+            cp '$input_data' input_data.nxs && nexuscreator -n /app/resources/nxd/b18_nxs.nxd -i input_data.nxs -o '$output_nexus'
+        #end if
+        #if $xdi.xdi:
+            && nxxas_to_xdi '$output_nexus' /app/resources/mappings --xdi='$output_xdi' --extra='$extra'
+        #end if
+    ]]></command>
+    <configfiles>
+        <configfile name="extra">
+            #if $xdi.xdi:
+                #for $e in $xdi.extra:
+                    ${e.label}: ${e.value}
+                #end for
+            #end if
+        </configfile>
+    </configfiles>
+    <inputs>
+        <conditional name="nexus_definition">
+            <param name="nexus_definition" type="select" display="radio" label="NeXus Definition">
+                <option value="dat" selected="true">DLS B18 ASCII</option>
+                <option value="nxs">DLS B18 NeXus</option>
+            </param>
+            <when value="dat">
+                <param name="input_data" type="data" format="txt" label="Input data" help="Data to be converted to NeXus/XDI."/>
+            </when>
+            <when value="nxs">
+                <param name="input_data" type="data" format="h5" label="Input data" help="Data to be converted to NeXus/XDI."/>
+            </when>
+        </conditional>
+        <conditional name="xdi">
+            <param name="xdi" type="select" display="radio" label="Output XDI">
+                <option value="true" selected="true">Yes</option>
+                <option value="">No</option>
+            </param>
+            <when value="true">
+                <repeat name="extra" title="Extra metadata">
+                    <param name="label" type="text" label="Label" help="Label to use in the XDI output"/>
+                    <param name="value" type="text" label="Value" help="Value to use in the XDI output"/>
+                </repeat>
+            </when>
+            <when value=""/>
+        </conditional>
+    </inputs>
+    <outputs>
+        <data name="output_nexus" format="h5" label="NeXus format of ${on_string}"/>
+        <data name="output_xdi" format="txt" label="XDI format of ${on_string}">
+            <filter>xdi["xdi"]</filter>
+        </data>
+    </outputs>
+    <tests>
+        <!-- 1 NXxas only-->
+        <test expect_num_outputs="1">
+            <conditional name="nexus_definition">
+                <param name="input_data" value="input.dat"/>
+            </conditional>
+            <param name="xdi" value=""/>
+            <output name="output_nexus">
+                <assert_contents>
+                    <has_size value="166216" delta="0"/>
+                </assert_contents>
+            </output>
+        </test>
+        <!-- 2 both outputs-->
+        <test expect_num_outputs="2">
+            <conditional name="nexus_definition">
+                <param name="input_data" value="input.dat"/>
+            </conditional>
+            <output name="output_nexus">
+                <assert_contents>
+                    <has_size value="166216" delta="0"/>
+                </assert_contents>
+            </output>
+            <output name="output_xdi" file="out_dat.xdi" compare="diff"/>
+        </test>
+        <!-- 3 Extras-->
+        <test expect_num_outputs="2">
+            <conditional name="nexus_definition">
+                <param name="input_data" value="input.dat"/>
+            </conditional>
+            <conditional name="xdi">
+                <repeat name="extra">
+                    <param name="label" value="Element.symbol"/>
+                    <param name="value" value="Sn"/>
+                </repeat>
+                <repeat name="extra">
+                    <param name="label" value="Element.edge"/>
+                    <param name="value" value="K"/>
+                </repeat>
+            </conditional>
+            <output name="output_nexus">
+                <assert_contents>
+                    <has_size value="166216" delta="0"/>
+                </assert_contents>
+            </output>
+            <output name="output_xdi" file="out_extra.xdi" compare="diff"/>
+        </test>
+        <!-- 4 nxs input -->
+        <test expect_num_outputs="2">
+            <conditional name="nexus_definition">
+                <param name="nexus_definition" value="nxs"/>
+                <param name="input_data" value="input.nxs"/>
+            </conditional>
+            <output name="output_nexus">
+                <assert_contents>
+                    <has_size value="316752" delta="0"/>
+                </assert_contents>
+            </output>
+            <output name="output_xdi" file="out_nxs.xdi" compare="diff" lines_diff="1"/>
+        </test>
+    </tests>
+    <help><![CDATA[
+        NeXusCreator, convert arbitrary data in a NeXus format. Optionally, then convert it into XDI.
+    ]]></help>
+    <citations>
+        <citation type="doi">@TOOL_CITATION@</citation>
+    </citations>
+</tool>

@@ -2,9 +2,8 @@
     <description>generate Artemis projects from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">0.9.80</token>
-        <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">2</token>
+<token name="@TOOL_VERSION@">2026.1.2</token>        <!-- version of this tool wrapper (integer) -->
+        <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1088/1742-6596/430/1/012007</token>
@@ -13,28 +12,23 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">xraylarch</requirement>
-        <requirement type="package" version="3.5.2">matplotlib</requirement>
-        <requirement type="package" version="3.0">zip</requirement>
+        <!-- <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container> -->
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
-    <required_files>
-        <include type="literal" path="larch_artemis.py"/>
-        <include type="literal" path="common.py"/>
-    </required_files>
     <command detect_errors="exit_code"><![CDATA[
         unzip '$feff_paths'
         && mkdir report rmr chikr
         #if $execution.execution=="series":
             #if $execution.format.format=="zipped":
                 && unzip '$execution.format.prj_file'
-                && python '${__tool_directory__}/larch_artemis.py' prj '$gds_file' '$sp_file' '$inputs'
+                && larch_artemis --prj=prj --gds='$gds_file' --sp='$sp_file' --inputs='$inputs'
             #else
-                && python '${__tool_directory__}/larch_artemis.py' '$execution.format.prj_file' '$gds_file' '$sp_file' '$inputs'
+                && larch_artemis --prj='$execution.format.prj_file' --gds='$gds_file' --sp='$sp_file' --inputs='$inputs'
             #end if
         #elif $execution.execution=="simultaneous":
-            && python '${__tool_directory__}/larch_artemis.py' _ '$gds_file' '$sp_file' '$inputs'
+            && larch_artemis --prj=_ --gds='$gds_file' --sp='$sp_file' --inputs='$inputs'
         #else
-            && python '${__tool_directory__}/larch_artemis.py' '$execution.prj_file' '$gds_file' '$sp_file' '$inputs'
+            && larch_artemis --prj='$execution.prj_file' --gds='$gds_file' --sp='$sp_file' --inputs='$inputs'
         #end if
         #if $zip_outputs:
             && zip out_zip.zip report/* rmr/* chikr/* >/dev/null
@@ -199,7 +193,7 @@
             <output name="fit_report" file="fit_report.txt" compare="re_match"/>
             <output name="rmr">
                 <assert_contents>
-                    <has_size value="50000" delta="10000"/>
+                    <has_size value="60000" delta="20000"/>
                 </assert_contents>
             </output>
             <output name="chikr">

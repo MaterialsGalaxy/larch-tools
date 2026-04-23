@@ -2,9 +2,9 @@
     <description>generate reports on LCF or FEFF fitting from XAFS data</description>
     <macros>
         <!-- version of underlying tool (PEP 440) -->
-        <token name="@TOOL_VERSION@">3.5.2</token>
+        <token name="@TOOL_VERSION@">2026.1.2</token>
         <!-- version of this tool wrapper (integer) -->
-        <token name="@WRAPPER_VERSION@">1</token>
+        <token name="@WRAPPER_VERSION@">0</token>
         <!-- citation should be updated with every underlying tool version -->
         <!-- typical fields to update are version, month, year, and doi -->
         <token name="@TOOL_CITATION@">10.1109/MCSE.2007.55</token>
@@ -13,12 +13,9 @@
         <person givenName="Patrick" familyName="Austin" url="https://github.com/patrick-austin" identifier="https://orcid.org/0000-0002-6279-7823"/>
     </creator>
     <requirements>
-        <requirement type="package" version="@TOOL_VERSION@">matplotlib</requirement>
-        <requirement type="package" version="3.0">zip</requirement>
+        <!-- <container type="docker">localhost/larch_container:v@TOOL_VERSION@</container> -->
+        <container type="docker">harbor.stfc.ac.uk/materialsgalaxy/larch_container:v@TOOL_VERSION@</container>
     </requirements>
-    <required_files>
-        <include type="literal" path="larch_criteria_report.py"/>
-    </required_files>
     <command detect_errors="exit_code"><![CDATA[
         mkdir plots
         && input_file='$format.input_data'
@@ -26,7 +23,7 @@
             && unzip \$input_file
             && input_file=report
         #end if
-        && python '${__tool_directory__}/larch_criteria_report.py' \$input_file '$inputs'
+        && larch_criteria_report \$input_file '$inputs'
     ]]></command>
     <configfiles>
         <inputs name="inputs"/>
