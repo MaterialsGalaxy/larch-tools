@@ -11,9 +11,9 @@
   Bayesian info crit   = [\d\.]{10}
 
 \[\[Parameters\]\]
-  alpha                = [-\s][\d\.]{9} \+\/-unknown  \(init= 1\.0000e-7\)
-  e0                   = [-\s][\d\.]{9} \+\/-unknown  \(init= 1\.0000e-7\)
   s02                  = [-\s][\d\.]{9} \+\/-unknown  \(init= 1\.0000000\)
+  e0                   = [-\s][\d\.]{9} \+\/-unknown  \(init= 1\.0000e-7\)
+  alpha                = [-\s][\d\.]{9} \+\/-unknown  \(init= 1\.0000e-7\)
   ss                   = [-\s][\d\.]{9} \+\/-unknown  \(init= 0\.0030000\)
   ss2                  = [-\s][\d\.]{9} \+\/-unknown  \(init= 0\.0030000\)
   ss3                  = [-\s][\d\.]{9} \+\/-unknown  = 'ss2'
@@ -27,17 +27,20 @@
   r-range              = 1\.400, 3\.000
   k-range              = 3\.000, 14\.000
   k window, dk         = 'hanning', 1\.000
-  paths used in fit    = \['[\/\w]*feff\/feff0001\.dat', '[\/\w]*feff\/feff0002\.dat', '[\/\w]*feff\/feff0003\.dat', '[\/\w]*feff\/feff0004\.dat'\]
   k-weight             = 2
   epsilon_k            = Array\(mean=5\.\d{4}e-4, std=4\.5\d{3}e-4\)
   epsilon_r            = [\d\.]{9}
   n_independent        = 12\.205
+  paths used in fit    = '[\/\w]*feff\/feff0001\.dat'
+                       = '[\/\w]*feff\/feff0002\.dat'
+                       = '[\/\w]*feff\/feff0003\.dat'
+                       = '[\/\w]*feff\/feff0004\.dat'
 
 \[\[Paths\]\]
  = Path 'S1' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0001\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C      -0\.74100,  0\.28850, -1\.74190  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000
@@ -50,7 +53,7 @@
  = Path 'S2' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0002\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C       1\.44140,  0\.42790,  1\.29650  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000
@@ -63,7 +66,7 @@
  = Path 'S3' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0003\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C      -1\.65860, -0\.10940,  1\.20840  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000
@@ -76,7 +79,7 @@
  = Path 'Fe' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0004\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C       0\.60430, -2\.00010,  0\.09750  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000
@@ -92,17 +95,20 @@
   r-range              = 1\.400, 3\.000
   k-range              = 3\.000, 14\.000
   k window, dk         = 'hanning', 1\.000
-  paths used in fit    = \['[\/\w]*feff\/feff0001\.dat', '[\/\w]*feff\/feff0002\.dat', '[\/\w]*feff\/feff0003\.dat', '[\/\w]*feff\/feff0004\.dat'\]
   k-weight             = 2
   epsilon_k            = Array\(mean=5\.\d{4}e-4, std=4\.5\d{3}e-4\)
   epsilon_r            = [\d\.]{9}
   n_independent        = 12\.205
+  paths used in fit    = '[\/\w]*feff\/feff0001\.dat'
+                       = '[\/\w]*feff\/feff0002\.dat'
+                       = '[\/\w]*feff\/feff0003\.dat'
+                       = '[\/\w]*feff\/feff0004\.dat'
 
 \[\[Paths\]\]
  = Path 'S1' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0001\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C      -0\.74100,  0\.28850, -1\.74190  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000
@@ -115,7 +121,7 @@
  = Path 'S2' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0002\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C       1\.44140,  0\.42790,  1\.29650  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000
@@ -128,7 +134,7 @@
  = Path 'S3' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0003\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C      -1\.65860, -0\.10940,  1\.20840  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000
@@ -141,7 +147,7 @@
  = Path 'Fe' Rh K Edge
     feffdat file = [\/\w]*feff\/feff0004\.dat
     geometry  atom      x        y        z      ipot
-              Rh       0\.00000,  0\.00000,  0\.00000  0%s \(absorber\)
+              Rh       0\.00000,  0\.00000,  0\.00000  0 \(absorber\)
                C       0\.60430, -2\.00010,  0\.09750  3
      reff   =  [\d\.]{9}
      degen  =  1\.0000000

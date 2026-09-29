@@ -173,8 +173,8 @@
                     <has_size value="5600" delta="400"/>
                 </assert_contents>
             </output>
-            <!-- 11 lines contain the random dataset id, so allow diff of 22 (+11/-11) -->
-            <output name="cdif_file" file="test.jsonld" lines_diff="22"/>
+            <!-- 11 lines contain the random dataset id, 1 contains current date, so allow diff of 24 (+12/-12) -->
+            <output name="cdif_file" file="test.jsonld" lines_diff="24"/>
         </test>
         <!--  2 -->
         <test expect_num_outputs="1">
