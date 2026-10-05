@@ -33,53 +33,53 @@
                 --merge-by='$merge_by.variable'
             #end for
         #end if
-        #if $processing.calibrate.calibration_e0
+        #if $processing.calibrate.calibration_e0!=""
             --calibration-energy='$processing.calibrate.calibration_e0'
         #end if
-        #if $processing.calibrate.energy_min
+        #if $processing.calibrate.energy_min!=""
             --minimum-energy='$processing.calibrate.energy_min'
         #end if
-        #if $processing.calibrate.energy_max
+        #if $processing.calibrate.energy_max!=""
             --maximum-energy='$processing.calibrate.energy_max'
         #end if
         $processing.rebin
         #if $processing.pre_edge.ref_channel
             --reference-channel='$processing.pre_edge.ref_channel'
         #end if
-        #if $processing.pre_edge.e0
+        #if $processing.pre_edge.e0!=""
             --edge-energy='$processing.pre_edge.e0'
         #end if
-        #if $processing.pre_edge.pre1
+        #if $processing.pre_edge.pre1!=""
             --pre-edge-lower='$processing.pre_edge.pre1'
         #end if
-        #if $processing.pre_edge.pre2
+        #if $processing.pre_edge.pre2!=""
             --pre-edge-upper='$processing.pre_edge.pre2'
         #end if
-        #if $processing.pre_edge.norm1
+        #if $processing.pre_edge.norm1!=""
             --post-edge-lower='$processing.pre_edge.norm1'
         #end if
-        #if $processing.pre_edge.norm2
+        #if $processing.pre_edge.norm2!=""
             --post-edge-upper='$processing.pre_edge.norm2'
         #end if
-        #if $processing.pre_edge.nnorm
+        #if $processing.pre_edge.nnorm!=""
             --post-edge-polynomial='$processing.pre_edge.nnorm'
         #end if
-        #if $processing.pre_edge.step
+        #if $processing.pre_edge.step!=""
             --edge-step='$processing.pre_edge.step'
         #end if
-        #if $processing.pre_edge.nvict
+        #if $processing.pre_edge.nvict!=""
             --energy-exponent='$processing.pre_edge.nvict'
         #end if
-        #if $processing.xftf.kmin
+        #if $processing.xftf.kmin!=""
             --k-min='$processing.xftf.kmin'
         #end if
-        #if $processing.xftf.kmax
+        #if $processing.xftf.kmax!=""
             --k-max='$processing.xftf.kmax'
         #end if
-        #if $processing.xftf.kweight
+        #if $processing.xftf.kweight!=""
             --k-weight='$processing.xftf.kweight'
         #end if
-        #if $processing.xftf.dk
+        #if $processing.xftf.dk!=""
             --dk='$processing.xftf.dk'
         #end if
         #if $processing.xftf.window

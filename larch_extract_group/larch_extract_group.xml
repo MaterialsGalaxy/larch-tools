@@ -83,7 +83,7 @@
                 --mu-column='$is_zipped.mu_column.mu_column'
             #end if
             #if $is_zipped.extract_group.extract_group=="all"
-                --extract-all --regex-find='$is_zipped.extract_group.regex_find' --regex-replace='$is_zipped.extract_group.regex_replace' \
+                --extract-all --regex-find='$is_zipped.extract_group.regex_find' --regex-replace='$is_zipped.extract_group.regex_replace'
             #else
                 #for $repeat in $is_zipped.extract_group.multiple
                     --extract-label='$repeat.group_name' --annotation='$repeat.annotation'
