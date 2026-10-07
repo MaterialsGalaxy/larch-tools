@@ -166,7 +166,6 @@
         <!--  1 -->
         <test expect_num_outputs="2">
             <param name="dat_file" value="test.xmu"/>
-            <param name="annotation" value="annotation"/>
             <param name="cdif" value="true"/>
             <output name="athena_project_file">
                 <assert_contents>

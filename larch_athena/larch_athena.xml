@@ -129,7 +129,7 @@
             <section name="xftf" title="Forward Fourier transform">
                 <param argument="kmin" type="float" optional="true" min="0.0" help="Minimum k value."/>
                 <param argument="kmax" type="float" optional="true" min="0.0" help="Maximum k value."/>
-                <param argument="kweight" type="float" optional="true" help="Exponent for weighting spectra by raising k to this power."/>
+                <param argument="kweight" type="integer" optional="true" help="Exponent for weighting spectra by raising k to this power."/>
                 <param argument="dk" type="float" optional="true" help="Tapering parameter for Fourier Transform window."/>
                 <param argument="window" type="select" optional="true" help="Fourier Transform window type.">
                     <option value="hanning">Hanning (cosine-squared taper)</option>
