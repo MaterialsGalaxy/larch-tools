@@ -1,5 +1,5 @@
   id,                     name, value, expr, vary
-   1,                    degen,      ,     , True
+   1,                    degen,      ,     , False
    2,                      s02,   0.1,     , False
    3,                       e0,   0.1,     , True
    4,                    alpha,  10.0,     , False

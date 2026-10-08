@@ -1,0 +1,10 @@
+categories:
+- Materials science
+description: Extracts Athena project files from XAS data
+homepage_url: https://github.com/MaterialsGalaxy/larch-tools
+long_description: |
+  Given XAS data in plaintext, HDF5, Athena project format, extract a single
+  group for further analysis.
+name: larch_extract_group
+owner: muon-spectroscopy-computational-project
+remote_repository_url: https://github.com/MaterialsGalaxy/larch-tools/tree/main/larch_extract_group

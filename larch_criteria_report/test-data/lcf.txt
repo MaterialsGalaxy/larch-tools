@@ -1,0 +1,14 @@
+[[Fit Statistics]]
+    # fitting method   = leastsq
+    # function evals   = 5
+    # data points      = 39
+    # variables        = 1
+    chi-square         = 0.25435282
+    reduced chi-square = 0.00669350
+    Akaike info crit   = -194.271188
+    Bayesian info crit = -192.607627
+[[Variables]]
+    c0:        0.21717439 +/- 0.04833418 (22.26%) (init = 0.3177773)
+    c1:        0.78282561 +/- 0.04833418 (6.17%) == '1-c0'
+    e0_shift:  0 (fixed)
+    total:     1.00000000 +/- 0.00000000 (0.00%) == 'c0+c1'
